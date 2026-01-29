@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Card, Descriptions, Avatar, Button, Form, Input, Upload, Modal, Row, Col, Spin } from 'antd';
-import { UserOutlined, MailOutlined, KeyOutlined, EditOutlined, CameraOutlined, LockOutlined } from '@ant-design/icons';
+import { UserOutlined, MailOutlined, EditOutlined, CameraOutlined, LockOutlined } from '@ant-design/icons';
+import { notification } from 'antd';
 import type { UploadProps } from 'antd';
 import { useAuthStore } from '@/store/authStore';
 import { authService } from '@/services/authService';
@@ -94,7 +95,7 @@ export const Profile = () => {
     }
   };
 
-  const handleChangePassword = async (values: any) => {
+  const handleChangePassword = async () => {
     try {
       // Aquí iría la llamada a la API para cambiar la contraseña
       enqueueSnackbar('Contraseña actualizada correctamente', { variant: 'success' });
@@ -136,12 +137,12 @@ export const Profile = () => {
     beforeUpload: (file) => {
       const isImage = file.type.startsWith('image/');
       if (!isImage) {
-        message.error('Solo puedes subir archivos de imagen');
+        notification.error({ message: 'Solo puedes subir archivos de imagen' });
         return false;
       }
       const isLt5M = file.size / 1024 / 1024 < 5;
       if (!isLt5M) {
-        message.error('La imagen debe ser menor a 5MB');
+        notification.error({ message: 'La imagen debe ser menor a 5MB' });
         return false;
       }
 
