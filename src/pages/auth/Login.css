@@ -1,0 +1,299 @@
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  background: linear-gradient(-135deg, #dc3545, #f39915);
+  padding: 20px;
+  
+}
+
+.login-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('https://entregaxpaqueteria.com/public/assets/images/portada.jpg') center/cover;
+  z-index: 0;
+}
+
+.login-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(220, 53, 69, 0.85) 0%, rgba(243, 153, 21, 0.85) 100%);
+  opacity: .5;
+  backdrop-filter: blur(3px);
+}
+
+/* Bubbles Animation */
+.bubbles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bubbles li {
+  position: absolute;
+  display: block;
+  list-style: none;
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.15);
+  bottom: -160px;
+  animation: square 25s infinite;
+  transition-timing-function: linear;
+  border-radius: 50%;
+}
+
+.bubbles li:nth-child(1) {
+  left: 10%;
+  width: 80px;
+  height: 80px;
+  animation-delay: 0s;
+}
+
+.bubbles li:nth-child(2) {
+  left: 20%;
+  width: 20px;
+  height: 20px;
+  animation-delay: 2s;
+  animation-duration: 17s;
+}
+
+.bubbles li:nth-child(3) {
+  left: 25%;
+  width: 50px;
+  height: 50px;
+  animation-delay: 4s;
+}
+
+.bubbles li:nth-child(4) {
+  left: 40%;
+  width: 60px;
+  height: 60px;
+  animation-delay: 0s;
+  animation-duration: 18s;
+}
+
+.bubbles li:nth-child(5) {
+  left: 70%;
+  width: 40px;
+  height: 40px;
+  animation-delay: 0s;
+}
+
+.bubbles li:nth-child(6) {
+  left: 80%;
+  width: 90px;
+  height: 90px;
+  animation-delay: 3s;
+}
+
+.bubbles li:nth-child(7) {
+  left: 32%;
+  width: 30px;
+  height: 30px;
+  animation-delay: 7s;
+}
+
+.bubbles li:nth-child(8) {
+  left: 55%;
+  width: 25px;
+  height: 25px;
+  animation-delay: 15s;
+  animation-duration: 40s;
+}
+
+.bubbles li:nth-child(9) {
+  left: 25%;
+  width: 15px;
+  height: 15px;
+  animation-delay: 2s;
+  animation-duration: 35s;
+}
+
+.bubbles li:nth-child(10) {
+  left: 90%;
+  width: 45px;
+  height: 45px;
+  animation-delay: 0s;
+  animation-duration: 21s;
+}
+
+@keyframes square {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-1000px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+.login-card {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 440px;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: none;
+  overflow: hidden;
+}
+
+.login-content {
+  padding: 20px;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.logo-image {
+  max-width: 200px;
+  height: auto;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2));
+}
+
+.login-title {
+  margin-bottom: 8px !important;
+  color: #1f2937;
+  font-weight: 600;
+  font-size: 28px;
+}
+
+.login-subtitle {
+  color: #6b7280;
+  font-size: 15px;
+}
+
+.login-form {
+  margin-top: 32px;
+}
+
+.login-form .ant-form-item-label > label {
+  font-weight: 500;
+  color: #374151;
+  font-size: 14px;
+}
+
+.login-form .ant-input-affix-wrapper,
+.login-form .ant-input {
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s;
+}
+
+.login-form .ant-input-affix-wrapper:hover,
+.login-form .ant-input:hover {
+  border-color: #667eea;
+}
+
+.login-form .ant-input-affix-wrapper-focused,
+.login-form .ant-input-affix-wrapper:focus,
+.login-form .ant-input:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.input-icon {
+  color: #9ca3af;
+}
+
+.form-footer {
+  margin-bottom: 8px;
+}
+
+.forgot-link {
+  color: #667eea;
+  font-size: 14px;
+}
+
+.forgot-link:hover {
+  color: #764ba2;
+}
+
+.login-button {
+  height: 44px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s;
+}
+
+.login-button:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #6a3f92 100%);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+  transform: translateY(-2px);
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.footer-text {
+  display: block;
+  color: #9ca3af;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.footer-text a {
+  color: #667eea;
+  font-weight: 500;
+}
+
+.footer-text a:hover {
+  color: #764ba2;
+}
+
+/* Responsive */
+@media (max-width: 576px) {
+  .login-card {
+    max-width: 100%;
+    margin: 0 16px;
+  }
+
+  .login-content {
+    padding: 16px;
+  }
+
+  .logo-circle {
+    width: 64px;
+    height: 64px;
+  }
+
+  .logo-text {
+    font-size: 28px;
+  }
+
+  .login-title {
+    font-size: 24px;
+  }
+}

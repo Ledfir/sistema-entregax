@@ -1,0 +1,69 @@
+.profile-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.profile-avatar-card {
+  text-align: center;
+}
+
+.avatar-section {
+  padding: 24px 0;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.avatar-section .ant-avatar {
+  border: 1px solid #F46512;
+}
+
+.change-photo-btn {
+  background-color: #f39915;
+  border-color: #f39915;
+}
+
+.change-photo-btn:hover {
+  background-color: #d48313 !important;
+  border-color: #d48313 !important;
+}
+
+.user-info-section {
+  padding: 24px 0;
+}
+
+.user-info-section h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.user-email {
+  color: #666;
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.user-type {
+  color: #f39915;
+  font-weight: 500;
+  margin: 4px 0;
+}
+
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 16px;
+  }
+  
+  .avatar-section {
+    padding: 16px 0;
+  }
+  
+  .user-info-section h2 {
+    font-size: 20px;
+  }
+}
