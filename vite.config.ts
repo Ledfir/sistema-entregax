@@ -83,6 +83,17 @@ export default defineConfig({
       }
     })
   ],
+  server: {
+    proxy: {
+      // Proxy las llamadas a /api hacia el backend remoto para desarrollo
+      '/api': {
+        target: 'https://www.sistemaentregax.com',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
+      },
+    },
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

@@ -2,6 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from '@/pages/auth/Login';
 import { Dashboard } from '@/pages/dashboard/Dashboard';
 import { Profile } from '@/pages/profile/Profile';
+import { ClientesLista } from '@/pages/clientes/ClientesLista';
+import { ClienteEdit } from '@/pages/clientes/ClienteEdit';
+import { ClienteAddAddress } from '@/pages/clientes/ClienteAddAddress';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 
@@ -25,8 +28,10 @@ export const AppRouter = () => {
           <Route path="/usuarios/nuevo" element={<div style={{ padding: 24 }}>Nuevo Usuario</div>} />
           
           {/* Rutas de clientes */}
-          <Route path="/clientes/lista" element={<div style={{ padding: 24 }}>Lista de Clientes</div>} />
+          <Route path="/clientes/lista" element={<ClientesLista />} />
           <Route path="/clientes/nuevo" element={<div style={{ padding: 24 }}>Nuevo Cliente</div>} />
+          <Route path="/clientes/editar/:id" element={<ClienteEdit />} />
+          <Route path="/clientes/:id/direcciones/nueva" element={<ClienteAddAddress />} />
           
           {/* Rutas de cargos extras */}
           <Route path="/cargos-extras/lista" element={<div style={{ padding: 24 }}>Lista de Cargos Extras</div>} />

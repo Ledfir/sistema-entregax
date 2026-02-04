@@ -1,0 +1,316 @@
+.clientes-container {
+  padding: 24px;
+}
+
+.clientes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.clientes-table {
+  background: #fff;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.clientes-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+}
+
+/* Botón Editar estilo degradado redondeado */
+.btn-edit.ant-btn {
+  background: linear-gradient(90deg, #f37055 0%, #f39915 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 20px;
+  padding: 4px 12px;
+  box-shadow: 0 2px 6px rgba(243,121,64,0.12);
+  transition: filter 120ms ease, transform 80ms ease;
+}
+
+.btn-edit.ant-btn:hover,
+.btn-edit.ant-btn:focus {
+  filter: brightness(0.95);
+  color: #fff;
+}
+
+.btn-edit.ant-btn:active {
+  transform: translateY(1px);
+}
+
+.btn-edit .anticon {
+  color: #fff;
+}
+
+/* Ajustes para el editor de cliente con tabs verticales */
+.cliente-edit-tabs .ant-tabs-tab {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.cliente-edit-tabs .ant-tabs-nav {
+  min-width: 220px;
+}
+
+.cliente-edit-tabs .ant-tabs-tab-btn {
+  font-weight: 600;
+}
+
+.cliente-edit-tabs .ant-tabs-content-holder {
+  padding-left: 16px;
+}
+
+/* Mejora visual de tabs izquierda y grid de 2 columnas para contenido */
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav {
+  min-width: 240px;
+}
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.cliente-edit-tabs .ant-tabs-tab {
+  padding: 8px 12px;
+}
+
+.cliente-edit-tabs .tab-panel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.cliente-edit-tabs .tab-panel-grid .ant-form-item {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .cliente-edit-tabs .ant-tabs-left .ant-tabs-nav { min-width: 160px; }
+  .cliente-edit-tabs .tab-panel-grid { grid-template-columns: 1fr; }
+}
+
+/* Forzar layout estable: nav a la izquierda y contenido ocupa el resto */
+.cliente-edit-tabs .ant-tabs {
+  display: flex;
+}
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav {
+  flex: 0 0 240px;
+}
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-content {
+  flex: 1 1 auto;
+  min-width: 0; /* evita overflow por elementos anchos */
+}
+.cliente-edit-tabs .ant-tabs-content-holder {
+  overflow: auto;
+}
+
+/* Fijar altura de la columna izquierda y permitir scroll independiente en la columna derecha */
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav {
+  height: 70vh; /* altura definida para la columna izquierda */
+  box-sizing: border-box;
+  overflow: auto; /* si hay muchas pestañas, que la izquierda haga scroll */
+  padding-top: 8px;
+}
+
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 100%;
+}
+
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav .ant-tabs-tab {
+  flex: 0 0 auto; /* cada tab no crece para ocupar espacio */
+}
+
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-content {
+  max-height: 70vh; /* misma altura que la izquierda */
+  overflow: auto; /* scroll independiente en la columna derecha */
+  padding-left: 16px;
+}
+
+/* Estilo para la tab activa: degradado, texto blanco y bordes redondeados */
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav-list .ant-tabs-tab.ant-tabs-tab-active {
+  background: linear-gradient(90deg, #f37055 0%, #f39915 100%);
+  color: #ffffff !important;
+  border-radius: 12px;
+  padding: 8px 14px; /* espacio interno tipo botón */
+  box-shadow: 0 4px 10px rgba(243,121,64,0.12);
+}
+
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav-list .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #ffffff !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Forzar color blanco a los iconos dentro de la tab activa */
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav-list .ant-tabs-tab.ant-tabs-tab-active svg,
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav-list .ant-tabs-tab.ant-tabs-tab-active .anticon {
+  color: #fff !important;
+  fill: #fff !important;
+}
+
+/* Pequeño efecto hover para tabs no activas */
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav-list .ant-tabs-tab:not(.ant-tabs-tab-active):hover {
+  background: rgba(0,0,0,0.03);
+}
+
+/* Centrar acciones (botones) dentro del tab */
+.cliente-edit-tabs .tab-actions {
+  margin-top: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.cliente-edit-tabs .tab-actions .ant-form-item {
+  margin: 0;
+}
+
+.cliente-edit-tabs .tab-actions .ant-btn + .ant-btn {
+  margin-left: 8px;
+}
+
+/* Botón Guardar: mismo degradado y estilo que la tab activa */
+.cliente-edit-tabs .tab-actions .ant-btn-primary {
+  background: linear-gradient(90deg, #f37055 0%, #f39915 100%) !important;
+  border: none !important;
+  color: #fff !important;
+  box-shadow: 0 4px 10px rgba(243,121,64,0.12);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px !important;
+}
+
+.cliente-edit-tabs .tab-actions .ant-btn-primary:hover,
+.cliente-edit-tabs .tab-actions .ant-btn-primary:focus {
+  filter: brightness(0.95);
+  color: #fff !important;
+}
+
+/* Forzar color blanco a iconos dentro del botón Guardar */
+.cliente-edit-tabs .tab-actions .ant-btn-primary svg,
+.cliente-edit-tabs .tab-actions .ant-btn-primary .anticon {
+  color: #fff !important;
+  fill: #fff !important;
+}
+
+/* Estilos para las imágenes ladoa / ladob dentro del tab */
+.cliente-edit-tabs .tab-images {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+.cliente-edit-tabs .tab-images .tab-image-col {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 140px;
+}
+.cliente-edit-tabs .tab-images .tab-image-col img {
+  max-width: 100%;
+  max-height: 140px;
+  object-fit: contain;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* Estilo para input file dentro de cada columna */
+.cliente-edit-tabs .tab-image-col .file-input {
+  margin-top: 8px;
+  width: 100%;
+}
+
+/* Estilos para la lista de direcciones de entrega */
+.delivery-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.delivery-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px;
+  border: 1px solid #e9e9e9;
+  border-radius: 6px;
+  background: #fff;
+}
+.delivery-card-left {
+  max-width: calc(100% - 160px);
+  color: #333;
+}
+.delivery-card-left strong {
+  color: #111;
+}
+.delivery-card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.delivery-btn {
+  border: none;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #fff;
+}
+.delivery-btn-delete { background: #e74a3b; }
+.delivery-btn-edit { background: #2b6cdf; }
+.delivery-btn-hide { background: #2b6cdf; padding: 8px 12px; }
+.cliente-edit-tabs .tab-images .img-placeholder {
+  color: #999;
+  font-size: 14px;
+}
+
+/* Título sobre las columnas de archivos */
+.cliente-edit-tabs .tab-images-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-top: 12px;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.cliente-edit-tabs .tab-images-title {
+  text-align: center;
+  display: block;
+  width: 100%;
+}
+
+/* Quitar la línea / barra azul que aparece junto a la tab activa */
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav .ant-tabs-ink-bar,
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav .ant-tabs-ink-bar-animated {
+  background: transparent !important;
+  box-shadow: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Eliminar el contorno/efecto de foco y cualquier borde residual en la tab activa */
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav-list .ant-tabs-tab .ant-tabs-tab-btn:focus,
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav-list .ant-tabs-tab:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Asegurar que no haya borde derecho visible en la columna de tabs */
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav,
+.cliente-edit-tabs .ant-tabs-left .ant-tabs-nav-list {
+  border-right: none !important;
+}

@@ -101,6 +101,15 @@ export const MainLayout = () => {
   const handleMenuClick = ({ key }: { key: string }) => {
     navigate(key);
   };
+  // Decidir qué item marcar como seleccionado en el sidebar
+  const pathname = location.pathname || '';
+  const selectedKey = (() => {
+    // Rutas específicas dentro de /clientes deben mapear a Lista de clientes
+    if (pathname === '/clientes/nuevo') return '/clientes/nuevo';
+    if (pathname.startsWith('/clientes')) return '/clientes/lista';
+    // por defecto usa la ruta completa
+    return pathname;
+  })();
 
   return (
     <Layout className="main-layout">
@@ -125,7 +134,7 @@ export const MainLayout = () => {
         <div className="menu-label">Menú</div>
         <Menu
           mode="inline"
-          selectedKeys={[location.pathname]}
+          selectedKeys={[selectedKey]}
           items={menuItems}
           onClick={handleMenuClick}
           className="sidebar-menu"

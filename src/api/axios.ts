@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_URL = 'http://sistemaentregax.com/api';
+// Usar ruta relativa para permitir que Vite dev server haga proxy a la API remota
+// en desarrollo y evitar problemas de CORS / preflight OPTIONS
+const API_URL = '/api';
 
 const apiClient = axios.create({
   baseURL: API_URL,
