@@ -49,6 +49,12 @@ export const clienteService = {
     return response.data?.data ?? response.data;
   },
 
+  searchAddress: async (postalCode: string): Promise<any> => {
+    const url = `/customers/search-address`;
+    const response = await apiClient.post(url, { postal_code: postalCode });
+    return response.data?.data ?? response.data;
+  },
+
   create: async (payload: any): Promise<any> => {
     const response = await apiClient.post('/clientes', payload);
     return response.data;

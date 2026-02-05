@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Form, Input, Button, Card, message, Row, Col, Select } from 'antd';
+import { Form, Input, Button, Card, message, Row, Col, Select, Spin } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import clienteService from '../../services/clienteService';
 import './Clientes.css';
@@ -12,6 +12,13 @@ export const ClienteAddAddress = () => {
   const [submitting, setSubmitting] = useState(false);
   const [clientInfo, setClientInfo] = useState<any>(null);
   const [deliveryOptions, setDeliveryOptions] = useState<any[]>([]);
+  const [searchingAddress, setSearchingAddress] = useState(false);
+  const [colonias, setColonias] = useState<any[]>([]);
+  const [estados, setEstados] = useState<any>(null);
+  const [municipios, setMunicipios] = useState<any>(null);
+  const [ciudades, setCiudades] = useState<any>(null);
+  const [localidades, setLocalidades] = useState<any[]>([]);
+  const [paises, setPaises] = useState<any>(null);
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -53,6 +60,61 @@ export const ClienteAddAddress = () => {
     }
   };
 
+  const handlePostalCodeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Solo permitir números
+    const numericValue = value.replace(/\D/g, '');
+    
+    // Actualizar el campo en el formulario
+    form.setFieldValue('postal_code', numericValue);
+    
+    // Si tiene exactamente 5 dígitos, hacer la búsqueda
+    if (numericValue.length === 5) {
+      try {
+        setSearchingAddress(true);
+        const addressData = await clienteService.searchAddress(numericValue);
+        
+        // Procesar respuesta y poblar selects
+        // Asumiendo que la API devuelve arrays para cada campo
+        const coloniasList = addressData?.colonias ?? addressData?.settlements ?? [];
+        const estadosObj = addressData?.estados ?? addressData?.states ?? null;
+        const municipiosObj = addressData?.municipios ?? addressData?.municipalities ?? null;
+        const ciudadObj = addressData?.ciudad ?? addressData?.city ?? null;
+        const localidadesList = addressData?.localidades ?? addressData?.localities ?? [];
+        const paisObj = addressData?.pais ?? addressData?.country ?? null;
+        
+        setColonias(Array.isArray(coloniasList) ? coloniasList : []);
+        setEstados(estadosObj);
+        setMunicipios(municipiosObj);
+        setCiudades(ciudadObj);
+        setLocalidades(Array.isArray(localidadesList) ? localidadesList : []);
+        setPaises(paisObj);
+        
+        // Si solo hay una opción en cada campo, auto-seleccionar
+        if (coloniasList.length === 1) form.setFieldValue('colonia', coloniasList[0]?.nombre ?? coloniasList[0]);
+        if (estadosObj) form.setFieldValue('state', estadosObj?.nombre ?? estadosObj?.name ?? estadosObj);
+        if (municipiosObj) form.setFieldValue('municipality', municipiosObj?.nombre ?? municipiosObj?.name ?? municipiosObj);
+        if (ciudadObj) form.setFieldValue('city', ciudadObj?.nombre ?? ciudadObj?.name ?? ciudadObj);
+        if (localidadesList.length === 1) form.setFieldValue('localidad', localidadesList[0]?.nombre ?? localidadesList[0]);
+        if (paisObj) form.setFieldValue('country', paisObj?.nombre ?? paisObj?.name ?? paisObj);
+        
+        message.success('Dirección encontrada');
+      } catch (e: any) {
+        console.error(e);
+        message.warning('No se encontró información para este código postal');
+        // Limpiar selects
+        setColonias([]);
+        setEstados(null);
+        setMunicipios(null);
+        setCiudades(null);
+        setLocalidades([]);
+        setPaises(null);
+      } finally {
+        setSearchingAddress(false);
+      }
+    }
+  };
+
   const onFinish = async (values: any) => {
     if (!id) return;
     try {
@@ -69,6 +131,7 @@ export const ClienteAddAddress = () => {
         state: values.state,
         municipality: values.municipality,
         city: values.city,
+        localidad: values.localidad,
         country: values.country,
         delivery_place: values.delivery_place,
         references: values.references,
@@ -149,33 +212,78 @@ export const ClienteAddAddress = () => {
 
             <Col span={8}>
               <Form.Item label="Código Postal" name="postal_code">
-                <Input placeholder="Escribe un código postal" />
+                <Input 
+                  placeholder="Escribe un código postal" 
+                  onChange={handlePostalCodeChange}
+                  maxLength={5}
+                  suffix={searchingAddress ? <Spin size="small" /> : null}
+                />
               </Form.Item>
             </Col>
             <Col span={8}>
               <Form.Item label="Colonia" name="colonia">
-                <Select allowClear placeholder="Selecciona colonia" />
+                <Select allowClear placeholder="Selecciona colonia" loading={searchingAddress}>
+                  {colonias.map((col: any, idx: number) => {
+                    const val = col?.nombre ?? col?.name ?? col;
+                    return <Option key={idx} value={val}>{val}</Option>;
+                  })}
+                </Select>
               </Form.Item>
             </Col>
             <Col span={8}>
               <Form.Item label="Estado" name="state">
-                <Select allowClear placeholder="Selecciona estado" />
+                <Select allowClear placeholder="Selecciona estado" loading={searchingAddress}>
+                  {estados && (
+                    <Option value={estados?.nombre ?? estados?.name ?? estados}>
+                      {estados?.nombre ?? estados?.name ?? estados}
+                    </Option>
+                  )}
+                </Select>
+              </Form.Item>
+            </Col>
+
+            <Col span={8}>
+              <Form.Item label="Localidad" name="localidad">
+                <Select allowClear placeholder="Selecciona localidad" loading={searchingAddress}>
+                  {localidades.map((loc: any, idx: number) => {
+                    const val = loc?.nombre ?? loc?.name ?? loc;
+                    return <Option key={idx} value={val}>{val}</Option>;
+                  })}
+                </Select>
               </Form.Item>
             </Col>
 
             <Col span={8}>
               <Form.Item label="Municipio" name="municipality">
-                <Select allowClear placeholder="Selecciona municipio" />
+                <Select allowClear placeholder="Selecciona municipio" loading={searchingAddress}>
+                  {municipios && (
+                    <Option value={municipios?.nombre ?? municipios?.name ?? municipios}>
+                      {municipios?.nombre ?? municipios?.name ?? municipios}
+                    </Option>
+                  )}
+                </Select>
               </Form.Item>
             </Col>
             <Col span={8}>
               <Form.Item label="Ciudad" name="city">
-                <Select allowClear placeholder="Selecciona ciudad" />
+                <Select allowClear placeholder="Selecciona ciudad" loading={searchingAddress}>
+                  {ciudades && (
+                    <Option value={ciudades?.nombre ?? ciudades?.name ?? ciudades}>
+                      {ciudades?.nombre ?? ciudades?.name ?? ciudades}
+                    </Option>
+                  )}
+                </Select>
               </Form.Item>
             </Col>
             <Col span={8}>
               <Form.Item label="País" name="country">
-                <Select allowClear placeholder="Selecciona país" />
+                <Select allowClear placeholder="Selecciona país" loading={searchingAddress}>
+                  {paises && (
+                    <Option value={paises?.nombre ?? paises?.name ?? paises}>
+                      {paises?.nombre ?? paises?.name ?? paises}
+                    </Option>
+                  )}
+                </Select>
               </Form.Item>
             </Col>
 
