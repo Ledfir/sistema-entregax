@@ -307,7 +307,7 @@ export const ClienteEdit = () => {
                         </div>
                         <div className="delivery-list">
                           {deliveryAddresses.map((d: any, idx: number) => {
-                            const receiver = d?.recipient_name ?? d?.quien_recibe ?? d?.name ?? d?.contact_name ?? '';
+                            const receiver = d?.recipient_name ?? d?.quienrecibe ?? d?.name ?? d?.contact_name ?? '';
                             const street = d?.street ?? d?.address_line_1 ?? d?.calle ?? d?.direccion ?? '';
                             const numeroExtRaw = d?.external_number ?? d?.numeroext ?? d?.numero_ext ?? d?.no_exterior ?? d?.numeroExterior ?? d?.numero ?? '';
                             const numeroIntRaw = d?.interior_number ?? d?.numero_interior ?? d?.no_interior ?? d?.numeroint ?? d?.numero_interior_text ?? '';

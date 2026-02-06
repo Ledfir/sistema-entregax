@@ -75,7 +75,6 @@ export const ClienteAddAddress = () => {
         const addressData = await clienteService.searchAddress(numericValue);
         
         // Procesar respuesta y poblar selects
-        // Asumiendo que la API devuelve arrays para cada campo
         const coloniasList = addressData?.colonias ?? addressData?.settlements ?? [];
         const estadosObj = addressData?.estados ?? addressData?.states ?? null;
         const municipiosObj = addressData?.municipios ?? addressData?.municipalities ?? null;
@@ -90,13 +89,13 @@ export const ClienteAddAddress = () => {
         setLocalidades(Array.isArray(localidadesList) ? localidadesList : []);
         setPaises(paisObj);
         
-        // Si solo hay una opción en cada campo, auto-seleccionar
-        if (coloniasList.length === 1) form.setFieldValue('colonia', coloniasList[0]?.nombre ?? coloniasList[0]);
-        if (estadosObj) form.setFieldValue('state', estadosObj?.nombre ?? estadosObj?.name ?? estadosObj);
-        if (municipiosObj) form.setFieldValue('municipality', municipiosObj?.nombre ?? municipiosObj?.name ?? municipiosObj);
-        if (ciudadObj) form.setFieldValue('city', ciudadObj?.nombre ?? ciudadObj?.name ?? ciudadObj);
-        if (localidadesList.length === 1) form.setFieldValue('localidad', localidadesList[0]?.nombre ?? localidadesList[0]);
-        if (paisObj) form.setFieldValue('country', paisObj?.nombre ?? paisObj?.name ?? paisObj);
+        // Si solo hay una opción en cada campo, auto-seleccionar usando el id
+        if (coloniasList.length === 1) form.setFieldValue('colonia', coloniasList[0]?.id ?? coloniasList[0]);
+        if (estadosObj && estadosObj.id) form.setFieldValue('state', estadosObj.id);
+        if (municipiosObj && municipiosObj.id) form.setFieldValue('municipality', municipiosObj.id);
+        if (ciudadObj && ciudadObj.id) form.setFieldValue('city', ciudadObj.id);
+        if (localidadesList.length === 1) form.setFieldValue('localidad', localidadesList[0]?.id ?? localidadesList[0]);
+        if (paisObj && paisObj.id) form.setFieldValue('country', paisObj.id);
         
         message.success('Dirección encontrada');
       } catch (e: any) {
@@ -116,10 +115,14 @@ export const ClienteAddAddress = () => {
   };
 
   const onFinish = async (values: any) => {
-    if (!id) return;
+    if (!id) {
+      message.error('ID de cliente no disponible');
+      return;
+    }
     try {
       setSubmitting(true);
       const payload = {
+        customer_id: id,
         recipient_name: values.recipient_name,
         phone: values.phone,
         mobile: values.mobile,
@@ -137,17 +140,24 @@ export const ClienteAddAddress = () => {
         references: values.references,
       };
 
-      await clienteService.addDeliveryAddress(id, payload);
-      message.success('Dirección agregada');
-      // regresar al editor del cliente y abrir la pestaña de entrega
+      const response = await clienteService.addDeliveryAddress(payload);
+      message.success(response?.message || 'Dirección agregada correctamente');
+      // Redirigir al listado de direcciones del cliente
       navigate(`/clientes/editar/${id}?tab=entrega`);
     } catch (e: any) {
       console.error(e);
-      message.error('Error al agregar la dirección');
+      message.error(e?.response?.data?.message || 'Error al agregar la dirección');
     } finally {
       setSubmitting(false);
     }
   };
+
+  // Cambia el valor inicial del formulario para delivery_place
+  useEffect(() => {
+    if (deliveryOptions.length === 1 && deliveryOptions[0]?.id) {
+      form.setFieldValue('delivery_place', deliveryOptions[0].id);
+    }
+  }, [deliveryOptions, form]);
 
   return (
     <Card title={`Agregar dirección de entrega${clientInfo ? ` - Cliente ${clientInfo?.clave || clientInfo?.id}` : ''}`} style={{ maxWidth: 900, margin: '0 auto' }}>
@@ -155,7 +165,14 @@ export const ClienteAddAddress = () => {
         <p>Agrega la dirección del cliente para la entrega de sus paquetes.</p>
       </div>
 
-      <Form form={form} layout="vertical" onFinish={onFinish} initialValues={{ delivery_place: 'Domicilio' }}>
+      <Form 
+        form={form} 
+        layout="vertical" 
+        onFinish={onFinish} 
+        initialValues={{
+          delivery_place: deliveryOptions.length > 0 && deliveryOptions[0]?.id ? deliveryOptions[0].id : undefined
+        }}
+      >
         <Card type="inner" title={`Cliente ${clientInfo?.clave ?? ''}`} style={{ marginBottom: 16 }}>
           <Row gutter={12}>
             <Col span={12}>
@@ -224,8 +241,9 @@ export const ClienteAddAddress = () => {
               <Form.Item label="Colonia" name="colonia">
                 <Select allowClear placeholder="Selecciona colonia" loading={searchingAddress}>
                   {colonias.map((col: any, idx: number) => {
-                    const val = col?.nombre ?? col?.name ?? col;
-                    return <Option key={idx} value={val}>{val}</Option>;
+                    const val = col?.id ?? idx;
+                    const label = col?.nombre ?? col?.name ?? col;
+                    return <Option key={val} value={val}>{label}</Option>;
                   })}
                 </Select>
               </Form.Item>
@@ -234,7 +252,7 @@ export const ClienteAddAddress = () => {
               <Form.Item label="Estado" name="state">
                 <Select allowClear placeholder="Selecciona estado" loading={searchingAddress}>
                   {estados && (
-                    <Option value={estados?.nombre ?? estados?.name ?? estados}>
+                    <Option value={estados?.id ?? estados}>
                       {estados?.nombre ?? estados?.name ?? estados}
                     </Option>
                   )}
@@ -246,8 +264,9 @@ export const ClienteAddAddress = () => {
               <Form.Item label="Localidad" name="localidad">
                 <Select allowClear placeholder="Selecciona localidad" loading={searchingAddress}>
                   {localidades.map((loc: any, idx: number) => {
-                    const val = loc?.nombre ?? loc?.name ?? loc;
-                    return <Option key={idx} value={val}>{val}</Option>;
+                    const val = loc?.id ?? idx;
+                    const label = loc?.nombre ?? loc?.name ?? loc;
+                    return <Option key={val} value={val}>{label}</Option>;
                   })}
                 </Select>
               </Form.Item>
@@ -257,7 +276,7 @@ export const ClienteAddAddress = () => {
               <Form.Item label="Municipio" name="municipality">
                 <Select allowClear placeholder="Selecciona municipio" loading={searchingAddress}>
                   {municipios && (
-                    <Option value={municipios?.nombre ?? municipios?.name ?? municipios}>
+                    <Option value={municipios?.id ?? municipios}>
                       {municipios?.nombre ?? municipios?.name ?? municipios}
                     </Option>
                   )}
@@ -268,7 +287,7 @@ export const ClienteAddAddress = () => {
               <Form.Item label="Ciudad" name="city">
                 <Select allowClear placeholder="Selecciona ciudad" loading={searchingAddress}>
                   {ciudades && (
-                    <Option value={ciudades?.nombre ?? ciudades?.name ?? ciudades}>
+                    <Option value={ciudades?.id ?? ciudades}>
                       {ciudades?.nombre ?? ciudades?.name ?? ciudades}
                     </Option>
                   )}
@@ -279,7 +298,7 @@ export const ClienteAddAddress = () => {
               <Form.Item label="País" name="country">
                 <Select allowClear placeholder="Selecciona país" loading={searchingAddress}>
                   {paises && (
-                    <Option value={paises?.nombre ?? paises?.name ?? paises}>
+                    <Option value={paises?.id ?? paises}>
                       {paises?.nombre ?? paises?.name ?? paises}
                     </Option>
                   )}
@@ -292,7 +311,7 @@ export const ClienteAddAddress = () => {
                 <Select>
                   {deliveryOptions && deliveryOptions.length > 0 ? (
                     deliveryOptions.map((opt: any, i: number) => {
-                      const value = opt.value ?? opt.code ?? opt.id ?? opt.name ?? `opt-${i}`;
+                      const value = opt.id ?? opt.code ?? opt.value ?? `opt-${i}`;
                       const label = opt.nombre ?? opt.name ?? opt.label ?? opt.title ?? opt.description ?? value;
                       return <Option key={value} value={value}>{label}</Option>;
                     })

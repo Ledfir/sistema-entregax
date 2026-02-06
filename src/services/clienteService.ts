@@ -42,10 +42,10 @@ export const clienteService = {
     return response.data?.data ?? response.data;
   },
 
-  addDeliveryAddress: async (id: string | number, payload: any): Promise<any> => {
+  addDeliveryAddress: async (data: any): Promise<any> => {
     // POST new delivery address for customer
-    const url = `/customers/delivery-addresses/${id}`;
-    const response = await apiClient.post(url, payload);
+    const url = `/customers/add-delivery-address`;
+    const response = await apiClient.post(url, data);
     return response.data?.data ?? response.data;
   },
 
