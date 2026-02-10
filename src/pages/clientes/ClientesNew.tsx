@@ -6,7 +6,7 @@ import clienteService from '../../services/clienteService';
 import dayjs from 'dayjs';
 import './Clientes.css';
 
-export const ClientesLista = () => {
+export const ClientesNew = () => {
   const [loading, setLoading] = useState(false);
   const [allClientes, setAllClientes] = useState<any[]>([]);
   const [filteredClientes, setFilteredClientes] = useState<any[]>([]);
@@ -23,7 +23,7 @@ export const ClientesLista = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = 'Sistema Entregax | Clientes';
+    document.title = 'Sistema Entregax | Clientes en espera de validación';
     loadClientes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -31,7 +31,7 @@ export const ClientesLista = () => {
   const loadClientes = async () => {
     try {
       setLoading(true);
-      const res = await clienteService.list('', 1, 10000);
+      const res = await clienteService.listNews('', 1, 10000);
       const items = res.items ?? [];
       setAllClientes(items);
       setFilteredClientes(items);
@@ -107,7 +107,7 @@ export const ClientesLista = () => {
   return (
     <div className="clientes-container">
       <div className="clientes-header-new">
-        <h1> Clientes</h1>
+        <h1> Clientes en espera de validación</h1>
         <div className="clientes-actions">
           <input
             type="text"
@@ -241,4 +241,4 @@ export const ClientesLista = () => {
   );
 };
 
-export default ClientesLista;
+export default ClientesNew;

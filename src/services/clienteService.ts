@@ -23,6 +23,25 @@ export const clienteService = {
     return { items: Array.isArray(items) ? items : [], total: total ? Number(total) : undefined };
   },
 
+  // Nuevo: lista de clientes pendientes/recientes desde endpoint 'customers/news'
+  listNews: async (query = '', page = 1, per_page = 10): Promise<{ items: any[]; total?: number }> => {
+    const params: any = {};
+    if (query) {
+      params.q = query;
+      params.search = query;
+    }
+    params.page = page;
+    params.per_page = per_page;
+    const url = '/customers/news';
+    const response = await apiClient.get(url, { params });
+
+    const raw = response.data ?? {};
+    const items = raw?.data ?? raw ?? [];
+    const total = raw?.total ?? raw?.meta?.total ?? raw?.pagination?.total ?? response.headers?.['x-total-count'] ?? (Array.isArray(items) ? items.length : undefined);
+
+    return { items: Array.isArray(items) ? items : [], total: total ? Number(total) : undefined };
+  },
+
   get: async (id: string | number): Promise<any> => {
     // Usar ruta relativa para que el dev proxy (/api) redirija a la API remota
     const url = `/customers/getCustomer/${id}`;
@@ -36,6 +55,19 @@ export const clienteService = {
     return response.data?.data ?? response.data;
   },
 
+  // Obtener una dirección de entrega por id
+  getDeliveryAddress: async (addressId: string | number): Promise<any> => {
+    const url = `/customers/delivery-address/${addressId}`;
+    const response = await apiClient.get(url);
+    return response.data?.data ?? response.data;
+  },
+
+  getHiddenAddresses: async (id: string | number): Promise<any> => {
+    const url = `/customers/hide-address/${id}`;
+    const response = await apiClient.get(url);
+    return response.data?.data ?? response.data;
+  },
+
   getDeliveryOptions: async (): Promise<any> => {
     const url = `/delivery/get`;
     const response = await apiClient.get(url);
@@ -45,6 +77,13 @@ export const clienteService = {
   addDeliveryAddress: async (data: any): Promise<any> => {
     // POST new delivery address for customer
     const url = `/customers/add-delivery-address`;
+    const response = await apiClient.post(url, data);
+    return response.data?.data ?? response.data;
+  },
+
+  updateDeliveryAddress: async (data: any): Promise<any> => {
+    // POST new delivery address for customer
+    const url = `/customers/update-delivery-address`;
     const response = await apiClient.post(url, data);
     return response.data?.data ?? response.data;
   },
@@ -69,6 +108,53 @@ export const clienteService = {
       return response.data;
     }
     const response = await apiClient.put(`/customers/${id}`, payload);
+    return response.data;
+  },
+
+  // Enviar actualización via POST a '/customers/update-customer'
+  updateCustomerPost: async (payload: any): Promise<any> => {
+    // payload puede ser FormData o un objeto plano
+    if (payload instanceof FormData) {
+      const response = await apiClient.post('/customers/update-customer', payload, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    }
+    const response = await apiClient.post('/customers/update-customer', payload);
+    return response.data;
+  },
+
+  // Bloquear cliente: POST a '/customers/ban-customer'
+  banCustomer: async (payload: any): Promise<any> => {
+    const url = '/customers/ban-customer';
+    const response = await apiClient.post(url, payload);
+    return response.data;
+  },
+
+  // Bloquear cliente: POST a '/customers/ban-customer'
+  desbanCustomer: async (payload: any): Promise<any> => {
+    const url = '/customers/desban-customer';
+    const response = await apiClient.post(url, payload);
+    return response.data;
+  },
+
+  // Ocultar dirección de entrega
+  hideDeliveryAddress: async (addressId: string | number): Promise<any> => {
+    const url = '/customers/hide-delivery-address';
+    const response = await apiClient.post(url, { id: addressId });
+    return response.data;
+  },
+
+  // Reactivar/mostrar dirección de entrega
+  showDeliveryAddress: async (addressId: string | number): Promise<any> => {
+    const url = '/customers/show-delivery-address';
+    const response = await apiClient.post(url, { id: addressId });
+    return response.data;
+  },
+  // Eliminar dirección de entrega (intento optimista de llamada al backend)
+  deleteDeliveryAddress: async (addressId: string | number): Promise<any> => {
+    const url = '/customers/delete-delivery-address';
+    const response = await apiClient.post(url, { id: addressId });
     return response.data;
   },
 };

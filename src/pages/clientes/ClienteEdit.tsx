@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Form, Input, Button, Select, Card, message, Spin, Tabs, Modal } from 'antd';
+import { Form, Input, Button, Select, Card, Spin, Tabs, Modal } from 'antd';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import clienteService from '../../services/clienteService';
+import Swal from 'sweetalert2';
 import './Clientes.css';
-import { FaSave, FaEdit, FaUser, FaMapMarker, FaEyeSlash, FaFileInvoice, FaCog, FaPlus } from 'react-icons/fa';
+import { FaSave, FaUser, FaMapMarker, FaEyeSlash, FaFileInvoice, FaCog, FaPlus, FaLock, FaUnlock } from 'react-icons/fa';
 
 const { Option } = Select;
 
@@ -21,6 +22,8 @@ export const ClienteEdit = () => {
   const [previewSrc, setPreviewSrc] = useState<string | null>(null);
   const [deliveryLoading, setDeliveryLoading] = useState(false);
   const [deliveryAddresses, setDeliveryAddresses] = useState<any[]>([]);
+  const [hiddenLoading, setHiddenLoading] = useState(false);
+  const [hiddenAddresses, setHiddenAddresses] = useState<any[]>([]);
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
@@ -50,9 +53,39 @@ export const ClienteEdit = () => {
       // (no poblamos inputs específicos aquí porque fueron removidos)
     } catch (e: any) {
       console.error(e);
-      message.error('Error al cargar direcciones de entrega');
+      Swal.fire({
+        position: 'center',
+        title: '',
+        text: 'Error al cargar direcciones de entrega',
+        icon: 'error',
+        showConfirmButton: false,
+        timer: 4500,
+      });
     } finally {
       setDeliveryLoading(false);
+    }
+  };
+
+  const loadHiddenAddresses = async (clientId: string | undefined) => {
+    if (!clientId) return;
+    try {
+      setHiddenLoading(true);
+      const data = await clienteService.getHiddenAddresses(clientId);
+      // guardar lista de direcciones ocultas en estado
+      const items = Array.isArray(data) ? data : (data?.addresses ?? data?.data ?? []);
+      setHiddenAddresses(items ?? []);
+    } catch (e: any) {
+      console.error(e);
+      Swal.fire({
+        position: 'center',
+        title: '',
+        text: 'Error al cargar direcciones ocultas',
+        icon: 'error',
+        showConfirmButton: false,
+        timer: 4500,
+      });
+    } finally {
+      setHiddenLoading(false);
     }
   };
 
@@ -64,23 +97,176 @@ export const ClienteEdit = () => {
     }
   };
 
+  const handleHideAddress = async (addressId: string | number) => {
+    try {
+      const res = await clienteService.hideDeliveryAddress(addressId);
+      const ok = Boolean(
+        res && (
+          res.success === true ||
+          String(res.status).toLowerCase() === 'success' ||
+          res.ok === true
+        )
+      );
+      
+      if (ok) {
+        Swal.fire({
+          position: 'center',
+          title: '',
+          text: res?.message ?? 'Dirección ocultada correctamente',
+          icon: 'success',
+          showConfirmButton: false,
+          timer: 4500,
+        });
+        // Recargar direcciones de entrega
+        setTimeout(() => {
+          loadDeliveryAddresses(id);
+        }, 1500);
+      } else {
+        const serverMsg = res?.message ?? res?.error ?? 'Error al ocultar la dirección';
+        Swal.fire({
+          position: 'center',
+          title: '',
+          text: serverMsg,
+          icon: 'error',
+          showConfirmButton: false,
+          timer: 4500,
+        });
+      }
+    } catch (e: any) {
+      console.error(e);
+      Swal.fire({
+        position: 'center',
+        title: '',
+        text: 'Error al ocultar la dirección',
+        icon: 'error',
+        showConfirmButton: false,
+        timer: 4500,
+      });
+    }
+  };
+
+  const handleDeleteAddress = async (addressId: string | number) => {
+    try {
+      const result = await Swal.fire({
+        title: 'Confirmar eliminación',
+        text: '¿Seguro que deseas eliminar esta dirección? Esta acción puede ser irreversible.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar',
+      });
+
+      if (result.isConfirmed) {
+        // Intentar llamar al endpoint de eliminación en el servicio
+        try {
+          const res = await clienteService.deleteDeliveryAddress(addressId);
+          const ok = Boolean(
+            res && (
+              res.success === true ||
+              String(res.status).toLowerCase() === 'success' ||
+              res.ok === true
+            )
+          );
+
+          if (ok) {
+            Swal.fire({
+              position: 'center',
+              title: '',
+              text: res?.message ?? 'Dirección eliminada',
+              icon: 'success',
+              showConfirmButton: false,
+              timer: 2000,
+            });
+            setTimeout(() => loadDeliveryAddresses(id), 800);
+          } else {
+            const serverMsg = res?.message ?? res?.error ?? 'Error al eliminar la dirección';
+            Swal.fire({ position: 'center', title: '', text: serverMsg, icon: 'error', showConfirmButton: false, timer: 4500 });
+          }
+        } catch (e: any) {
+          console.error(e);
+          Swal.fire({ position: 'center', title: '', text: 'Error al eliminar la dirección', icon: 'error', showConfirmButton: false, timer: 4500 });
+        }
+      }
+    } catch (e: any) {
+      console.error(e);
+    }
+  };
+
+  const handleShowAddress = async (addressId: string | number) => {
+    try {
+      const res = await clienteService.showDeliveryAddress(addressId);
+      const ok = Boolean(
+        res && (
+          res.success === true ||
+          String(res.status).toLowerCase() === 'success' ||
+          res.ok === true
+        )
+      );
+      
+      if (ok) {
+        Swal.fire({
+          position: 'center',
+          title: '',
+          text: res?.message ?? 'Dirección reactivada correctamente',
+          icon: 'success',
+          showConfirmButton: false,
+          timer: 4500,
+        });
+        // Recargar direcciones ocultas
+        setTimeout(() => {
+          loadHiddenAddresses(id);
+        }, 1500);
+      } else {
+        const serverMsg = res?.message ?? res?.error ?? 'Error al reactivar la dirección';
+        Swal.fire({
+          position: 'center',
+          title: '',
+          text: serverMsg,
+          icon: 'error',
+          showConfirmButton: false,
+          timer: 4500,
+        });
+      }
+    } catch (e: any) {
+      console.error(e);
+      Swal.fire({
+        position: 'center',
+        title: '',
+        text: 'Error al reactivar la dirección',
+        icon: 'error',
+        showConfirmButton: false,
+        timer: 4500,
+      });
+    }
+  };
+
   const loadClient = async (clientId: string | undefined) => {
     if (!clientId) return;
     try {
       setLoading(true);
       const data = await clienteService.get(clientId);
       // normalize fields
+      // Map numeric tipo (1,2,3) to human labels expected by the form
+      const rawTipo = data?.tipo_cliente ?? data?.type ?? data?.client_type ?? data?.idtp;
+      let tipoClienteMapped: any = rawTipo;
+      if (typeof rawTipo === 'number' || (typeof rawTipo === 'string' && /^\d+$/.test(String(rawTipo)))) {
+        const n = Number(rawTipo);
+        tipoClienteMapped = n === 1 ? 'Final' : (n === 2 ? 'Broker' : 'Desconocido');
+      }
+
       const model = {
         clave: data?.clave ?? data?.clavecliente ?? data?.id,
         nombre: data?.nombre ?? data?.name,
         correo: data?.correo ?? data?.email,
         telefono: data?.telefono ?? data?.phone,
-        telefono_movil: data?.telefono_movil ?? data?.mobile ?? data?.celular,
+        telefono_movil: data?.telefono_movil ?? data?.mobile ?? data?.celular ?? data?.movil,
         whatsapp: data?.whatsapp ?? data?.wa ?? data?.watsapp,
         wechat: data?.wechat ?? data?.we_chat,
         facebook: data?.facebook ?? data?.fb,
         alias: data?.alias ?? data?.nickname,
-        tipo_cliente: data?.tipo_cliente ?? data?.type ?? data?.client_type,
+        tipo_cliente: tipoClienteMapped,
         asesor: data?.asesor ?? data?.advisor ?? data?.resp,
         ladoa: data?.ladoa ?? data?.lado_a ?? data?.fileA ?? null,
         ladob: data?.ladob ?? data?.lado_b ?? data?.fileB ?? null,
@@ -98,9 +284,82 @@ export const ClienteEdit = () => {
       setFileB(null);
     } catch (e: any) {
       console.error(e);
-      message.error('Error al cargar cliente');
+      Swal.fire({
+        position: 'center',
+        title: '',
+        text: 'Error al cargar cliente',
+        icon: 'error',
+        showConfirmButton: false,
+        timer: 4500,
+      });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleBlockClient = async () => {
+    // Abrir modal para capturar motivo de bloqueo
+    if (!id) return;
+    setBlockModalOpen(true);
+  };
+
+  // Estado y función para modal de bloqueo
+  const [blockModalOpen, setBlockModalOpen] = useState(false);
+  const [blockReason, setBlockReason] = useState('');
+  const [blockingSubmitting, setBlockingSubmitting] = useState(false);
+
+  const submitBlockClient = async () => {
+    if (!id) return;
+    if (!blockReason || String(blockReason).trim().length === 0) {
+      Swal.fire({ icon: 'warning', title: '', text: 'Por favor escribe el motivo del bloqueo', showConfirmButton: false, timer: 2500 });
+      return;
+    }
+    try {
+      setBlockingSubmitting(true);
+      const payload: any = { id: String(id), motivo_bloqueo: blockReason };
+      const res = await clienteService.banCustomer(payload);
+      const ok = Boolean(res && (res.success === true || String(res.status).toLowerCase() === 'success' || res.ok === true));
+      if (ok) {
+        Swal.fire({ icon: 'success', title: '', text: res?.message ?? 'Cliente bloqueado', showConfirmButton: false, timer: 2500 });
+        // actualizar campo state en el formulario si existe
+        try { form.setFieldValue && form.setFieldValue('state', '0'); } catch(e) {}
+        setBlockReason('');
+        setBlockModalOpen(false);
+      } else {
+        Swal.fire({ icon: 'error', title: '', text: res?.message ?? 'No se pudo bloquear al cliente', showConfirmButton: false, timer: 3500 });
+      }
+    } catch (e: any) {
+      console.error(e);
+      Swal.fire({ icon: 'error', title: '', text: 'Error al bloquear cliente', showConfirmButton: false, timer: 3500 });
+    } finally {
+      setBlockingSubmitting(false);
+    }
+  };
+
+  const handleUnblockClient = async () => {
+    if (!id) return;
+    const result = await Swal.fire({
+      title: '¿Confirmas desbloquear al cliente?',
+      text: 'Esto marcará al cliente como activo en el sistema.',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, desbloquear',
+      cancelButtonText: 'Cancelar',
+    });
+    if (result.isConfirmed) {
+      try {
+        const payload = { id: String(id) };
+        const res = await clienteService.desbanCustomer(payload);
+        const ok = Boolean(res && (res.success === true || String(res.status).toLowerCase() === 'success' || res.ok === true));
+        if (ok) {
+          Swal.fire({ icon: 'success', title: '', text: res?.message ?? 'Cliente desbloqueado', showConfirmButton: false, timer: 2500 });
+        } else {
+          Swal.fire({ icon: 'error', title: '', text: res?.message ?? 'No se pudo desbloquear al cliente', showConfirmButton: false, timer: 3500 });
+        }
+      } catch (e: any) {
+        console.error(e);
+        Swal.fire({ icon: 'error', title: '', text: 'Error al desbloquear cliente', showConfirmButton: false, timer: 3500 });
+      }
     }
   };
 
@@ -108,45 +367,86 @@ export const ClienteEdit = () => {
     if (!id) return;
     try {
       setSaving(true);
-      // map form values to API payload
-      // If user selected new files, send multipart/form-data
-      if (fileA || fileB) {
-        const form = new FormData();
-        form.append('clavecliente', values.clave ?? '');
-        form.append('nombre', values.nombre ?? '');
-        form.append('correo', values.correo ?? '');
-        form.append('telefono', values.telefono ?? '');
-        form.append('telefono_movil', values.telefono_movil ?? '');
-        form.append('whatsapp', values.whatsapp ?? '');
-        form.append('wechat', values.wechat ?? '');
-        form.append('facebook', values.facebook ?? '');
-        form.append('alias', values.alias ?? '');
-        form.append('tipo_cliente', values.tipo_cliente ?? '');
-        form.append('state', values.state ?? '');
-        if (fileA) form.append('ladoa', fileA);
-        if (fileB) form.append('ladob', fileB);
-        await clienteService.update(id, form);
+      // Enviar por POST a '/customers/update-customer' los campos solicitados
+      // Campos: nombre, correo, telefono, telefono_movil, whatsapp, wechat, facebook, alias, tipo_cliente
+      // Archivos: el primero con name 'archivo' y el segundo con name 'ladob'
+      const hasFiles = !!(fileA || fileB);
+      let res: any = null;
+      if (hasFiles) {
+        const formData = new FormData();
+        formData.append('id', String(id));
+        formData.append('nombre', values.nombre ?? '');
+        formData.append('correo', values.correo ?? '');
+        formData.append('telefono', values.telefono ?? '');
+        formData.append('telefono_movil', values.telefono_movil ?? '');
+        formData.append('whatsapp', values.whatsapp ?? '');
+        formData.append('wechat', values.wechat ?? '');
+        formData.append('facebook', values.facebook ?? '');
+        formData.append('alias', values.alias ?? '');
+        formData.append('tipo_cliente', values.tipo_cliente ?? '');
+        if (fileA) formData.append('archivo', fileA);
+        if (fileB) formData.append('ladob', fileB);
+        res = await clienteService.updateCustomerPost(formData);
       } else {
         const payload = {
-          clavecliente: values.clave,
-          nombre: values.nombre,
-          correo: values.correo,
-          telefono: values.telefono,
-          telefono_movil: values.telefono_movil,
-          whatsapp: values.whatsapp,
-          wechat: values.wechat,
-          facebook: values.facebook,
-          alias: values.alias,
-          tipo_cliente: values.tipo_cliente,
-          state: values.state,
+          id: String(id),
+          nombre: values.nombre ?? '',
+          correo: values.correo ?? '',
+          telefono: values.telefono ?? '',
+          telefono_movil: values.telefono_movil ?? '',
+          whatsapp: values.whatsapp ?? '',
+          wechat: values.wechat ?? '',
+          facebook: values.facebook ?? '',
+          alias: values.alias ?? '',
+          tipo_cliente: values.tipo_cliente ?? '',
         };
-        await clienteService.update(id, payload);
+        res = await clienteService.updateCustomerPost(payload);
       }
-      message.success('Cliente actualizado');
-      navigate('/clientes/lista');
+
+      // Verificar que la respuesta indique éxito antes de navegar
+      const ok = Boolean(
+        res && (
+          res.success === true ||
+          String(res.status).toLowerCase() === 'success' ||
+          res.ok === true ||
+          Number(res.code) === 200 ||
+          (res.data && res.data.success === true)
+        )
+      );
+
+      if (ok) {
+        Swal.fire({
+          position: 'center',
+          title: '',
+          text: res?.message ?? 'Cliente actualizado',
+          icon: 'success',
+          showConfirmButton: false,
+          timer: 4500,
+        });
+        setTimeout(() => {
+          navigate('/clientes/lista');
+        }, 1500);
+      } else {
+        const serverMsg = res?.message ?? res?.error ?? 'No se recibió confirmación de éxito del servidor';
+        Swal.fire({
+          position: 'center',
+          title: '',
+          text: serverMsg,
+          icon: 'error',
+          showConfirmButton: false,
+          timer: 4500,
+        });
+      }
     } catch (e: any) {
       console.error(e);
-      message.error('Error al guardar cliente');
+      Swal.fire({
+        position: 'center',
+        title: '',
+        text: 'Error al guardar cliente',
+        icon: 'error',
+        showConfirmButton: false,
+        timer: 4500,
+      });
     } finally {
       setSaving(false);
     }
@@ -171,6 +471,7 @@ export const ClienteEdit = () => {
           <Tabs tabPosition="left" activeKey={activeTab} onChange={(key) => {
             setActiveTab(key);
             if (key === 'entrega') loadDeliveryAddresses(id);
+            if (key === 'ocultas') loadHiddenAddresses(id);
           }}>
             <Tabs.TabPane tab={<><FaUser /> Datos personales</>} key="datos">
               <div className="tab-panel-grid">
@@ -307,6 +608,7 @@ export const ClienteEdit = () => {
                         </div>
                         <div className="delivery-list">
                           {deliveryAddresses.map((d: any, idx: number) => {
+                            const addressId = d?.id ?? d?.token ?? idx;
                             const receiver = d?.recipient_name ?? d?.quienrecibe ?? d?.name ?? d?.contact_name ?? '';
                             const street = d?.street ?? d?.address_line_1 ?? d?.calle ?? d?.direccion ?? '';
                             const numeroExtRaw = d?.external_number ?? d?.numeroext ?? d?.numero_ext ?? d?.no_exterior ?? d?.numeroExterior ?? d?.numero ?? '';
@@ -342,9 +644,9 @@ export const ClienteEdit = () => {
                                   </div>
                                 </div>
                                 <div className="delivery-card-actions">
-                                  <button className="delivery-btn delivery-btn-delete" title="Eliminar">✖</button>
-                                  <button className="delivery-btn delivery-btn-edit" title="Editar">✎</button>
-                                  <button className="delivery-btn delivery-btn-hide" title="Ocultar">Ocultar</button>
+                                  <button type="button" className="delivery-btn delivery-btn-delete" title="Eliminar" onClick={() => handleDeleteAddress(addressId)}>✖</button>
+                                  <button type="button" className="delivery-btn delivery-btn-edit" title="Editar" onClick={() => navigate(`/clientes/${id}/direccion/editar/${addressId}`)}>✎</button>
+                                  <button type="button" className="delivery-btn delivery-btn-hide" title="Ocultar" onClick={() => handleHideAddress(addressId)}>Ocultar</button>
                                 </div>
                               </div>
                             );
@@ -359,12 +661,63 @@ export const ClienteEdit = () => {
 
             <Tabs.TabPane tab={<><FaEyeSlash /> Direcciones ocultas</>} key="ocultas">
               <div className="tab-panel-grid">
-                <Form.Item label="Dirección oculta 1" name="direccion_oculta_1">
-                  <Input />
-                </Form.Item>
-                <Form.Item label="Dirección oculta 2" name="direccion_oculta_2">
-                  <Input />
-                </Form.Item>
+                {hiddenLoading ? (
+                  <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 24 }}><Spin /></div>
+                ) : (
+                  <>
+                    {hiddenAddresses && hiddenAddresses.length > 0 ? (
+                      <div style={{ gridColumn: '1 / -1', marginTop: 8 }}>
+                        <div className="delivery-list">
+                          {hiddenAddresses.map((d: any, idx: number) => {
+                            const addressId = d?.id ?? d?.token ?? idx;
+                            const receiver = d?.recipient_name ?? d?.quienrecibe ?? d?.name ?? d?.contact_name ?? '';
+                            const street = d?.street ?? d?.address_line_1 ?? d?.calle ?? d?.direccion ?? '';
+                            const numeroExtRaw = d?.external_number ?? d?.numeroext ?? d?.numero_ext ?? d?.no_exterior ?? d?.numeroExterior ?? d?.numero ?? '';
+                            const numeroIntRaw = d?.interior_number ?? d?.numero_interior ?? d?.no_interior ?? d?.numeroint ?? d?.numero_interior_text ?? '';
+                            const numberInt = numeroIntRaw ?? '';
+                            const numeroExt = numeroExtRaw ? (numberInt ? `${numeroExtRaw} ${numberInt}` : numeroExtRaw) : (numberInt || '');
+                            const colonia = d?.colonia ?? d?.neighbourhood ?? '';
+                            const refe = d?.refe ?? d?.referencia ?? d?.reference ?? d?.ref ?? d?.referencia1 ?? '';
+                            const cp = d?.postal_code ?? d?.cp ?? '';
+                            const municipio = d?.city ?? d?.municipio ?? '';
+                            const estado = d?.state ?? d?.estado ?? '';
+                            const lugarRaw = d?.delivery_place ?? d?.lugar_entrega ?? d?.lugarentrega ?? d?.lugarEntrega ?? d?.lugar_entrega_text ?? d?.place ?? d?.lugar ?? null;
+                            const lugar = lugarRaw ?? 'Domicilio';
+                            return (
+                              <div className="delivery-card" key={idx}>
+                                <div className="delivery-card-left">
+                                  <div><strong>¿Quien recibe?:</strong> <strong>{receiver}</strong></div>
+                                  <div style={{ marginTop: 6 }}>
+                                    <strong>Calle:</strong> <span>{street}</span>
+                                    {numeroExt ? (<span>  <strong>Numero:</strong> <span>{numeroExt}</span></span>) : null}
+                                    {colonia ? (<span>  <strong>Colonia:</strong> <span>{colonia}</span></span>) : null}
+                                    {refe ? (<span>  <strong>Ref:</strong> <span>{refe}</span></span>) : null}
+                                    {cp ? (<span>  <strong>CP:</strong> <span>{cp}</span></span>) : null}
+                                  </div>
+                                  <div style={{ marginTop: 6 }}>
+                                    <strong>Municipio:</strong> <span>{municipio}</span>
+                                    {'  '}
+                                    <strong>Estado:</strong> <span>{estado}</span>
+                                  </div>
+                                  <div style={{ marginTop: 6 }}>
+                                    <strong>Lugar de entrega:</strong> <span>{lugar}</span>
+                                  </div>
+                                </div>
+                                <div className="delivery-card-actions">
+                                  <button type="button" className="delivery-btn delivery-btn-hide" title="Reactivar" onClick={() => handleShowAddress(addressId)}>Reactivar/mostrar</button>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 24, color: '#999' }}>
+                        No hay direcciones ocultas
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </Tabs.TabPane>
 
@@ -381,16 +734,25 @@ export const ClienteEdit = () => {
 
             <Tabs.TabPane tab={<><FaCog /> Opciones</>} key="opciones">
               <div className="tab-panel-grid">
-                <Form.Item label="Estatus" name="state">
-                  <Select style={{ width: 180 }}>
-                    <Option value="1">Activo</Option>
-                    <Option value="0">Inactivo</Option>
-                  </Select>
-                </Form.Item>
+                <div style={{ padding: 12, borderRadius: 6, background: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 220, boxSizing: 'border-box', width: '100%' }}>
+                  <div>
+                    <h4 style={{ marginTop: 0, textAlign: 'center' }}>Bloquear a cliente dentro del sistema.</h4>
+                    <p style={{ color: '#666', textAlign: 'center' }}>Marca al cliente como inactivo para evitar que pueda realizar operaciones.</p>
+                  </div>
+                  <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center' }}>
+                    <Button type="primary" danger onClick={handleBlockClient}><FaLock style={{ marginRight: 8 }} />Bloquear</Button>
+                  </div>
+                </div>
 
-                <Form.Item label="Observaciones" name="observaciones">
-                  <Input.TextArea rows={4} />
-                </Form.Item>
+                <div style={{ padding: 12, borderRadius: 6, background: '#fff', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', minHeight: 220, boxSizing: 'border-box', width: '100%' }}>
+                  <div>
+                    <h4 style={{ marginTop: 0, textAlign: 'center' }}>Desbloquear a cliente dentro del sistema.</h4>
+                    <p style={{ color: '#666', textAlign: 'center' }}>Restablece el estatus del cliente a activo para permitir operaciones nuevamente.</p>
+                  </div>
+                  <div style={{ marginTop: 12, display: 'flex', justifyContent: 'center' }}>
+                    <Button style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50', color: '#fff' }} onClick={handleUnblockClient}><FaUnlock style={{ marginRight: 8 }} />Desbloquear</Button>
+                  </div>
+                </div>
               </div>
             </Tabs.TabPane>
           </Tabs>
@@ -399,6 +761,11 @@ export const ClienteEdit = () => {
     </Card>
       <Modal open={previewOpen} footer={null} onCancel={() => setPreviewOpen(false)} centered width={900}>
         {previewSrc && <img src={previewSrc} alt="Preview" style={{ width: '100%', height: 'auto' }} />}
+      </Modal>
+
+      <Modal title="Motivo de bloqueo" open={blockModalOpen} onCancel={() => setBlockModalOpen(false)} okText="Bloquear" onOk={submitBlockClient} confirmLoading={blockingSubmitting} centered>
+        <p>Escribe el motivo por el cual se bloqueará este cliente:</p>
+        <Input.TextArea rows={4} value={blockReason} onChange={(e) => setBlockReason(e.target.value)} placeholder="Motivo del bloqueo" />
       </Modal>
     </>
   );
