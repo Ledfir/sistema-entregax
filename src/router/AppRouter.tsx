@@ -7,6 +7,7 @@ import { ClientesNew } from '@/pages/clientes/ClientesNew';
 import { ClienteEdit } from '@/pages/clientes/ClienteEdit';
 import { ClienteAddAddress } from '@/pages/clientes/ClienteAddAddress';
 import { ClienteEditAddress } from '@/pages/clientes/ClienteEditAddress';
+import { CargoExtraCreate } from '@/pages/cargosextra/CargoExtraCreate';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 
@@ -38,7 +39,7 @@ export const AppRouter = () => {
           
           {/* Rutas de cargos extras */}
           <Route path="/cargos-extras/lista" element={<div style={{ padding: 24 }}>Lista de Cargos Extras</div>} />
-          <Route path="/cargos-extras/nuevo" element={<div style={{ padding: 24 }}>Nuevo Cargo Extra</div>} />
+          <Route path="/cargos-extras/nuevo" element={<CargoExtraCreate />} />
           
           {/* Otras rutas */}
           <Route path="/comunicados" element={<div style={{ padding: 24 }}>Comunicados</div>} />
