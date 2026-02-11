@@ -20,6 +20,15 @@ export const cargoExtraService = {
     return { items: Array.isArray(items) ? items : [], total: total ? Number(total) : undefined };
   },
 
+  // Obtener todos los clientes para select
+  getCuentas: async (): Promise<any[]> => {
+    const url = '/cuentas';
+    const response = await apiClient.get(url);
+    const raw = response.data ?? {};
+    const items = raw?.data ?? raw ?? [];
+    return Array.isArray(items) ? items : [];
+  },
+
   get: async (id: string | number): Promise<any> => {
     const url = `/extra-charges/${id}`;
     const response = await apiClient.get(url);

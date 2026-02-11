@@ -1,6 +1,15 @@
 import apiClient from '@/api/axios';
 
 export const clienteService = {
+  // Obtener todos los clientes para select
+  getAll: async (): Promise<any[]> => {
+    const url = '/customers';
+    const response = await apiClient.get(url);
+    const raw = response.data ?? {};
+    const items = raw?.data ?? raw ?? [];
+    return Array.isArray(items) ? items : [];
+  },
+
   // Devuelve { items: any[], total?: number }
   list: async (query = '', page = 1, per_page = 10): Promise<{ items: any[]; total?: number }> => {
     const params: any = {};

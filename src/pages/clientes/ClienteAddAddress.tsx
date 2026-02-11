@@ -159,6 +159,8 @@ export const ClienteAddAddress = () => {
     }
   }, [deliveryOptions, form]);
 
+  if (loading) return <div style={{ textAlign: 'center', padding: 32 }}><Spin size="large" /></div>;
+
   return (
     <Card title={`Agregar dirección de entrega${clientInfo ? ` - Cliente ${clientInfo?.clave || clientInfo?.id}` : ''}`} style={{ maxWidth: 900, margin: '0 auto' }}>
       <div style={{ marginBottom: 12 }}>
