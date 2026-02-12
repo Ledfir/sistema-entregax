@@ -1,0 +1,216 @@
+.user-grid-container {
+  padding: 24px;
+}
+
+.user-grid-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.user-grid-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-grid-title h1 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.user-grid-count {
+  color: #666;
+  font-size: 18px;
+  font-weight: 400;
+}
+
+.user-grid-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.user-cards-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.user-card {
+  background: white;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 24px;
+  position: relative;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.user-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.user-card-menu {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+}
+
+.user-avatar-wrapper {
+  margin-bottom: 16px;
+}
+
+.user-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f0f0f0;
+}
+
+.user-avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 32px;
+  font-weight: 600;
+}
+
+.user-info {
+  margin-bottom: 16px;
+  width: 100%;
+}
+
+.user-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 4px 0;
+}
+
+.user-role {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.user-card-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.user-card-actions button {
+  flex: 1;
+}
+
+.user-grid-pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+  padding: 12px 0;
+  border-top: 1px solid #f0f0f0;
+}
+
+.pagination-info {
+  font-size: 14px;
+  color: #666;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 0;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.view-toggle button {
+  padding: 8px 12px;
+  border: none !important;
+  border-right: 1px solid #d9d9d9 !important;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s;
+  border-radius: 0 !important;
+}
+
+.view-toggle button:last-child {
+  border-right: none !important;
+}
+
+.view-toggle button:hover {
+  background: #f5f5f5;
+  color: #1890ff;
+}
+
+.view-toggle button.active {
+  background: #5f5af6 !important;
+  color: white !important;
+}
+
+.view-toggle .ant-btn-icon-only {
+  width: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .user-cards-container {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+  }
+
+  .user-grid-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .user-grid-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 480px) {
+  .user-cards-container {
+    grid-template-columns: 1fr;
+  }
+}

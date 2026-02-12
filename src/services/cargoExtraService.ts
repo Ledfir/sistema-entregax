@@ -29,8 +29,8 @@ export const cargoExtraService = {
     return Array.isArray(items) ? items : [];
   },
 
-  get: async (id: string | number): Promise<any> => {
-    const url = `/extra-charges/${id}`;
+  get: async (token: string): Promise<any> => {
+    const url = `/extra-charges/get/${token}`;
     const response = await apiClient.get(url);
     return response.data?.data ?? response.data;
   },

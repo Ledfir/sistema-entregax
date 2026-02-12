@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, Table, Button, Input, Tag, Space, Dropdown, Menu, Modal, Form, Select, DatePicker, Spin } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import { SearchOutlined, MoreOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import cargoExtraService from '../../services/cargoExtraService';
@@ -41,6 +42,9 @@ export const CargoExtraList = () => {
   const [editingRecord, setEditingRecord] = useState<CargoExtra | null>(null);
   const [cuentas, setCuentas] = useState<Cuenta[]>([]);
   const [loadingCuentas, setLoadingCuentas] = useState(false);
+  const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [cargoDetail, setCargoDetail] = useState<any>(null);
+  const [loadingDetail, setLoadingDetail] = useState(false);
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
@@ -113,9 +117,31 @@ export const CargoExtraList = () => {
     setSearchText(value);
   };
 
-  const handleView = (record: CargoExtra) => {
-    // Implementar vista de detalle
-    console.log('Ver:', record);
+  const handleView = async (record: CargoExtra) => {
+    try {
+      setLoadingDetail(true);
+      setDetailModalVisible(true);
+      const data = await cargoExtraService.get(record.token);
+      setCargoDetail(data);
+    } catch (error) {
+      console.error('Error al cargar detalles:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudieron cargar los detalles del cargo extra',
+        showConfirmButton: true,
+      });
+      setDetailModalVisible(false);
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
+
+  const handleGeneratePdf = () => {
+    if (!cargoDetail?.charge?.token) return;
+    
+    const url = `https://www.sistemaentregax.com/cargosextras/generarpdf/${cargoDetail.charge.token}`;
+    window.open(url, '_blank');
   };
 
   const handleEdit = (record: CargoExtra) => {
@@ -240,7 +266,7 @@ export const CargoExtraList = () => {
     </Menu>
   );
 
-  const columns = [
+  const columns: ColumnsType<CargoExtra> = [
     {
       title: 'OPCIONES',
       key: 'opciones',
@@ -272,6 +298,10 @@ export const CargoExtraList = () => {
         </div>
       ),
       filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+      onFilter: (value: unknown, record: CargoExtra) => {
+        const searchValue = String(value).toLowerCase();
+        return record.idce?.toLowerCase().includes(searchValue) || false;
+      },
     },
     {
       title: 'CLIENTE',
@@ -294,6 +324,13 @@ export const CargoExtraList = () => {
         </div>
       ),
       filterIcon: (filtered: boolean) => <SearchOutlined style={{ color: filtered ? '#1890ff' : undefined }} />,
+      onFilter: (value: unknown, record: CargoExtra) => {
+        const searchValue = String(value).toLowerCase();
+        const suite = record.SUITE?.toLowerCase() || '';
+        const cliente = record.CLIENTE?.toLowerCase() || '';
+        const combined = `(${suite}) ${cliente}`;
+        return combined.includes(searchValue) || suite.includes(searchValue) || cliente.includes(searchValue);
+      },
     },
     {
       title: 'FECHA DE CREACIÓN',
@@ -453,6 +490,233 @@ export const CargoExtraList = () => {
             />
           </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        title={`📋 INFORMACIÓN SOBRE EL CARGO ${cargoDetail?.charge?.idce || ''}`}
+        open={detailModalVisible}
+        onCancel={() => {
+          setDetailModalVisible(false);
+          setCargoDetail(null);
+        }}
+        footer={null}
+        width={800}
+      >
+        <Spin spinning={loadingDetail}>
+          {cargoDetail && (
+            <div style={{ padding: '20px 0' }}>
+              {/* Información Principal */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: 30 }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ color: '#666', fontSize: 12, marginBottom: 5 }}>👤 Asesor:</div>
+                  <div style={{ fontWeight: 500 }}>{cargoDetail.user?.name || 'Atención a clientes'}</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ color: '#666', fontSize: 12, marginBottom: 5 }}>👥 Cliente:</div>
+                  <div style={{ fontWeight: 500 }}>
+                    {cargoDetail.customer?.nombre || '-'}
+                    {cargoDetail.customer?.clavecliente && ` (${cargoDetail.customer.clavecliente})`}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ color: '#666', fontSize: 12, marginBottom: 5 }}>💼 Cuenta:</div>
+                  <div style={{ fontWeight: 500 }}>{cargoDetail.cuenta?.name || '-'}</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ color: '#666', fontSize: 12, marginBottom: 5 }}>📅 Fecha límite de pago:</div>
+                  <div style={{ fontWeight: 500 }}>
+                    {cargoDetail.charge?.fechap && cargoDetail.charge.fechap !== '0000-00-00' && cargoDetail.charge.fechap !== '0000-00-00 00:00:00'
+                      ? dayjs(cargoDetail.charge.fechap).format('DD-MM-YYYY')
+                      : '-'}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ color: '#666', fontSize: 12, marginBottom: 5 }}>📅 Fecha de creación:</div>
+                  <div style={{ fontWeight: 500 }}>
+                    {cargoDetail.charge?.created && cargoDetail.charge.created !== '0000-00-00 00:00:00'
+                      ? dayjs(cargoDetail.charge.created).format('DD-MM-YYYY') 
+                      : '-'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Información de pago */}
+              <div style={{ 
+                background: '#f5f5f5', 
+                padding: 15, 
+                borderRadius: 8, 
+                marginBottom: 20 
+              }}>
+                <h3 style={{ margin: '0 0 15px 0', fontSize: 16, textAlign: 'center' }}>Información de pago</h3>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ color: '#666', fontSize: 12, marginBottom: 5 }}>Estado:</div>
+                    <div>
+                      {Number(cargoDetail.charge?.pagado) === 1 ? (
+                        <Tag color="green">Pagado</Tag>
+                      ) : (
+                        <Tag color="orange">Pendiente de pago</Tag>
+                      )}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ color: '#666', fontSize: 12, marginBottom: 5 }}>📅 Fecha de pago:</div>
+                    <div style={{ fontWeight: 500 }}>
+                      {cargoDetail.charge?.paid && cargoDetail.charge.paid !== '0000-00-00' && cargoDetail.charge.paid !== '0000-00-00 00:00:00'
+                        ? dayjs(cargoDetail.charge.paid).format('DD-MM-YYYY')
+                        : 'Pendiente'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Conceptos */}
+              <div style={{ marginBottom: 20 }}>
+                <h3 style={{ margin: '0 0 15px 0', fontSize: 16, textAlign: 'center' }}>Conceptos</h3>
+                <Table
+                  dataSource={
+                    Array.isArray(cargoDetail.detalles) && cargoDetail.detalles.length > 0
+                      ? cargoDetail.detalles.map((detalle: any, idx: number) => ({
+                          key: `detalle-${idx}`,
+                          concepto: String(detalle.concepto || 'Cargo extra'),
+                          monto: Number(detalle.monto || 0)
+                        }))
+                      : [{
+                          key: 'detalle-0',
+                          concepto: 'Cargo extra',
+                          monto: 0
+                        }]
+                  }
+                  columns={[
+                    {
+                      title: 'Concepto',
+                      dataIndex: 'concepto',
+                      key: 'concepto',
+                    },
+                    {
+                      title: 'Monto',
+                      dataIndex: 'monto',
+                      key: 'monto',
+                      align: 'right' as const,
+                      render: (monto: any) => {
+                        const amount = Number(monto) || 0;
+                        return `$ ${amount.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                      },
+                    },
+                  ]}
+                  pagination={false}
+                  size="small"
+                  summary={(pageData) => {
+                    const total = pageData.reduce((sum, record: any) => sum + (Number(record.monto) || 0), 0);
+                    return (
+                      <Table.Summary.Row style={{ background: '#fafafa' }}>
+                        <Table.Summary.Cell index={0}>
+                          <strong>Total</strong>
+                        </Table.Summary.Cell>
+                        <Table.Summary.Cell index={1} align="right">
+                          <strong>$ {total.toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                        </Table.Summary.Cell>
+                      </Table.Summary.Row>
+                    );
+                  }}
+                />
+              </div>
+
+              {/* Archivo adjunto */}
+              {cargoDetail.archivo && (
+                <div style={{ marginBottom: 20, textAlign: 'center' }}>
+                  <div style={{ color: '#666', fontSize: 12, marginBottom: 10 }}>📎 Archivo adjunto:</div>
+                  
+                  {/* Previsualizador */}
+                  {(() => {
+                    try {
+                      const fileUrl = cargoDetail.archivo;
+                      const fileName = fileUrl.split('/').pop() || '';
+                      const extension = fileName.split('.').pop()?.toLowerCase() || '';
+                      const isImage = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'].includes(extension);
+                      const isPdf = extension === 'pdf';
+
+                      if (isImage) {
+                        return (
+                          <div style={{ 
+                            border: '1px solid #d9d9d9', 
+                            borderRadius: 8, 
+                            padding: 10,
+                            marginBottom: 10,
+                            textAlign: 'center',
+                            background: '#fafafa'
+                          }}>
+                            <img 
+                              src={fileUrl} 
+                              alt="Archivo adjunto"
+                              style={{ 
+                                maxWidth: '100%', 
+                                maxHeight: '350px',
+                                objectFit: 'contain'
+                              }}
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        );
+                      }
+
+                      if (isPdf) {
+                        return (
+                          <div style={{ 
+                            border: '1px solid #d9d9d9', 
+                            borderRadius: 8, 
+                            overflow: 'hidden',
+                            marginBottom: 10
+                          }}>
+                            <iframe 
+                              src={fileUrl} 
+                              style={{ 
+                                width: '100%', 
+                                height: '350px',
+                                border: 'none'
+                              }}
+                              title="Vista previa PDF"
+                            />
+                          </div>
+                        );
+                      }
+
+                      return null;
+                    } catch (error) {
+                      console.error('Error al mostrar archivo:', error);
+                      return null;
+                    }
+                  })()}
+                  
+                  <div>
+                    <a 
+                      href={cargoDetail.archivo} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{ color: '#1890ff' }}
+                    >
+                      Descargar archivo ({cargoDetail.archivo.split('/').pop() || 'archivo'})
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {/* Botón Generar PDF */}
+              <div style={{ textAlign: 'center', marginTop: 20 }}>
+                <Button 
+                  type="primary" 
+                  size="large"
+                  onClick={handleGeneratePdf}
+                >
+                  📄 Generar PDF
+                </Button>
+              </div>
+            </div>
+          )}
+        </Spin>
       </Modal>
     </Card>
   );

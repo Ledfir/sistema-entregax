@@ -8,6 +8,7 @@ import { ClienteEdit } from '@/pages/clientes/ClienteEdit';
 import { ClienteAddAddress } from '@/pages/clientes/ClienteAddAddress';
 import { ClienteEditAddress } from '@/pages/clientes/ClienteEditAddress';
 import { CargoExtraCreate, CargoExtraList } from '@/pages/cargosextra';
+import { UserGrid } from '@/pages/usuarios';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 
@@ -27,7 +28,7 @@ export const AppRouter = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           
           {/* Rutas de usuarios */}
-          <Route path="/usuarios/lista" element={<div style={{ padding: 24 }}>Lista de Usuarios</div>} />
+          <Route path="/usuarios/lista" element={<UserGrid />} />
           <Route path="/usuarios/nuevo" element={<div style={{ padding: 24 }}>Nuevo Usuario</div>} />
           
           {/* Rutas de clientes */}
