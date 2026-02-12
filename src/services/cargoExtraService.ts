@@ -49,8 +49,8 @@ export const cargoExtraService = {
     return response.data;
   },
 
-  update: async (id: string | number, payload: any): Promise<any> => {
-    const url = `/extra-charges/update/${id}`;
+  update: async (payload: any): Promise<any> => {
+    const url = '/extra-charges/update';
     
     if (payload instanceof FormData) {
       const response = await apiClient.post(url, payload, {

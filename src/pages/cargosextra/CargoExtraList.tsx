@@ -132,24 +132,33 @@ export const CargoExtraList = () => {
     try {
       const values = await form.validateFields();
       
-      const payload = {
-        token: editingRecord?.token,
-        cuenta: values.cuenta,
-        fecha_pago: values.fecha_pago ? values.fecha_pago.format('YYYY-MM-DD HH:mm:ss') : null,
-      };
+      // Crear FormData para enviar como form-data
+      const formData = new FormData();
+      formData.append('token', editingRecord?.token || '');
+      formData.append('tokenCuenta', values.cuenta);
+      if (values.fecha_pago) {
+        formData.append('fechap', values.fecha_pago.format('YYYY-MM-DD HH:mm:ss'));
+      }
 
-      await cargoExtraService.update(editingRecord?.token || '', payload);
+      const response = await cargoExtraService.update(formData);
       
-      Swal.fire({
-        icon: 'success',
-        title: 'Actualizado',
-        text: 'El cargo extra ha sido actualizado',
-        showConfirmButton: false,
-        timer: 2000,
-      });
-      
-      handleModalCancel();
-      fetchCargosExtras();
+      // Verificar respuesta exitosa
+      if (response?.success || response?.status === 'success' || response) {
+        // Primero cerrar el modal
+        handleModalCancel();
+        
+        // Actualizar la tabla
+        await fetchCargosExtras();
+        
+        // Mostrar mensaje de éxito
+        Swal.fire({
+          icon: 'success',
+          title: 'Actualizado',
+          text: 'El cargo extra ha sido actualizado correctamente',
+          showConfirmButton: false,
+          timer: 2000,
+        });
+      }
     } catch (error: any) {
       if (error.errorFields) {
         return;
@@ -233,7 +242,7 @@ export const CargoExtraList = () => {
       key: 'idce',
       width: 150,
       align: 'center' as const,
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: any) => (
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }: any) => (
         <div style={{ padding: 8 }}>
           <Input
             placeholder="Filtrar clave"
@@ -255,7 +264,7 @@ export const CargoExtraList = () => {
         const cliente = record.CLIENTE || '';
         return `(${suite}) ${cliente}`;
       },
-      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: any) => (
+      filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }: any) => (
         <div style={{ padding: 8 }}>
           <Input
             placeholder="Filtrar cliente"
