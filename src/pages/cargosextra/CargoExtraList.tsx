@@ -61,12 +61,17 @@ export const CargoExtraList = () => {
       setTotal(totalItems || 0);
     } catch (error) {
       console.error('Error al cargar cargos extras:', error);
+      
+      const errorMessage = (error as any)?.response?.data?.message || 
+                           (error as any)?.response?.data?.error || 
+                           (error as any)?.message || 
+                           'No se pudieron cargar los cargos extras';
+      
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'No se pudieron cargar los cargos extras',
-        showConfirmButton: false,
-        timer: 2500,
+        text: errorMessage,
+        showConfirmButton: true,
       });
     } finally {
       setLoading(false);
@@ -163,12 +168,17 @@ export const CargoExtraList = () => {
       if (error.errorFields) {
         return;
       }
+      
+      const errorMessage = error?.response?.data?.message || 
+                           error?.response?.data?.error || 
+                           error?.message || 
+                           'No se pudo actualizar el cargo extra';
+      
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'No se pudo actualizar el cargo extra',
-        showConfirmButton: false,
-        timer: 2500,
+        text: errorMessage,
+        showConfirmButton: true,
       });
     }
   };
@@ -187,6 +197,11 @@ export const CargoExtraList = () => {
       if (result.isConfirmed) {
         try {
           await cargoExtraService.delete(record.token);
+          
+          // Actualizar la tabla inmediatamente
+          await fetchCargosExtras();
+          
+          // Mostrar mensaje de éxito
           Swal.fire({
             icon: 'success',
             title: 'Eliminado',
@@ -194,14 +209,17 @@ export const CargoExtraList = () => {
             showConfirmButton: false,
             timer: 2000,
           });
-          fetchCargosExtras();
-        } catch (error) {
+        } catch (error: any) {
+          const errorMessage = error?.response?.data?.message || 
+                               error?.response?.data?.error || 
+                               error?.message || 
+                               'No se pudo eliminar el cargo extra';
+          
           Swal.fire({
             icon: 'error',
             title: 'Error',
-            text: 'No se pudo eliminar el cargo extra',
-            showConfirmButton: false,
-            timer: 2500,
+            text: errorMessage,
+            showConfirmButton: true,
           });
         }
       }

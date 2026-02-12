@@ -63,9 +63,9 @@ export const cargoExtraService = {
     return response.data;
   },
 
-  delete: async (id: string | number): Promise<any> => {
+  delete: async (token: string): Promise<any> => {
     const url = `/extra-charges/delete`;
-    const response = await apiClient.post(url, { id });
+    const response = await apiClient.post(url, { token });
     return response.data;
   },
 };
