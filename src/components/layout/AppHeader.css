@@ -61,11 +61,11 @@
   background: #f5f5f5;
 }
 
-.user-avatar {
-  border: 2px solid #f39915;
+.user-dropdown .user-avatar {
+  border: 1px solid #f39915;
 }
 
-.user-name {
+.user-dropdown .user-name {
   font-size: 14px;
   font-weight: 500;
   color: #333;
@@ -164,7 +164,7 @@
     max-width: 200px;
   }
 
-  .user-name {
+  .user-dropdown .user-name {
     display: none;
   }
 

@@ -1,0 +1,204 @@
+.user-create-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.user-create-header {
+  margin-bottom: 24px;
+}
+
+.user-create-header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.user-create-form-wrapper {
+  background: white;
+  border-radius: 8px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-required-message {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.required-asterisk {
+  color: #ff4d4f;
+  font-weight: bold;
+}
+
+.user-create-form .ant-form-item-label > label {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.form-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.form-icon {
+  font-size: 16px;
+}
+
+.green-icon {
+  color: #10b981;
+}
+
+.red-icon {
+  color: #ef4444;
+}
+
+.orange-icon {
+  color: #f97316;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-item-half {
+  flex: 1;
+}
+
+.password-input-wrapper {
+  position: relative;
+}
+
+.password-field {
+  margin-bottom: 40px !important;
+}
+
+.password-field .ant-form-item-explain-error {
+  margin-bottom: 4px;
+}
+
+.password-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: #666;
+  cursor: pointer;
+  margin-top: 28px;
+}
+
+.password-toggle:hover {
+  color: #5f5af6;
+}
+
+.form-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #999;
+  margin: 24px 0 16px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.upload-hint {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+.image-preview-container {
+  margin-top: 12px;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  padding: 8px;
+  background: #f5f5f7;
+}
+
+.image-preview {
+  max-width: 100%;
+  max-height: 150px;
+  display: block;
+  margin: 0 auto;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.btn-submit {
+  background: #10b981 !important;
+  border-color: #10b981 !important;
+  min-width: 150px;
+  height: 40px;
+  font-weight: 600;
+}
+
+.btn-submit:hover {
+  background: #059669 !important;
+  border-color: #059669 !important;
+}
+
+.btn-reset {
+  min-width: 150px;
+  height: 40px;
+  font-weight: 600;
+}
+
+/* Estilos para los inputs */
+.user-create-form .ant-input,
+.user-create-form .ant-input-password {
+  border-radius: 4px;
+  padding: 8px 12px;
+  background: #f5f5f7;
+  border: 1px solid #e8e8e8;
+}
+
+.user-create-form .ant-input:focus,
+.user-create-form .ant-input-password:focus,
+.user-create-form .ant-input-focused {
+  background: white;
+  border-color: #5f5af6;
+  box-shadow: 0 0 0 2px rgba(95, 90, 246, 0.1);
+}
+
+.user-create-form .ant-input::placeholder {
+  color: #999;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column;
+  }
+
+  .form-item-half {
+    width: 100%;
+  }
+
+  .user-create-form-wrapper {
+    padding: 20px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .btn-submit,
+  .btn-reset {
+    width: 100%;
+  }
+}

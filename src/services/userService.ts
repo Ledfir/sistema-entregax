@@ -55,6 +55,27 @@ export const userService = {
     const response = await apiClient.delete(url);
     return response.data;
   },
+
+  // Obtener tipos de usuario
+  listTypes: async (): Promise<any[]> => {
+    const url = '/users/list-type';
+    const response = await apiClient.get(url);
+    return response.data?.data ?? response.data ?? [];
+  },
+
+  // Obtener ubicaciones
+  listUbications: async (): Promise<any[]> => {
+    const url = '/users/list-ubication';
+    const response = await apiClient.get(url);
+    return response.data?.data ?? response.data ?? [];
+  },
+
+  // Obtener team leaders
+  listTeamLeaders: async (): Promise<any[]> => {
+    const url = '/users/team-leaders';
+    const response = await apiClient.get(url);
+    return response.data?.data ?? response.data ?? [];
+  },
 };
 
 export default userService;

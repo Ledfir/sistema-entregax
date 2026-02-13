@@ -93,6 +93,7 @@
 .user-info {
   margin-bottom: 16px;
   width: 100%;
+  text-align: center;
 }
 
 .user-name {
@@ -100,12 +101,16 @@
   font-weight: 600;
   color: #1a1a1a;
   margin: 0 0 4px 0;
+  text-align: center;
+  width: 100%;
 }
 
 .user-role {
   font-size: 14px;
   color: #666;
   margin: 0;
+  text-align: center;
+  width: 100%;
 }
 
 .user-card-actions {
@@ -114,7 +119,8 @@
   width: 100%;
 }
 
-.user-card-actions button {
+.user-card-actions button,
+.user-card-actions a {
   flex: 1;
 }
 

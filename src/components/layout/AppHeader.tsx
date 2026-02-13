@@ -73,7 +73,7 @@ export const AppHeader = () => {
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
               <div className="user-dropdown">
                 <Avatar
-                  size="default"
+                  size={32}
                   icon={<UserOutlined />}
                   src={(user as any)?.profile_image || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'Usuario')}&background=f39915&color=fff`}
                   className="user-avatar"

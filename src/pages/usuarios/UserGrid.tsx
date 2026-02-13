@@ -4,7 +4,8 @@ import type { ColumnsType } from 'antd/es/table';
 import { 
   MoreOutlined, 
   UserOutlined, 
-  MessageOutlined, 
+  MailOutlined, 
+  PhoneOutlined, 
   EditOutlined, 
   DeleteOutlined,
   UnorderedListOutlined,
@@ -25,12 +26,15 @@ interface User {
   mail: string;
   phone: string;
   tipo_usuario: string;
-  avatar?: string;
+  file?: string;
+  micapitan: string | null;
+  ubicacion: string | null;
 }
 
 export const UserGrid = () => {
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [searchText, setSearchText] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(9);
@@ -40,7 +44,11 @@ export const UserGrid = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [currentPage, pageSize, searchText]);
+  }, [currentPage, pageSize]);
+
+  useEffect(() => {
+    filterUsers();
+  }, [searchText, users]);
 
   // Ajustar pageSize al cambiar de vista
   useEffect(() => {
@@ -55,9 +63,9 @@ export const UserGrid = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const { items, total: totalItems } = await userService.list(searchText, currentPage, pageSize);
+      const { items, total: totalItems } = await userService.list('', 1, 1000);
       setUsers(items);
-      setTotal(totalItems || 0);
+      setTotal(totalItems || items.length);
     } catch (error) {
       console.error('Error al cargar usuarios:', error);
       
@@ -75,6 +83,26 @@ export const UserGrid = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const filterUsers = () => {
+    if (!searchText.trim()) {
+      setFilteredUsers(users);
+      return;
+    }
+
+    const searchLower = searchText.toLowerCase();
+    const filtered = users.filter((user) => {
+      const nameMatch = user.name?.toLowerCase().includes(searchLower);
+      const emailMatch = user.mail?.toLowerCase().includes(searchLower);
+      const phoneMatch = user.phone?.toLowerCase().includes(searchLower);
+      const typeMatch = user.tipo_usuario?.toLowerCase().includes(searchLower);
+      
+      return nameMatch || emailMatch || phoneMatch || typeMatch;
+    });
+    
+    setFilteredUsers(filtered);
+    setCurrentPage(1);
   };
 
   const handleSearch = (value: string) => {
@@ -150,6 +178,20 @@ export const UserGrid = () => {
       <Menu.Item key="edit" icon={<EditOutlined />} onClick={() => handleEdit(user)}>
         Editar
       </Menu.Item>
+      {viewMode === 'list' && (
+        <>
+          <Menu.Item key="email" icon={<MailOutlined />}>
+            <a href={`mailto:${user.mail}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+              Enviar correo
+            </a>
+          </Menu.Item>
+          <Menu.Item key="phone" icon={<PhoneOutlined />}>
+            <a href={`tel:${user.phone}`} style={{ color: 'inherit', textDecoration: 'none' }}>
+              Llamar
+            </a>
+          </Menu.Item>
+        </>
+      )}
       <Menu.Item key="delete" icon={<DeleteOutlined />} danger onClick={() => handleDelete(user)}>
         Eliminar
       </Menu.Item>
@@ -174,8 +216,8 @@ export const UserGrid = () => {
       </div>
 
       <div className="user-avatar-wrapper">
-        {user.avatar ? (
-          <img src={user.avatar} alt={user.name} className="user-avatar" />
+        {user.file ? (
+          <img src={user.file} alt={user.name} className="user-avatar" />
         ) : (
           <div className="user-avatar-placeholder">
             {getInitials(user.name)}
@@ -185,15 +227,65 @@ export const UserGrid = () => {
 
       <div className="user-info">
         <h3 className="user-name">{user.name}</h3>
-        <p className="user-role">{user.tipo_usuario || 'Usuario'}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
+          <span style={{ 
+            display: 'inline-block',
+            padding: '2px 12px',
+            background: '#10b981',
+            color: 'white',
+            fontSize: 11,
+            fontWeight: 600,
+            borderRadius: 4,
+            textTransform: 'uppercase'
+          }}>
+            TIPO DE USUARIO: {user.tipo_usuario || 'Usuario'}
+          </span>
+          {user.micapitan && (
+            <span style={{ 
+              display: 'inline-block',
+              padding: '2px 12px',
+              background: '#3b82f6',
+              color: 'white',
+              fontSize: 11,
+              fontWeight: 600,
+              borderRadius: 4,
+              textTransform: 'uppercase'
+            }}>
+              TEAM LEADER: {user.micapitan}
+            </span>
+          )}
+          {user.ubicacion && (
+            <span style={{ 
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              padding: '2px 12px',
+              background: '#f59e0b',
+              color: 'white',
+              fontSize: 11,
+              fontWeight: 600,
+              borderRadius: 4,
+              textTransform: 'uppercase'
+            }}>
+              <img src="https://img.icons8.com/color/24/place-marker--v1.png" alt="location" style={{ width: 16, height: 16 }} />
+              {user.ubicacion}
+            </span>
+          )}
+        </div>
       </div>
 
       <div className="user-card-actions">
-        <Button onClick={() => handleViewProfile(user)}>
-          Profile
+        <Button 
+          href={`mailto:${user.mail}`} 
+          icon={<MailOutlined />}
+        >
+          Enviar correo
         </Button>
-        <Button onClick={() => handleMessage(user)} icon={<MessageOutlined />}>
-          Message
+        <Button 
+          href={`tel:${user.phone}`} 
+          icon={<PhoneOutlined />}
+        >
+          Llamar
         </Button>
       </div>
     </div>
@@ -206,8 +298,8 @@ export const UserGrid = () => {
       width: 250,
       render: (_, record) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          {record.avatar ? (
-            <Avatar size={40} src={record.avatar} />
+          {record.file ? (
+            <Avatar size={40} src={record.file} />
           ) : (
             <Avatar size={40} style={{ backgroundColor: '#5f5af6' }}>
               {getInitials(record.name)}
@@ -220,8 +312,56 @@ export const UserGrid = () => {
     {
       title: 'Position',
       key: 'tipo_usuario',
-      dataIndex: 'tipo_usuario',
-      render: (tipo_usuario) => tipo_usuario || 'Usuario',
+      render: (_, record) => (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <span style={{ 
+            display: 'inline-block',
+            padding: '2px 12px',
+            background: '#10b981',
+            color: 'white',
+            fontSize: 11,
+            fontWeight: 600,
+            borderRadius: 4,
+            textTransform: 'uppercase',
+            width: 'fit-content'
+          }}>
+            TIPO DE USUARIO: {record.tipo_usuario || 'Usuario'}
+          </span>
+          {record.micapitan && (
+            <span style={{ 
+              display: 'inline-block',
+              padding: '2px 12px',
+              background: '#3b82f6',
+              color: 'white',
+              fontSize: 11,
+              fontWeight: 600,
+              borderRadius: 4,
+              textTransform: 'uppercase',
+              width: 'fit-content'
+            }}>
+              TEAM LEADER: {record.micapitan}
+            </span>
+          )}
+          {record.ubicacion && (
+            <span style={{ 
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 4,
+              padding: '2px 12px',
+              background: '#f59e0b',
+              color: 'white',
+              fontSize: 11,
+              fontWeight: 600,
+              borderRadius: 4,
+              textTransform: 'uppercase',
+              width: 'fit-content'
+            }}>
+              <img src="https://img.icons8.com/color/24/place-marker--v1.png" alt="location" style={{ width: 16, height: 16 }} />
+              {record.ubicacion}
+            </span>
+          )}
+        </div>
+      ),
     },
     {
       title: 'Email',
@@ -245,8 +385,8 @@ export const UserGrid = () => {
     <div className="user-grid-container">
       <div className="user-grid-header">
         <div className="user-grid-title">
-          <h1>Contact List</h1>
-          <span className="user-grid-count">({total})</span>
+          <h1>Lista de usuarios</h1>
+          <span className="user-grid-count">({searchText ? filteredUsers.length : total})</span>
         </div>
 
         <div className="user-grid-actions">
@@ -269,12 +409,8 @@ export const UserGrid = () => {
             onClick={() => navigate('/usuarios/nuevo')}
             style={{ backgroundColor: '#5f5af6', borderColor: '#5f5af6' }}
           >
-            Add New
+            Nuevo Usuario
           </Button>
-
-          <Dropdown overlay={<Menu />} trigger={['click']}>
-            <Button icon={<MoreOutlined />} />
-          </Dropdown>
         </div>
       </div>
 
@@ -333,12 +469,12 @@ export const UserGrid = () => {
                 {(() => {
                   const startIndex = (currentPage - 1) * pageSize;
                   const endIndex = startIndex + pageSize;
-                  const paginatedUsers = users.slice(startIndex, endIndex);
+                  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
                   return paginatedUsers.map(renderUserCard);
                 })()}
               </div>
 
-              {total > 0 && (
+              {(searchText ? filteredUsers.length : total) > 0 && (
                 <div style={{ 
                   display: 'flex', 
                   justifyContent: 'space-between', 
@@ -349,16 +485,17 @@ export const UserGrid = () => {
                 }}>
                   <div style={{ fontSize: 14, color: '#666' }}>
                     {(() => {
+                      const actualTotal = searchText ? filteredUsers.length : total;
                       const start = (currentPage - 1) * pageSize + 1;
-                      const end = Math.min(currentPage * pageSize, total);
-                      return `${start}-${end} de ${total}`;
+                      const end = Math.min(currentPage * pageSize, actualTotal);
+                      return `${start}-${end} de ${actualTotal}`;
                     })()}
                   </div>
 
                   <Pagination
                     current={currentPage}
                     pageSize={pageSize}
-                    total={total}
+                    total={searchText ? filteredUsers.length : total}
                     showSizeChanger={false}
                     onChange={(page) => {
                       setCurrentPage(page);
@@ -389,12 +526,12 @@ export const UserGrid = () => {
           ) : (
             <Table
               columns={columns}
-              dataSource={users}
+              dataSource={filteredUsers}
               rowKey="token"
               pagination={{
                 current: currentPage,
                 pageSize: pageSize,
-                total: total,
+                total: searchText ? filteredUsers.length : total,
                 showSizeChanger: false,
                 showTotal: (total, range) => `Showing ${range[0]} to ${range[1]} of ${total} entries`,
                 onChange: (page, size) => {
