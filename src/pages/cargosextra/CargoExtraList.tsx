@@ -4,6 +4,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { SearchOutlined, MoreOutlined, EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import cargoExtraService from '../../services/cargoExtraService';
+import { RoleGuard } from '../../components/common/RoleGuard';
 import Swal from 'sweetalert2';
 import dayjs from 'dayjs';
 import './CargoExtra.css';
@@ -257,12 +258,16 @@ export const CargoExtraList = () => {
       <Menu.Item key="view" icon={<EyeOutlined />} onClick={() => handleView(record)}>
         Ver detalles
       </Menu.Item>
-      <Menu.Item key="edit" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
-        Editar
-      </Menu.Item>
-      <Menu.Item key="delete" icon={<DeleteOutlined />} danger onClick={() => handleDelete(record)}>
-        Eliminar
-      </Menu.Item>
+      <RoleGuard permission="extra-charges.edit">
+        <Menu.Item key="edit" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
+          Editar
+        </Menu.Item>
+      </RoleGuard>
+      <RoleGuard permission="extra-charges.delete">
+        <Menu.Item key="delete" icon={<DeleteOutlined />} danger onClick={() => handleDelete(record)}>
+          Eliminar
+        </Menu.Item>
+      </RoleGuard>
     </Menu>
   );
 
@@ -391,13 +396,15 @@ export const CargoExtraList = () => {
             <span style={{ fontSize: 20 }}>📋</span>
             <span>CARGOS EXTRAS</span>
           </div>
-          <Button
-            type="primary"
-            onClick={() => navigate('/cargos-extras/crear')}
-            style={{ backgroundColor: '#ff6b2c', borderColor: '#ff6b2c' }}
-          >
-            + Crear cargo extra
-          </Button>
+          <RoleGuard permission="extra-charges.create">
+            <Button
+              type="primary"
+              onClick={() => navigate('/cargos-extras/crear')}
+              style={{ backgroundColor: '#ff6b2c', borderColor: '#ff6b2c' }}
+            >
+              + Crear cargo extra
+            </Button>
+          </RoleGuard>
         </div>
       }
     >

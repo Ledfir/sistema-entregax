@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Button, Spin, message } from 'antd';
-// icon removed: PlusOutlined
+import { Button, Spin, message, Dropdown, Menu } from 'antd';
+import { MoreOutlined, EditOutlined, AppstoreOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import clienteService from '../../services/clienteService';
+import { RoleGuard } from '../../components/common/RoleGuard';
 import dayjs from 'dayjs';
 import './Clientes.css';
 
@@ -96,6 +97,27 @@ export const ClientesLista = () => {
   const handleFilterChange = (field: string, value: string) => {
     setFilters(prev => ({ ...prev, [field]: value }));
   };
+
+  const getMenu = (cliente: any) => (
+    <Menu>
+      <Menu.Item 
+        key="edit" 
+        icon={<EditOutlined />} 
+        onClick={() => navigate(`/clientes/editar/${cliente.id ?? cliente.clave}`)}
+      >
+        Editar
+      </Menu.Item>
+      <RoleGuard roles={['SERVICIO AL CLIENTE']}>
+        <Menu.Item 
+          key="inventario" 
+          icon={<AppstoreOutlined />} 
+          onClick={() => navigate('/inventario')}
+        >
+          Inventario
+        </Menu.Item>
+      </RoleGuard>
+    </Menu>
+  );
 
   // Calcular datos paginados
   const totalRecords = filteredClientes.length;
@@ -198,13 +220,11 @@ export const ClientesLista = () => {
                         <td>{cliente.asesor ?? '—'}</td>
                         <td>{fechaCreacion ? dayjs(fechaCreacion).format('DD/MM/YYYY') : '—'}</td>
                         <td>
-                          <Button 
-                            className="btn-edit" 
-                            size="small" 
-                            onClick={() => navigate(`/clientes/editar/${cliente.id ?? cliente.clave}`)}
-                          >
-                            Editar
-                          </Button>
+                          <Dropdown overlay={getMenu(cliente)} trigger={['click']}>
+                            <Button type="link" icon={<MoreOutlined />}>
+                              Opciones
+                            </Button>
+                          </Dropdown>
                         </td>
                       </tr>
                     );

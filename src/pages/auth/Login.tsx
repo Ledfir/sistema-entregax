@@ -50,6 +50,12 @@ export const Login = () => {
           email: backendData.mail || values.email,
           type: backendData.type || 1,
           token: response.token,
+          tipo_usuario: backendData.tipo_usuario || backendData.user_type || backendData.type || '',
+          tipo_usuario_token: backendData.tipo_usuario_token || '',
+          ubicacion: backendData.ubicacion || '',
+          ubicacion_token: backendData.ubicacion_token || '',
+          asesor: backendData.asesor || '',
+          asesor_token: backendData.asesor_token || '',
           profile_image: backendData.profile_image || '',
           login_time: backendData.login_time || '',
         };

@@ -1,21 +1,24 @@
 import { useState, useEffect } from 'react';
-import { Form, Input, Button, Select, message } from 'antd';
+import { Form, Input, Button, Select, message, Spin } from 'antd';
 import { 
   UserOutlined, 
   PhoneOutlined, 
   MailOutlined, 
   EnvironmentOutlined,
   EyeOutlined,
-  EyeInvisibleOutlined
+  EyeInvisibleOutlined,
+  ArrowLeftOutlined
 } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import userService from '../../services/userService';
 import Swal from 'sweetalert2';
 import './UserCreate.css';
 
-export const UserCreate = () => {
+export const UserEdit = () => {
+  const { token } = useParams<{ token: string }>();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [loadingUser, setLoadingUser] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [tiposUsuario, setTiposUsuario] = useState<any[]>([]);
@@ -29,7 +32,45 @@ export const UserCreate = () => {
   useEffect(() => {
     loadTiposUsuario();
     loadUbicaciones();
-  }, []);
+    if (token) {
+      loadUserData();
+    }
+  }, [token]);
+
+  const loadUserData = async () => {
+    try {
+      setLoadingUser(true);
+      console.log('Cargando usuario con token:', token);
+      const data = await userService.get(token!);
+      console.log('Datos del usuario recibidos:', data);
+      
+      // Pre-rellenar el formulario
+      form.setFieldsValue({
+        name: data.name,
+        phone: data.phone,
+        mail: data.mail,
+        tipo_usuario: data.tipo_usuario_token || data.type,
+        asesor: data.asesor_token || (data.micapitan && data.micapitan !== '0' ? data.micapitan : undefined),
+        ubicacion: data.ubicacion_token || data.ubic,
+      });
+
+      // Si tiene asesor, cargar team leaders
+      if (data.asesor_token || (data.micapitan && data.micapitan !== '0')) {
+        await loadTeamLeaders();
+      }
+    } catch (error: any) {
+      console.error('Error completo al cargar usuario:', error);
+      console.error('Response:', error?.response?.data);
+      const errorMsg = error?.response?.data?.message || 
+                       error?.response?.data?.error || 
+                       error?.message || 
+                       'No se pudieron cargar los datos del usuario';
+      message.error(errorMsg);
+      navigate('/usuarios/lista');
+    } finally {
+      setLoadingUser(false);
+    }
+  };
 
   const loadTiposUsuario = async () => {
     try {
@@ -61,7 +102,6 @@ export const UserCreate = () => {
     try {
       setLoadingTeamLeaders(true);
       const data = await userService.listTeamLeaders();
-      console.log('Team leaders recibidos:', data);
       setTeamLeaders(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Error al cargar team leaders:', error);
@@ -72,7 +112,6 @@ export const UserCreate = () => {
   };
 
   const handleTipoUsuarioChange = (value: string) => {
-    console.log('Tipo de usuario seleccionado (token):', value);
     // Limpiar el campo asesor
     form.setFieldsValue({ asesor: undefined });
     
@@ -80,14 +119,10 @@ export const UserCreate = () => {
     const tipoSeleccionado = tiposUsuario.find((tipo: any) => tipo.token === value);
     const nombreTipo = tipoSeleccionado?.nombre || tipoSeleccionado?.name;
     
-    console.log('Nombre del tipo:', nombreTipo);
-    
     // Si selecciona ASESOR, cargar team leaders
     if (nombreTipo === 'ASESOR') {
-      console.log('Cargando team leaders...');
       loadTeamLeaders();
     } else {
-      console.log('No es ASESOR, limpiando team leaders');
       setTeamLeaders([]);
     }
   };
@@ -96,22 +131,28 @@ export const UserCreate = () => {
     try {
       setLoading(true);
 
-      // Crear FormData para enviar archivo
-      const formData = new FormData();
-      formData.append('name', values.name);
-      formData.append('phone', values.phone);
-      formData.append('mail', values.mail);
-      formData.append('password', values.password);
-      formData.append('tipo_usuario', values.tipo_usuario);
-      formData.append('asesor', values.asesor || '');
-      formData.append('ubicacion', values.ubicacion || '');
+      // Crear objeto JSON con los datos del usuario
+      const payload: any = {
+        token: token!,
+        name: values.name,
+        phone: values.phone,
+        mail: values.mail,
+        tipo_usuario: values.tipo_usuario,
+        asesor: values.asesor || '',
+        ubicacion: values.ubicacion || '',
+      };
+      
+      // Solo enviar contraseña si se ingresó una nueva
+      if (values.password) {
+        payload.password = values.password;
+      }
 
-      await userService.create(formData);
+      await userService.update(payload);
 
       Swal.fire({
         icon: 'success',
         title: '¡Éxito!',
-        text: 'El usuario ha sido creado correctamente',
+        text: 'El usuario ha sido actualizado correctamente',
         showConfirmButton: false,
         timer: 2000,
       });
@@ -124,7 +165,7 @@ export const UserCreate = () => {
       const errorMessage = error?.response?.data?.message || 
                            error?.response?.data?.error || 
                            error?.message || 
-                           'No se pudo crear el usuario';
+                           'No se pudo actualizar el usuario';
       
       Swal.fire({
         icon: 'error',
@@ -137,23 +178,36 @@ export const UserCreate = () => {
     }
   };
 
-  const handleReset = () => {
-    form.resetFields();
-    setTeamLeaders([]);
-    message.info('Datos borrados');
+  const handleCancel = () => {
+    navigate('/usuarios/lista');
   };
 
-
+  if (loadingUser) {
+    return (
+      <div className="user-create-container">
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <Spin size="large" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="user-create-container">
       <div className="user-create-header">
-        <h1>Crear usuario</h1>
+        <Button 
+          icon={<ArrowLeftOutlined />} 
+          onClick={() => navigate('/usuarios/lista')}
+          style={{ marginRight: 16 }}
+        >
+          Volver
+        </Button>
+        <h1>Editar usuario</h1>
       </div>
 
       <div className="user-create-form-wrapper">
         <div className="form-required-message">
-          Todos los campos son obligatorios <span className="required-asterisk">*</span>
+          Los campos marcados con <span className="required-asterisk">*</span> son obligatorios
         </div>
 
         <Form
@@ -212,8 +266,7 @@ export const UserCreate = () => {
           <div className="form-row">
             <Form.Item
               name="password"
-              label="Contraseña:"
-              rules={[{ required: true, message: 'Por favor ingrese la contraseña' }]}
+              label="Nueva contraseña (dejar en blanco para mantener la actual):"
               className="form-item-half password-field"
             >
               <div className="password-input-wrapper">
@@ -238,13 +291,21 @@ export const UserCreate = () => {
 
             <Form.Item
               name="confirmPassword"
-              label="Confirmar contraseña:"
+              label="Confirmar nueva contraseña:"
               dependencies={['password']}
               rules={[
-                { required: true, message: 'Por favor confirme la contraseña' },
                 ({ getFieldValue }) => ({
                   validator(_, value) {
-                    if (!value || getFieldValue('password') === value) {
+                    const password = getFieldValue('password');
+                    // Si no hay contraseña, no validar confirmación
+                    if (!password && !value) {
+                      return Promise.resolve();
+                    }
+                    // Si hay contraseña, debe coincidir
+                    if (!value && password) {
+                      return Promise.reject(new Error('Por favor confirme la contraseña'));
+                    }
+                    if (password === value) {
                       return Promise.resolve();
                     }
                     return Promise.reject(new Error('Las contraseñas no coinciden'));
@@ -353,14 +414,13 @@ export const UserCreate = () => {
               className="btn-submit"
               icon={<UserOutlined />}
             >
-              Crear usuario
+              Actualizar usuario
             </Button>
             <Button 
-              danger 
-              onClick={handleReset}
+              onClick={handleCancel}
               className="btn-reset"
             >
-              Borrar datos
+              Cancelar
             </Button>
           </div>
         </Form>

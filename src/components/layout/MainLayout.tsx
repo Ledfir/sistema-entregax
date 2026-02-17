@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Layout, Menu } from 'antd';
 import {
   HomeOutlined,
@@ -6,13 +6,14 @@ import {
   DollarOutlined,
   TeamOutlined,
   NotificationOutlined,
-  ShopOutlined,
+  FormOutlined,
+  SettingOutlined,
+  FileProtectOutlined,
   CustomerServiceOutlined,
-  BellOutlined,
-  FileTextOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { AppHeader } from './AppHeader';
+import { useAuthStore } from '@/store/authStore';
 import './MainLayout.css';
 
 const { Sider, Content } = Layout;
@@ -21,8 +22,10 @@ export const MainLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { hasRole, user } = useAuthStore();
 
-  const menuItems = [
+  // Menú completo para SISTEMAS
+  const sistemasMenuItems = [
     {
       key: '/dashboard',
       icon: <HomeOutlined />,
@@ -60,13 +63,74 @@ export const MainLayout = () => {
       icon: <NotificationOutlined />,
       label: 'Comunicados',
     },
+  ];
+
+  // Menú para SERVICIO AL CLIENTE / ATENCION A CLIENTES
+  const servicioClienteMenuItems = [
     {
-      key: 'paqueterias',
-      icon: <ShopOutlined />,
-      label: 'Paqueterías',
+      key: '/dashboard',
+      icon: <HomeOutlined />,
+      label: 'Home',
+    },
+    {
+      key: 'cargos-extras',
+      icon: <DollarOutlined />,
+      label: 'Cargos Extra',
       children: [
-        { key: '/paqueterias/lista', label: 'Lista de paqueterías' },
-        { key: '/paqueterias/nueva', label: 'Nueva paquetería' },
+        { key: '/cargos-extras/lista', label: 'Lista de cargos' },
+        { key: '/cargos-extras/nuevo', label: 'Nuevo cargo' },
+      ],
+    },
+    {
+      key: 'clientes',
+      icon: <UserOutlined />,
+      label: 'Clientes',
+      children: [
+        { key: '/clientes/lista', label: 'Lista de clientes' },
+        { key: '/clientes/nuevo', label: 'Nuevo cliente' },
+      ],
+    },
+    {
+      key: 'encuestas',
+      icon: <FormOutlined />,
+      label: 'Encuestas de calidad',
+      children: [
+        { key: '/encuestas/pendientes', label: 'Pendientes de enviar' },
+        { key: '/encuestas/realizadas', label: 'Encuestas realizadas' },
+      ],
+    },
+    {
+      key: '/asesores',
+      icon: <TeamOutlined />,
+      label: 'Lista de Asesores',
+    },
+    {
+      key: 'operaciones',
+      icon: <SettingOutlined />,
+      label: 'Operaciones',
+      children: [
+        { key: '/operaciones/actualizar-costo-kilo-tc', label: 'Actualizar costo por kilo | TC (TDI)' },
+        { key: '/operaciones/actualizar-tc-aumento-maritimo', label: 'Actualizar TC aumento marítimo' },
+        { key: '/operaciones/actualizar-tc-costo', label: 'Actualizar TC / costo' },
+        { key: '/operaciones/cambio-inst', label: 'Cambio Inst.' },
+        { key: '/operaciones/descuentos', label: 'Descuentos' },
+        { key: '/operaciones/editar-guia-dhl', label: 'Editar guía DHL' },
+        { key: '/operaciones/nbox', label: 'N. B.O.X.' },
+        { key: '/operaciones/nbox-maritimo', label: 'N. B.O.X. Marítimo' },
+        { key: '/operaciones/operacion-maritima', label: 'Operación Marítima' },
+        { key: '/operaciones/reasignar-guia', label: 'Reasignar guía' },
+        { key: '/operaciones/reasignar-cliente', label: 'Reasignar cliente' },
+        { key: '/operaciones/solo-adm-ctz-pasadas', label: 'SÓLO ADM CTZ PASADAS' },
+        { key: '/operaciones/usa-remp', label: 'USA REMP.' },
+      ],
+    },
+    {
+      key: 'polizas',
+      icon: <FileProtectOutlined />,
+      label: 'Pólizas',
+      children: [
+        { key: '/polizas/lista', label: 'Lista de pólizas' },
+        { key: '/polizas/nueva', label: 'Nueva póliza' },
       ],
     },
     {
@@ -78,25 +142,49 @@ export const MainLayout = () => {
         { key: '/tickets/nuevo', label: 'Nuevo ticket' },
       ],
     },
+  ];
+
+  // Menú para otros roles (sin Usuarios)
+  const generalMenuItems = [
     {
-      key: 'noticias',
-      icon: <BellOutlined />,
-      label: 'Noticias',
+      key: '/dashboard',
+      icon: <HomeOutlined />,
+      label: 'Inicio',
+    },
+    {
+      key: 'clientes',
+      icon: <UserOutlined />,
+      label: 'Clientes',
       children: [
-        { key: '/noticias/lista', label: 'Lista de noticias' },
-        { key: '/noticias/nueva', label: 'Nueva noticia' },
+        { key: '/clientes/lista', label: 'Lista de clientes' },
+        { key: '/clientes/nuevo', label: 'Nuevo cliente' },
       ],
     },
     {
-      key: 'proveedores',
-      icon: <FileTextOutlined />,
-      label: 'Proveedores',
+      key: 'cargos-extras',
+      icon: <DollarOutlined />,
+      label: 'Cargos Extras',
       children: [
-        { key: '/proveedores/lista', label: 'Lista de proveedores' },
-        { key: '/proveedores/nuevo', label: 'Nuevo proveedor' },
+        { key: '/cargos-extras/lista', label: 'Lista de cargos' },
+        { key: '/cargos-extras/nuevo', label: 'Nuevo cargo' },
       ],
+    },
+    {
+      key: '/comunicados',
+      icon: <NotificationOutlined />,
+      label: 'Comunicados',
     },
   ];
+
+  // Seleccionar menú según el rol
+  const menuItems = useMemo(() => {
+    if (hasRole(['SISTEMAS'])) {
+      return sistemasMenuItems;
+    } else if (hasRole(['ATENCION A CLIENTES', 'SERVICIO AL CLIENTE'])) {
+      return servicioClienteMenuItems;
+    }
+    return generalMenuItems;
+  }, [hasRole, user?.tipo_usuario]);
 
   const handleMenuClick = ({ key }: { key: string }) => {
     navigate(key);

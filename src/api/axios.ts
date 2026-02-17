@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Usar ruta relativa para permitir que Vite dev server haga proxy a la API remota
-// en desarrollo y evitar problemas de CORS / preflight OPTIONS
+// En desarrollo, usar ruta relativa para aprovechar el proxy de Vite
+// En producción, usar la URL completa
 const API_URL = 'https://www.sistemaentregax.com/api';
 
 const apiClient = axios.create({
@@ -21,6 +21,12 @@ apiClient.interceptors.request.use(
         config.headers.Authorization = `Bearer ${state.user.token}`;
       }
     }
+    
+    // Si el body es FormData, dejar que el navegador establezca el Content-Type automáticamente
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+    
     return config;
   },
   (error) => {

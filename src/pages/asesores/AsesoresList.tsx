@@ -1,26 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Button, Dropdown, Menu, Spin, Pagination, Input, Table, Avatar, Select } from 'antd';
+import { Button, Spin, Pagination, Input, Table, Avatar, Select } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { 
-  MoreOutlined, 
-  UserOutlined, 
-  MailOutlined, 
-  PhoneOutlined, 
-  EditOutlined, 
-  DeleteOutlined,
   UnorderedListOutlined,
   AppstoreOutlined,
-  PlusOutlined,
-  SearchOutlined
+  SearchOutlined,
+  MailOutlined,
+  PhoneOutlined
 } from '@ant-design/icons';
-import { useNavigate } from 'react-router-dom';
 import userService from '../../services/userService';
 import Swal from 'sweetalert2';
-import './UserGrid.css';
+import '../usuarios/UserGrid.css';
 
 const { Search } = Input;
 
-interface User {
+interface Asesor {
   token: string;
   name: string;
   mail: string;
@@ -31,24 +25,23 @@ interface User {
   ubicacion: string | null;
 }
 
-export const UserGrid = () => {
+export const AsesoresList = () => {
   const [loading, setLoading] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const [asesores, setAsesores] = useState<Asesor[]>([]);
+  const [filteredAsesores, setFilteredAsesores] = useState<Asesor[]>([]);
   const [searchText, setSearchText] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(9);
   const [total, setTotal] = useState(0);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const navigate = useNavigate();
 
   useEffect(() => {
-    fetchUsers();
-  }, [currentPage, pageSize]);
+    fetchAsesores();
+  }, []);
 
   useEffect(() => {
-    filterUsers();
-  }, [searchText, users]);
+    filterAsesores();
+  }, [searchText, asesores]);
 
   // Ajustar pageSize al cambiar de vista
   useEffect(() => {
@@ -60,19 +53,19 @@ export const UserGrid = () => {
     setCurrentPage(1);
   }, [viewMode]);
 
-  const fetchUsers = async () => {
+  const fetchAsesores = async () => {
     try {
       setLoading(true);
-      const { items, total: totalItems } = await userService.list('', 1, 1000);
-      setUsers(items);
-      setTotal(totalItems || items.length);
+      const items = await userService.listAdvisors();
+      setAsesores(items);
+      setTotal(items.length);
     } catch (error) {
-      console.error('Error al cargar usuarios:', error);
+      console.error('Error al cargar asesores:', error);
       
       const errorMessage = (error as any)?.response?.data?.message || 
                            (error as any)?.response?.data?.error || 
                            (error as any)?.message || 
-                           'No se pudieron cargar los usuarios';
+                           'No se pudieron cargar los asesores';
       
       Swal.fire({
         icon: 'error',
@@ -85,23 +78,23 @@ export const UserGrid = () => {
     }
   };
 
-  const filterUsers = () => {
+  const filterAsesores = () => {
     if (!searchText.trim()) {
-      setFilteredUsers(users);
+      setFilteredAsesores(asesores);
       return;
     }
 
     const searchLower = searchText.toLowerCase();
-    const filtered = users.filter((user) => {
-      const nameMatch = user.name?.toLowerCase().includes(searchLower);
-      const emailMatch = user.mail?.toLowerCase().includes(searchLower);
-      const phoneMatch = user.phone?.toLowerCase().includes(searchLower);
-      const typeMatch = user.tipo_usuario?.toLowerCase().includes(searchLower);
+    const filtered = asesores.filter((asesor) => {
+      const nameMatch = asesor.name?.toLowerCase().includes(searchLower);
+      const emailMatch = asesor.mail?.toLowerCase().includes(searchLower);
+      const phoneMatch = asesor.phone?.toLowerCase().includes(searchLower);
+      const typeMatch = asesor.tipo_usuario?.toLowerCase().includes(searchLower);
       
       return nameMatch || emailMatch || phoneMatch || typeMatch;
     });
     
-    setFilteredUsers(filtered);
+    setFilteredAsesores(filtered);
     setCurrentPage(1);
   };
 
@@ -109,84 +102,6 @@ export const UserGrid = () => {
     setSearchText(value);
     setCurrentPage(1);
   };
-
-  const handleViewProfile = (user: User) => {
-    // Navegar al perfil del usuario
-    navigate(`/usuarios/perfil/${user.token}`);
-  };
-
-  const handleEdit = (user: User) => {
-    navigate(`/usuarios/editar/${user.token}`);
-  };
-
-  const handleDelete = async (user: User) => {
-    Swal.fire({
-      title: '¿Estás seguro?',
-      text: `¿Deseas eliminar al usuario ${user.name}?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar',
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          await userService.delete(user.token);
-          
-          await fetchUsers();
-          
-          Swal.fire({
-            icon: 'success',
-            title: 'Eliminado',
-            text: 'El usuario ha sido eliminado',
-            showConfirmButton: false,
-            timer: 2000,
-          });
-        } catch (error: any) {
-          const errorMessage = error?.response?.data?.message || 
-                               error?.response?.data?.error || 
-                               error?.message || 
-                               'No se pudo eliminar el usuario';
-          
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: errorMessage,
-            showConfirmButton: true,
-          });
-        }
-      }
-    });
-  };
-
-  const getMenu = (user: User) => (
-    <Menu>
-      <Menu.Item key="profile" icon={<UserOutlined />} onClick={() => handleViewProfile(user)}>
-        Ver perfil
-      </Menu.Item>
-      <Menu.Item key="edit" icon={<EditOutlined />} onClick={() => handleEdit(user)}>
-        Editar
-      </Menu.Item>
-      {viewMode === 'list' && (
-        <>
-          <Menu.Item key="email" icon={<MailOutlined />}>
-            <a href={`mailto:${user.mail}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-              Enviar correo
-            </a>
-          </Menu.Item>
-          <Menu.Item key="phone" icon={<PhoneOutlined />}>
-            <a href={`tel:${user.phone}`} style={{ color: 'inherit', textDecoration: 'none' }}>
-              Llamar
-            </a>
-          </Menu.Item>
-        </>
-      )}
-      <Menu.Item key="delete" icon={<DeleteOutlined />} danger onClick={() => handleDelete(user)}>
-        Eliminar
-      </Menu.Item>
-    </Menu>
-  );
 
   const getInitials = (name: string) => {
     if (!name) return '?';
@@ -197,26 +112,20 @@ export const UserGrid = () => {
     return name.substring(0, 2).toUpperCase();
   };
 
-  const renderUserCard = (user: User) => (
-    <div key={user.token} className="user-card">
-      <div className="user-card-menu">
-        <Dropdown overlay={getMenu(user)} trigger={['click']}>
-          <Button type="text" icon={<MoreOutlined />} />
-        </Dropdown>
-      </div>
-
+  const renderAsesorCard = (asesor: Asesor) => (
+    <div key={asesor.token} className="user-card">
       <div className="user-avatar-wrapper">
-        {user.file ? (
-          <img src={user.file} alt={user.name} className="user-avatar" />
+        {asesor.file ? (
+          <img src={asesor.file} alt={asesor.name} className="user-avatar" />
         ) : (
           <div className="user-avatar-placeholder">
-            {getInitials(user.name)}
+            {getInitials(asesor.name)}
           </div>
         )}
       </div>
 
       <div className="user-info">
-        <h3 className="user-name">{user.name}</h3>
+        <h3 className="user-name">{asesor.name}</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
           <span style={{ 
             display: 'inline-block',
@@ -228,9 +137,9 @@ export const UserGrid = () => {
             borderRadius: 4,
             textTransform: 'uppercase'
           }}>
-            TIPO DE USUARIO: {user.tipo_usuario || 'Usuario'}
+            TIPO DE USUARIO: {asesor.tipo_usuario || 'Usuario'}
           </span>
-          {user.micapitan && (
+          {asesor.micapitan && (
             <span style={{ 
               display: 'inline-block',
               padding: '2px 12px',
@@ -241,10 +150,10 @@ export const UserGrid = () => {
               borderRadius: 4,
               textTransform: 'uppercase'
             }}>
-              TEAM LEADER: {user.micapitan}
+              TEAM LEADER: {asesor.micapitan}
             </span>
           )}
-          {user.ubicacion && (
+          {asesor.ubicacion && (
             <span style={{ 
               display: 'inline-flex',
               alignItems: 'center',
@@ -258,7 +167,7 @@ export const UserGrid = () => {
               textTransform: 'uppercase'
             }}>
               <img src="https://img.icons8.com/color/24/place-marker--v1.png" alt="location" style={{ width: 16, height: 16 }} />
-              {user.ubicacion}
+              {asesor.ubicacion}
             </span>
           )}
         </div>
@@ -266,13 +175,13 @@ export const UserGrid = () => {
 
       <div className="user-card-actions">
         <Button 
-          href={`mailto:${user.mail}`} 
+          href={`mailto:${asesor.mail}`} 
           icon={<MailOutlined />}
         >
           Enviar correo
         </Button>
         <Button 
-          href={`tel:${user.phone}`} 
+          href={`tel:${asesor.phone}`} 
           icon={<PhoneOutlined />}
         >
           Llamar
@@ -281,7 +190,7 @@ export const UserGrid = () => {
     </div>
   );
 
-  const columns: ColumnsType<User> = [
+  const columns: ColumnsType<Asesor> = [
     {
       title: 'Name',
       key: 'name',
@@ -359,15 +268,9 @@ export const UserGrid = () => {
       dataIndex: 'mail',
     },
     {
-      title: 'Action',
-      key: 'action',
-      width: 100,
-      align: 'center' as const,
-      render: (_, record) => (
-        <Dropdown overlay={getMenu(record)} trigger={['click']}>
-          <Button type="text" icon={<MoreOutlined />} />
-        </Dropdown>
-      ),
+      title: 'Phone',
+      key: 'phone',
+      dataIndex: 'phone',
     },
   ];
 
@@ -375,8 +278,8 @@ export const UserGrid = () => {
     <div className="user-grid-container">
       <div className="user-grid-header">
         <div className="user-grid-title">
-          <h1>Lista de usuarios</h1>
-          <span className="user-grid-count">({searchText ? filteredUsers.length : total})</span>
+          <h1>Lista de asesores</h1>
+          <span className="user-grid-count">({searchText ? filteredAsesores.length : total})</span>
         </div>
 
         <div className="user-grid-actions">
@@ -392,15 +295,6 @@ export const UserGrid = () => {
               onClick={() => setViewMode('grid')}
             />
           </div>
-
-          <Button 
-            type="primary" 
-            icon={<PlusOutlined />}
-            onClick={() => navigate('/usuarios/nuevo')}
-            style={{ backgroundColor: '#5f5af6', borderColor: '#5f5af6' }}
-          >
-            Nuevo Usuario
-          </Button>
         </div>
       </div>
 
@@ -437,7 +331,7 @@ export const UserGrid = () => {
       {viewMode === 'grid' && (
         <div style={{ marginBottom: 24 }}>
           <Search
-            placeholder="Buscar usuarios..."
+            placeholder="Buscar asesores..."
             allowClear
             onSearch={handleSearch}
             onChange={(e) => setSearchText(e.target.value)}
@@ -459,12 +353,12 @@ export const UserGrid = () => {
                 {(() => {
                   const startIndex = (currentPage - 1) * pageSize;
                   const endIndex = startIndex + pageSize;
-                  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
-                  return paginatedUsers.map(renderUserCard);
+                  const paginatedAsesores = filteredAsesores.slice(startIndex, endIndex);
+                  return paginatedAsesores.map(renderAsesorCard);
                 })()}
               </div>
 
-              {(searchText ? filteredUsers.length : total) > 0 && (
+              {(searchText ? filteredAsesores.length : total) > 0 && (
                 <div style={{ 
                   display: 'flex', 
                   justifyContent: 'space-between', 
@@ -475,7 +369,7 @@ export const UserGrid = () => {
                 }}>
                   <div style={{ fontSize: 14, color: '#666' }}>
                     {(() => {
-                      const actualTotal = searchText ? filteredUsers.length : total;
+                      const actualTotal = searchText ? filteredAsesores.length : total;
                       const start = (currentPage - 1) * pageSize + 1;
                       const end = Math.min(currentPage * pageSize, actualTotal);
                       return `${start}-${end} de ${actualTotal}`;
@@ -485,7 +379,7 @@ export const UserGrid = () => {
                   <Pagination
                     current={currentPage}
                     pageSize={pageSize}
-                    total={searchText ? filteredUsers.length : total}
+                    total={searchText ? filteredAsesores.length : total}
                     showSizeChanger={false}
                     onChange={(page) => {
                       setCurrentPage(page);
@@ -516,12 +410,12 @@ export const UserGrid = () => {
           ) : (
             <Table
               columns={columns}
-              dataSource={filteredUsers}
+              dataSource={filteredAsesores}
               rowKey="token"
               pagination={{
                 current: currentPage,
                 pageSize: pageSize,
-                total: searchText ? filteredUsers.length : total,
+                total: searchText ? filteredAsesores.length : total,
                 showSizeChanger: false,
                 showTotal: (total, range) => `Showing ${range[0]} to ${range[1]} of ${total} entries`,
                 onChange: (page, size) => {
@@ -537,4 +431,4 @@ export const UserGrid = () => {
   );
 };
 
-export default UserGrid;
+export default AsesoresList;

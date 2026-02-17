@@ -29,30 +29,30 @@ export const userService = {
   },
 
   // Obtener un usuario específico
-  get: async (id: string | number): Promise<any> => {
-    const url = `/users/${id}`;
+  get: async (token: string): Promise<any> => {
+    const url = `/users/get/${token}`;
     const response = await apiClient.get(url);
     return response.data?.data ?? response.data;
   },
 
   // Crear nuevo usuario
   create: async (payload: any): Promise<any> => {
-    const url = '/users/create';
+    const url = '/users/create-user';
     const response = await apiClient.post(url, payload);
     return response.data;
   },
 
   // Actualizar usuario
-  update: async (id: string | number, payload: any): Promise<any> => {
-    const url = `/users/${id}`;
-    const response = await apiClient.put(url, payload);
+  update: async (payload: any): Promise<any> => {
+    const url = '/users/update-user';
+    const response = await apiClient.post(url, payload);
     return response.data;
   },
 
   // Eliminar usuario
-  delete: async (id: string | number): Promise<any> => {
-    const url = `/users/${id}`;
-    const response = await apiClient.delete(url);
+  delete: async (token: string): Promise<any> => {
+    const url = '/users/delete-user';
+    const response = await apiClient.post(url, { token });
     return response.data;
   },
 
@@ -73,6 +73,13 @@ export const userService = {
   // Obtener team leaders
   listTeamLeaders: async (): Promise<any[]> => {
     const url = '/users/team-leaders';
+    const response = await apiClient.get(url);
+    return response.data?.data ?? response.data ?? [];
+  },
+
+  // Obtener lista de asesores para servicio al cliente
+  listAdvisors: async (): Promise<any[]> => {
+    const url = '/users/list-advisors';
     const response = await apiClient.get(url);
     return response.data?.data ?? response.data ?? [];
   },
