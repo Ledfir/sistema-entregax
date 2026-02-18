@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Form, Input, Button, message, Spin } from 'antd';
+import { Form, Input, Button, Spin } from 'antd';
 import { operacionesService } from '@/services/operacionesService';
+import Swal from 'sweetalert2';
 
 export const ActualizarTCAumentoMaritimo = () => {
   const [loading, setLoading] = useState(false);
@@ -21,7 +22,13 @@ export const ActualizarTCAumentoMaritimo = () => {
       });
     } catch (error: any) {
       console.error(error);
-      message.error('Error al cargar el valor actual');
+      Swal.fire({
+        icon: 'error',
+        title: '',
+        text: 'Error al cargar el valor actual',
+        showConfirmButton: false,
+        timer: 3500
+      });
     } finally {
       setLoading(false);
     }
@@ -38,18 +45,27 @@ export const ActualizarTCAumentoMaritimo = () => {
       const response = await operacionesService.updateAumentoMaritimo(data);
       
       // Mostrar mensaje del servidor
-      if (response?.message) {
-        message.success(response.message);
-      } else {
-        message.success('Aumento de TC actualizado correctamente');
-      }
+      const successMessage = response?.message || 'Aumento de TC actualizado correctamente';
+      Swal.fire({
+        icon: 'success',
+        title: '',
+        text: successMessage,
+        showConfirmButton: false,
+        timer: 3500
+      });
       
       // Recargar los valores actualizados
       await loadCurrentValues();
     } catch (error: any) {
       console.error(error);
       const errorMessage = error?.response?.data?.message || 'Error al actualizar el aumento de TC';
-      message.error(errorMessage);
+      Swal.fire({
+        icon: 'error',
+        title: '',
+        text: errorMessage,
+        showConfirmButton: false,
+        timer: 3500
+      });
     } finally {
       setLoading(false);
     }

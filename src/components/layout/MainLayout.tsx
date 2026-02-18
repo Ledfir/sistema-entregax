@@ -112,7 +112,6 @@ export const MainLayout = () => {
         { key: '/operaciones/actualizar-costo-kilo-tc', label: 'Actualizar costo por kilo | TC (TDI)' },
         { key: '/operaciones/actualizar-tc-aumento-maritimo', label: 'Actualizar TC aumento marítimo' },
         { key: '/operaciones/actualizar-tc-costo', label: 'Actualizar TC / costo' },
-        { key: '/operaciones/cambio-inst', label: 'Cambio Inst.' },
         { key: '/operaciones/descuentos', label: 'Descuentos' },
         { key: '/operaciones/editar-guia-dhl', label: 'Editar guía DHL' },
         { key: '/operaciones/nbox', label: 'N. B.O.X.' },

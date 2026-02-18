@@ -14,6 +14,8 @@ import { EncuestasPendientes, EncuestasRealizadas } from '@/pages/encuestas';
 import { AsesoresList } from '@/pages/asesores';
 import { ActualizarCostoKiloTC } from '@/pages/operaciones/ActualizarCostoKiloTC';
 import { ActualizarTCAumentoMaritimo } from '@/pages/operaciones/ActualizarTCAumentoMaritimo';
+import { ActualizarTCCosto } from '@/pages/operaciones/ActualizarTCCosto';
+import { Descuentos } from '@/pages/operaciones/Descuentos';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 
@@ -188,7 +190,7 @@ export const AppRouter = () => {
             path="/operaciones/actualizar-tc-costo" 
             element={
               <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
-                <div style={{ padding: 24 }}>Actualizar TC / costo</div>
+                <ActualizarTCCosto />
               </ProtectedRoute>
             } 
           />
@@ -204,7 +206,7 @@ export const AppRouter = () => {
             path="/operaciones/descuentos" 
             element={
               <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
-                <div style={{ padding: 24 }}>Descuentos</div>
+                <Descuentos />
               </ProtectedRoute>
             } 
           />
