@@ -119,7 +119,6 @@ export const MainLayout = () => {
         { key: '/operaciones/operacion-maritima', label: 'Operación Marítima' },
         { key: '/operaciones/reasignar-guia', label: 'Reasignar guía' },
         { key: '/operaciones/reasignar-cliente', label: 'Reasignar cliente' },
-        { key: '/operaciones/solo-adm-ctz-pasadas', label: 'SÓLO ADM CTZ PASADAS' },
         { key: '/operaciones/usa-remp', label: 'USA REMP.' },
       ],
     },

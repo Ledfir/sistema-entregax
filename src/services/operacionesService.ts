@@ -73,6 +73,50 @@ export const operacionesService = {
     const response = await apiClient.post(url, data);
     return response.data;
   },
+
+  // Buscar guía DHL para editar
+  searchDHLWaybill: async (data: { guia: string }): Promise<any> => {
+    const url = '/operations/search-dhl-waybill';
+    const response = await apiClient.post(url, data);
+    return response.data;
+  },
+
+  // Actualizar guía DHL
+  updateDHLWaybill: async (data: any): Promise<any> => {
+    const url = '/operations/update-dhl-waybill';
+    const response = await apiClient.post(url, data);
+    return response.data;
+  },
+
+  // Obtener cotizaciones marítimas
+  getMaritimeQuotes: async (): Promise<any[]> => {
+    const url = '/operations/get-maritime-quotes';
+    const response = await apiClient.get(url);
+    const data = response.data?.data ?? response.data;
+    return Array.isArray(data) ? data : [];
+  },
+
+  // Actualizar cotización marítima
+  updateMaritimeQuote: async (data: any): Promise<any> => {
+    const url = '/operations/update-maritime-quote';
+    const response = await apiClient.post(url, data);
+    return response.data;
+  },
+
+  // Obtener lista de reempaques USA
+  getListReempaque: async (): Promise<any[]> => {
+    const url = '/operations/get-list-reempaque';
+    const response = await apiClient.get(url);
+    const data = response.data?.data ?? response.data;
+    return Array.isArray(data) ? data : [];
+  },
+
+  // Ver guías de reempaque
+  viewWaybillsReempaque: async (data: { id: string; idu: string }): Promise<any> => {
+    const url = '/operations/view-waybils-reempaque';
+    const response = await apiClient.post(url, data);
+    return response.data;
+  },
 };
 
 export default operacionesService;

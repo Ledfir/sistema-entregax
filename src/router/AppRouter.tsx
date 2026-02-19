@@ -16,6 +16,10 @@ import { ActualizarCostoKiloTC } from '@/pages/operaciones/ActualizarCostoKiloTC
 import { ActualizarTCAumentoMaritimo } from '@/pages/operaciones/ActualizarTCAumentoMaritimo';
 import { ActualizarTCCosto } from '@/pages/operaciones/ActualizarTCCosto';
 import { Descuentos } from '@/pages/operaciones/Descuentos';
+import { EditarGuiaDHL } from '@/pages/operaciones/EditarGuiaDHL';
+import { OperacionMaritima } from '@/pages/operaciones/OperacionMaritima';
+import { UsaRemp } from '@/pages/operaciones/UsaRemp';
+import { NBox } from '@/pages/operaciones/NBox';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 
@@ -214,7 +218,7 @@ export const AppRouter = () => {
             path="/operaciones/editar-guia-dhl" 
             element={
               <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
-                <div style={{ padding: 24 }}>Editar guía DHL</div>
+                <EditarGuiaDHL />
               </ProtectedRoute>
             } 
           />
@@ -222,7 +226,7 @@ export const AppRouter = () => {
             path="/operaciones/nbox" 
             element={
               <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
-                <div style={{ padding: 24 }}>N. B.O.X.</div>
+                <NBox />
               </ProtectedRoute>
             } 
           />
@@ -238,7 +242,7 @@ export const AppRouter = () => {
             path="/operaciones/operacion-maritima" 
             element={
               <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
-                <div style={{ padding: 24 }}>Operación Marítima</div>
+                <OperacionMaritima />
               </ProtectedRoute>
             } 
           />
@@ -270,7 +274,7 @@ export const AppRouter = () => {
             path="/operaciones/usa-remp" 
             element={
               <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
-                <div style={{ padding: 24 }}>USA REMP.</div>
+                <UsaRemp />
               </ProtectedRoute>
             } 
           />

@@ -63,6 +63,16 @@
 
 .user-dropdown .user-avatar {
   border: 1px solid #f39915;
+  border-radius: 50% !important;
+  width: 32px !important;
+  height: 32px !important;
+  object-fit: cover;
+}
+
+.user-dropdown .user-avatar img {
+  border-radius: 50%;
+  object-fit: cover;
+  width: 100%;
 }
 
 .user-dropdown .user-name {
