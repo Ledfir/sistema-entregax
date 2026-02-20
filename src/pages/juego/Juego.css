@@ -1,0 +1,191 @@
+@import url("https://fonts.googleapis.com/css?family=Press+Start+2P");
+
+.game {
+  display: block;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(to bottom, #87ceeb 0%, #87ceeb 80%, #90ee90 80%, #90ee90 100%);
+}
+
+#controls {
+  position: absolute;
+  bottom: 20px;
+  min-width: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 10;
+}
+
+#controls div {
+  display: grid;
+  grid-template-columns: 50px 50px 50px;
+  gap: 10px;
+}
+
+#controls button {
+  width: 100%;
+  height: 40px;
+  background-color: white;
+  border: 1px solid lightgray;
+  box-shadow: 3px 5px 0px 0px rgba(0, 0, 0, 0.75);
+  cursor: pointer;
+  outline: none;
+  font-family: "Press Start 2P", cursive;
+  font-size: 14px;
+  transition: all 0.1s;
+}
+
+#controls button:hover {
+  background-color: #f0f0f0;
+  transform: translateY(-2px);
+  box-shadow: 3px 7px 0px 0px rgba(0, 0, 0, 0.75);
+}
+
+#controls button:active {
+  transform: translateY(2px);
+  box-shadow: 1px 3px 0px 0px rgba(0, 0, 0, 0.75);
+}
+
+#controls button:first-of-type {
+  grid-column: 1/-1;
+}
+
+#score {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-size: 2em;
+  color: white;
+  font-family: "Press Start 2P", cursive;
+  text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+#result-container {
+  position: absolute;
+  min-width: 100%;
+  min-height: 100%;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 100;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+#result-container #result {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  font-family: "Press Start 2P", cursive;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+#result-container #result h1 {
+  margin: 0 0 20px 0;
+  font-size: 1.5em;
+  color: #333;
+}
+
+#result-container #result p {
+  margin: 10px 0 30px 0;
+  font-size: 1em;
+  color: #666;
+}
+
+#result-container #result p span {
+  color: #ff6600;
+  font-size: 1.5em;
+}
+
+#result-container button {
+  background-color: #ff6600;
+  color: white;
+  padding: 15px 40px;
+  margin: 10px;
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  box-shadow: 0 5px 0 0 #cc5200;
+  transition: all 0.1s;
+}
+
+#result-container button:hover {
+  background-color: #ff8800;
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 0 #cc5200;
+}
+
+#result-container button:active {
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 0 #cc5200;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #score {
+    font-size: 1.5em;
+    top: 10px;
+    left: 10px;
+  }
+
+  #controls {
+    bottom: 10px;
+  }
+
+  #controls div {
+    grid-template-columns: 45px 45px 45px;
+    gap: 8px;
+  }
+
+  #controls button {
+    height: 35px;
+    font-size: 12px;
+  }
+
+  #result-container #result {
+    padding: 30px;
+    margin: 20px;
+  }
+
+  #result-container #result h1 {
+    font-size: 1.2em;
+  }
+
+  #result-container #result p {
+    font-size: 0.9em;
+  }
+
+  #result-container button {
+    padding: 12px 30px;
+    font-size: 0.8em;
+  }
+}

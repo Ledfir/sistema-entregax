@@ -20,6 +20,7 @@ import { EditarGuiaDHL } from '@/pages/operaciones/EditarGuiaDHL';
 import { OperacionMaritima } from '@/pages/operaciones/OperacionMaritima';
 import { UsaRemp } from '@/pages/operaciones/UsaRemp';
 import { NBox } from '@/pages/operaciones/NBox';
+import { Juego, Snake } from '@/pages/juego';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 
@@ -136,6 +137,8 @@ export const AppRouter = () => {
           {/* Otras rutas */}
           <Route path="/comunicados" element={<div style={{ padding: 24 }}>Comunicados</div>} />
           <Route path="/perfil" element={<Profile />} />
+          <Route path="/juego" element={<Juego />} />
+          <Route path="/snake" element={<Snake />} />
           <Route 
             path="/configuracion" 
             element={

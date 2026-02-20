@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Button, Select, Spin, Table, Dropdown, Input } from 'antd';
+import { Button, Select, Spin, Table, Dropdown, Input, Modal, Form } from 'antd';
 import type { MenuProps } from 'antd';
 import { UserOutlined, TeamOutlined, EditOutlined, HistoryOutlined, EyeOutlined, MoreOutlined, FileTextOutlined, SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -17,6 +17,11 @@ export const NBox = () => {
   const [tableData, setTableData] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [pageSize, setPageSize] = useState(10);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<any>(null);
+  const [qrError, setQrError] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editForm] = Form.useForm();
 
   useEffect(() => {
     document.title = 'Sistema Entregax | N.B.O.X';
@@ -188,8 +193,17 @@ export const NBox = () => {
       icon: <EditOutlined />,
       label: 'Editar',
       onClick: () => {
-        // TODO: Implementar edición
-        console.log('Editar:', record);
+        setSelectedRecord(record);
+        editForm.setFieldsValue({
+          costo: record.costo || '',
+          tipodecambio: record.tipodecambio || '',
+          costoenvio: record.costoenvio || '',
+          peso: record.kilos || '',
+          largo: record.largo || '',
+          ancho: record.ancho || '',
+          alto: record.alto || ''
+        });
+        setIsEditModalOpen(true);
       },
     },
     {
@@ -197,8 +211,9 @@ export const NBox = () => {
       icon: <EyeOutlined />,
       label: 'Ver todo',
       onClick: () => {
-        // TODO: Implementar ver todo
-        console.log('Ver todo:', record);
+        setSelectedRecord(record);
+        setQrError(false);
+        setIsModalOpen(true);
       },
     },
     {
@@ -220,6 +235,92 @@ export const NBox = () => {
       },
     },
   ];
+
+  const handleDownloadQR = async (guiaunica: string, tipo: string) => {
+    try {
+      const tipoLower = tipo.toLowerCase();
+      // Usar el backend como proxy para evitar problemas de CORS
+      const response = await apiClient.get(`/operations/download-qr/${tipoLower}/${guiaunica}`, {
+        responseType: 'blob'
+      });
+      
+      const blob = new Blob([response.data], { type: 'image/svg+xml' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `QR-${guiaunica}.svg`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      Swal.fire({
+        icon: 'success',
+        title: '',
+        text: 'QR descargado exitosamente',
+        showConfirmButton: false,
+        timer: 2000
+      });
+    } catch (error: any) {
+      console.error('Error al descargar QR:', error);
+      Swal.fire({
+        icon: 'error',
+        title: '',
+        text: 'Error al descargar el archivo QR',
+        showConfirmButton: false,
+        timer: 3500
+      });
+    }
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      const values = await editForm.validateFields();
+      
+      const response = await apiClient.post('/operations/update-waybill-nbox', {
+        id: selectedRecord.id,
+        idu: selectedRecord.idu,
+        ...values
+      });
+      
+      if (response.data.status === 'success') {
+        Swal.fire({
+          icon: 'success',
+          title: '',
+          text: response.data.message || 'Cambios guardados exitosamente',
+          showConfirmButton: false,
+          timer: 2000
+        });
+        
+        // Actualizar los datos en la tabla
+        setTableData(prevData => 
+          prevData.map(item => 
+            item.id === selectedRecord.id ? { ...item, ...values } : item
+          )
+        );
+        
+        setIsEditModalOpen(false);
+        editForm.resetFields();
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: '',
+          text: response.data.message || 'Error al guardar cambios',
+          showConfirmButton: false,
+          timer: 3500
+        });
+      }
+    } catch (error: any) {
+      console.error('Error al guardar cambios:', error);
+      Swal.fire({
+        icon: 'error',
+        title: '',
+        text: error.response?.data?.message || 'Error al guardar los cambios',
+        showConfirmButton: false,
+        timer: 3500
+      });
+    }
+  };
 
   const handleDownloadCtz = async (idco: string) => {
     try {
@@ -360,8 +461,8 @@ export const NBox = () => {
     },
     {
       title: 'CEDIS',
-      dataIndex: 'cedisid',
-      key: 'cedisid',
+      dataIndex: 'cedis',
+      key: 'cedis',
       align: 'center',
     },
     {
@@ -596,6 +697,405 @@ export const NBox = () => {
           </div>
         )}
       </div>
+
+      {/* Modal Ver Todo */}
+      <Modal
+        title="Detalle de la Guía"
+        open={isModalOpen}
+        onCancel={() => {
+          setIsModalOpen(false);
+          setQrError(false);
+        }}
+        footer={null}
+        width={700}
+      >
+        {selectedRecord && (
+          <div style={{ padding: '20px 0' }}>
+            {/* Cotización y Estado */}
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: '1fr 1fr',
+              gap: '20px',
+              marginBottom: '30px',
+              paddingBottom: '20px',
+              borderBottom: '1px solid #f0f0f0'
+            }}>
+              <div>
+                <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                  Cotización
+                </div>
+                <div style={{ fontSize: '16px', fontWeight: 600, color: '#1890ff' }}>
+                  {selectedRecord.idco || '-'}
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                  Estado de la cotización
+                </div>
+                <div style={{ 
+                  fontSize: '16px', 
+                  fontWeight: 600,
+                  color: !selectedRecord.idco || selectedRecord.idco === '' ? '#8c8c8c' : '#52c41a',
+                  backgroundColor: !selectedRecord.idco || selectedRecord.idco === '' ? '#f5f5f5' : '#f6ffed',
+                  padding: '4px 12px',
+                  borderRadius: '4px',
+                  display: 'inline-block'
+                }}>
+                  {!selectedRecord.idco || selectedRecord.idco === '' ? 'Sin cotizar' : (selectedRecord.estadoctz || 'Nuevo')}
+                </div>
+              </div>
+            </div>
+
+            {/* Información en dos columnas */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              {/* Columna izquierda */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    Guía de ingreso
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
+                    {selectedRecord.guiaingreso || '-'}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    Tipo
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
+                    {selectedRecord.tipo || '-'}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    Guía única
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
+                    {selectedRecord.guiaunica || '-'}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    Fecha de entrada
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
+                    {selectedRecord.fechaentrada || '-'}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    Instrucciones
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: selectedRecord.instruccion == 1 ? '#52c41a' : '#ff4d4f' }}>
+                    {selectedRecord.instruccion == 1 ? 'SI' : 'NO'}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    Guía de salida
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
+                    {selectedRecord.regsa || '-'}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    Costo
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#f5222d' }}>
+                    {selectedRecord.costo ? `$${parseFloat(selectedRecord.costo).toFixed(2)}` : '-'}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    Tipo de cambio
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
+                    {selectedRecord.tipodecambio ? `$${parseFloat(selectedRecord.tipodecambio).toFixed(2)}` : '-'}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    Medidas
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
+                    {selectedRecord.largo || '0'} x {selectedRecord.ancho || '0'} x {selectedRecord.alto || '0'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Columna derecha */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    Cliente
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 600 }}>
+                    {selectedRecord.suite || '-'}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    Estado
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
+                    {selectedRecord.estadotxt || '-'}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    CEDIS
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
+                    {selectedRecord.cedis || '-'}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    Fecha de salida
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
+                    {selectedRecord.fechasalida || '-'}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    Paquetería
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
+                    {selectedRecord.paqueteriasalidad || '-'}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    Fecha de recepción CHINA
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
+                    {selectedRecord.dsrecepcion || '-'}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    Costo de envío
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#f5222d' }}>
+                    {selectedRecord.costoenvio ? `$${parseFloat(selectedRecord.costoenvio).toFixed(2)}` : '-'}
+                  </div>
+                </div>
+
+                <div>
+                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    Guía USA
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
+                    {selectedRecord.guiaalas || '-'}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sección QR */}
+            {(selectedRecord.tipo === 'DHL' || selectedRecord.tipo === 'TDI') && selectedRecord.guiaunica && (
+              <div style={{ 
+                marginTop: '30px', 
+                paddingTop: '20px',
+                borderTop: '1px solid #f0f0f0',
+                textAlign: 'center'
+              }}>
+                <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '16px' }}>
+                  Archivo QR
+                </div>
+                {!qrError ? (
+                  <>
+                    <img
+                      src={`https://www.sistemaentregax.com/qr/guia/${selectedRecord.tipo.toLowerCase()}/${selectedRecord.guiaunica}.svg`}
+                      alt="QR Code"
+                      style={{ maxWidth: '250px', width: '100%', height: 'auto' }}
+                      onError={() => setQrError(true)}
+                    />
+                    <div style={{ marginTop: '16px' }}>
+                      <Button
+                        type="primary"
+                        onClick={() => handleDownloadQR(selectedRecord.guiaunica, selectedRecord.tipo)}
+                      >
+                        Descargar QR
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <div style={{
+                    padding: '40px',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '8px',
+                    color: '#8c8c8c',
+                    fontSize: '14px'
+                  }}>
+                    QR sin crearse
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      {/* Modal Editar */}
+      <Modal
+        title="Editar Registro"
+        open={isEditModalOpen}
+        onCancel={() => {
+          setIsEditModalOpen(false);
+          editForm.resetFields();
+        }}
+        footer={null}
+        width={700}
+      >
+        <Form
+          form={editForm}
+          layout="vertical"
+          style={{ marginTop: '20px' }}
+        >
+          <Form.Item
+            label="Costo (US)"
+            name="costo"
+            rules={[{ required: false, message: 'Ingrese el costo' }]}
+          >
+            <Input
+              type="number"
+              step="0.01"
+              placeholder="Ingrese el costo en USD"
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Tipo de cambio"
+            name="tipodecambio"
+            rules={[{ required: false, message: 'Ingrese el tipo de cambio' }]}
+          >
+            <Input
+              type="number"
+              step="0.01"
+              placeholder="Ingrese el tipo de cambio"
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Costo de envío (MXN)"
+            name="costoenvio"
+            rules={[{ required: false, message: 'Ingrese el costo de envío' }]}
+          >
+            <Input
+              type="number"
+              step="0.01"
+              placeholder="Ingrese el costo de envío"
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Peso"
+            name="peso"
+            rules={[{ required: false, message: 'Ingrese el peso' }]}
+          >
+            <Input
+              type="number"
+              step="0.01"
+              placeholder="Ingrese el peso"
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Largo"
+            name="largo"
+            rules={[{ required: false, message: 'Ingrese el largo' }]}
+          >
+            <Input
+              type="number"
+              step="0.01"
+              placeholder="Ingrese el largo"
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Ancho"
+            name="ancho"
+            rules={[{ required: false, message: 'Ingrese el ancho' }]}
+          >
+            <Input
+              type="number"
+              step="0.01"
+              placeholder="Ingrese el ancho"
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="Alto"
+            name="alto"
+            rules={[{ required: false, message: 'Ingrese el alto' }]}
+          >
+            <Input
+              type="number"
+              step="0.01"
+              placeholder="Ingrese el alto"
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
+
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'flex-end', 
+            gap: '12px',
+            marginTop: '24px'
+          }}>
+            <Button
+              onClick={() => {
+                setIsEditModalOpen(false);
+                editForm.resetFields();
+              }}
+              style={{
+                backgroundColor: '#dc3545',
+                color: 'white',
+                border: 'none',
+                padding: '8px 24px',
+                fontSize: '16px'
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="primary"
+              onClick={handleSaveEdit}
+              style={{
+                backgroundColor: '#ff6600',
+                borderColor: '#ff6600',
+                padding: '8px 24px',
+                fontSize: '16px'
+              }}
+            >
+              Guardar cambios
+            </Button>
+          </div>
+        </Form>
+      </Modal>
     </div>
   );
 };
