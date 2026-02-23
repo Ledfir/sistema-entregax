@@ -20,6 +20,7 @@ import { EditarGuiaDHL } from '@/pages/operaciones/EditarGuiaDHL';
 import { OperacionMaritima } from '@/pages/operaciones/OperacionMaritima';
 import { UsaRemp } from '@/pages/operaciones/UsaRemp';
 import { NBox } from '@/pages/operaciones/NBox';
+import { NBoxMaritimo } from '@/pages/operaciones/NBoxMaritimo';
 import { Juego, Snake } from '@/pages/juego';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
@@ -237,7 +238,7 @@ export const AppRouter = () => {
             path="/operaciones/nbox-maritimo" 
             element={
               <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
-                <div style={{ padding: 24 }}>N. B.O.X. Marítimo</div>
+                <NBoxMaritimo />
               </ProtectedRoute>
             } 
           />

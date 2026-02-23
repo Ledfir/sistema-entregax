@@ -7,7 +7,7 @@ import apiClient from '@/api/axios';
 import Swal from 'sweetalert2';
 import './Descuentos.css';
 
-export const NBox = () => {
+export const NBoxMaritimo = () => {
   const [loading, setLoading] = useState(false);
   const [searching, setSearching] = useState(false);
   const [clientes, setClientes] = useState<any[]>([]);
@@ -27,7 +27,7 @@ export const NBox = () => {
   const [loadingInstructions, setLoadingInstructions] = useState(false);
 
   useEffect(() => {
-    document.title = 'Sistema Entregax | N.B.O.X';
+    document.title = 'Sistema Entregax | N.B.O.X. Marítimo';
     loadData();
   }, []);
 
@@ -90,7 +90,7 @@ export const NBox = () => {
 
     try {
       setSearching(true);
-      const response = await apiClient.post('/operations/search-nbox', {
+      const response = await apiClient.post('/operations/search-nbox-maritime', {
         input: selectedCliente,
         tipo: 1
       });
@@ -147,7 +147,7 @@ export const NBox = () => {
 
     try {
       setSearching(true);
-      const response = await apiClient.post('/operations/search-nbox', {
+      const response = await apiClient.post('/operations/search-nbox-maritime', {
         input: selectedAsesor,
         tipo: 2
       });
@@ -228,7 +228,7 @@ export const NBox = () => {
     if (selectedCliente) {
       try {
         setSearching(true);
-        const response = await apiClient.post('/operations/search-nbox', {
+        const response = await apiClient.post('/operations/search-nbox-maritime', {
           input: selectedCliente,
           tipo: 1
         });
@@ -245,13 +245,13 @@ export const NBox = () => {
     } else if (selectedAsesor) {
       try {
         setSearching(true);
-        const response = await apiClient.post('/operations/search-nbox', {
+        const response = await apiClient.post('/operations/search-nbox-maritime', {
           input: selectedAsesor,
           tipo: 2
         });
 
         if (response.data.status === 'success') {
-          const data = response.data?.data ?? [];
+          const data = response.data?.data ?? [];  
           setTableData(Array.isArray(data) ? data : []);
         }
       } catch (error) {
@@ -324,13 +324,9 @@ export const NBox = () => {
       onClick: () => {
         setSelectedRecord(record);
         editForm.setFieldsValue({
-          costo: record.costo || '',
-          tipodecambio: record.tipodecambio || '',
-          costoenvio: record.costoenvio || '',
-          peso: record.kilos || '',
-          largo: record.largo || '',
-          ancho: record.ancho || '',
-          alto: record.alto || ''
+          cbm: record.cbm || '',
+          bultos: record.bultos || '',
+          peso: record.peso || '',
         });
         setIsEditModalOpen(true);
       },
@@ -405,9 +401,8 @@ export const NBox = () => {
     try {
       const values = await editForm.validateFields();
       
-      const response = await apiClient.post('/operations/update-waybill-nbox', {
+      const response = await apiClient.post('/operations/update-waybill-nbox-maritime', {
         id: selectedRecord.id,
-        idu: selectedRecord.idu,
         ...values
       });
       
@@ -452,7 +447,7 @@ export const NBox = () => {
 
   const handleDownloadCtz = async (idco: string) => {
     try {
-      const response = await apiClient.get(`/operations/download-ctz/${idco}`, {
+      const response = await apiClient.get(`/operations/download-ctz-maritime/${idco}`, {
         responseType: 'blob'
       });
 
@@ -493,9 +488,48 @@ export const NBox = () => {
     }
   };
 
+  // Función helper para formatear fechas
+  const formatDate = (value: string) => {
+    if (!value || value === '0000-00-00 00:00:00' || value === '0000-00-00') {
+      return '';
+    }
+    
+    try {
+      const date = new Date(value);
+      
+      // Verificar si la fecha es válida
+      if (isNaN(date.getTime())) {
+        return value; // Si no es válida, retornar el valor original
+      }
+      
+      // Verificar si incluye hora (diferente de 00:00:00)
+      const hasTime = value.includes(':') && !(value.includes('00:00:00') && value.includes(' '));
+      
+      if (hasTime) {
+        // Formato con fecha y hora: "23 feb 2026, 14:30"
+        return date.toLocaleDateString('es-ES', {
+          day: '2-digit',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+      } else {
+        // Formato solo fecha: "23/02/2026"
+        return date.toLocaleDateString('es-ES', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric'
+        });
+      }
+    } catch (error) {
+      return value; // En caso de error, retornar el valor original
+    }
+  };
+
   const columns: ColumnsType<any> = [
     {
-      title: 'Acciones',
+      title: 'OPCIONES',
       key: 'acciones',
       fixed: 'left',
       align: 'center',
@@ -508,9 +542,15 @@ export const NBox = () => {
       ),
     },
     {
-      title: 'Cotización',
-      dataIndex: 'idco',
-      key: 'idco',
+      title: 'LOG',
+      dataIndex: 'name',
+      key: 'name',
+      align: 'center',
+    },
+    {
+      title: 'COTIZACION',
+      dataIndex: 'ctz',
+      key: 'ctz',
       align: 'center',
       render: (value) => {
         if (value && value !== '') {
@@ -528,44 +568,46 @@ export const NBox = () => {
       },
     },
     {
-      title: 'Guía de ingreso',
-      dataIndex: 'guiaingreso',
-      key: 'guiaingreso',
+      title: 'BL',
+      dataIndex: 'bl',
+      key: 'bl',
       align: 'center',
     },
     {
-      title: 'Cliente',
+      title: 'ASESOR',
+      dataIndex: 'asesor',
+      key: 'asesor',
+      align: 'center',
+    },
+    {
+      title: 'CLIENTE',
       dataIndex: 'suite',
       key: 'suite',
       align: 'center',
       render: (value) => <span style={{ fontWeight: 'bold' }}>{value}</span>,
     },
     {
-      title: 'Tipo',
-      dataIndex: 'tipo',
-      key: 'tipo',
+      title: 'FECHA DE CREACION',
+      dataIndex: 'created',
+      key: 'created',
       align: 'center',
+      render: (value) => formatDate(value),
     },
     {
-      title: 'Estado',
-      dataIndex: 'estadotxt',
-      key: 'estadotxt',
+      title: 'FECHA PROXIMA DE LLEGADA',
+      dataIndex: 'arrived',
+      key: 'arrived',
       align: 'center',
+      render: (value) => formatDate(value),
     },
     {
-      title: 'Guía única',
-      dataIndex: 'guiaunica',
-      key: 'guiaunica',
-      align: 'center',
-    },
-    {
-      title: 'Instrucciones',
-      dataIndex: 'instruccion',
-      key: 'instruccion',
+      title: 'INSTRUCCIONES',
+      dataIndex: 'instrucciones',
+      key: 'instrucciones',
       align: 'center',
       render: (value, record) => {
         if (value == 1) {
-          if (!record.idco || record.idco === '') {
+          if (!record.ctz || record.ctz === '') {
             return (
               <Button
                 type="primary"
@@ -587,77 +629,55 @@ export const NBox = () => {
       },
     },
     {
-      title: 'CEDIS',
-      dataIndex: 'cedis',
-      key: 'cedis',
+      title: 'ESTADO',
+      dataIndex: 'estadotxt',
+      key: 'estadotxt',
       align: 'center',
     },
     {
-      title: 'Fecha de recepción CHINA',
-      dataIndex: 'dsrecepcion',
-      key: 'dsrecepcion',
+      title: 'WEEK',
+      dataIndex: 'week',
+      key: 'week',
       align: 'center',
     },
     {
-      title: 'Fecha de entrada',
-      dataIndex: 'fechaentrada',
-      key: 'fechaentrada',
-      align: 'center',
-    },
-    {
-      title: 'Fecha de salida',
-      dataIndex: 'fechasalida',
-      key: 'fechasalida',
-      align: 'center',
-    },
-    {
-      title: 'Paquetería de salida',
-      dataIndex: 'paqueteriasalidad',
-      key: 'paqueteriasalidad',
-      align: 'center',
-    },
-    {
-      title: 'Guía de salida',
-      dataIndex: 'regsa',
-      key: 'regsa',
-      align: 'center',
-    },
-    {
-      title: 'Costo',
-      dataIndex: 'costo',
-      key: 'costo',
-      align: 'center',
-      render: (value) => value ? `$${parseFloat(value).toFixed(2)}` : '-',
-    },
-    {
-      title: 'Tipo de cambio',
-      dataIndex: 'tipodecambio',
-      key: 'tipodecambio',
+      title: 'CBM',
+      dataIndex: 'cbm',
+      key: 'cbm',
       align: 'center',
       render: (value) => value ? parseFloat(value).toFixed(2) : '-',
     },
     {
-      title: 'Costo de envío',
-      dataIndex: 'costoenvio',
-      key: 'costoenvio',
+      title: 'BULTOS',
+      dataIndex: 'bultos',
+      key: 'bultos',
       align: 'center',
-      render: (value) => value ? `$${parseFloat(value).toFixed(2)}` : '-',
     },
     {
-      title: 'Medidas',
-      key: 'medidas',
+      title: 'PESO',
+      dataIndex: 'peso',
+      key: 'peso',
       align: 'center',
-      render: (_, record) => {
-        const largo = record.largo || '0';
-        const ancho = record.ancho || '0';
-        const alto = record.alto || '0';
-        return `${largo} x ${ancho} x ${alto}`;
-      }
+      render: (value) => value ? `${parseFloat(value).toFixed(2)} kg` : '-',
     },
     {
-      title: 'Guía US',
-      dataIndex: 'guiaalas',
-      key: 'guiaalas',
+      title: 'FECHA DE INGRESO',
+      dataIndex: 'ingreso_date',
+      key: 'ingreso_date',
+      align: 'center',
+      render: (value) => formatDate(value),
+    },
+    {
+      title: 'FECHA DE SALIDA',
+      dataIndex: 'salida_fecha',
+      key: 'salida_fecha',
+      align: 'center',
+      render: (value) => formatDate(value),
+    },
+    {
+      title: 'GUIA DE SALIDA',
+      dataIndex: 'guiasalida',
+      key: 'guiasalida',
       align: 'center',
     },
   ];
@@ -678,7 +698,7 @@ export const NBox = () => {
           padding: '24px',
         }}>
           <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}>
-            Nuevo Recepcion Box
+            Nuevo Recepcion Box Maritimo
           </h1>
         </div>
 
@@ -796,18 +816,22 @@ export const NBox = () => {
                     if (!searchTerm) return true;
                     const searchLower = searchTerm.toLowerCase();
                     return (
-                      item.guiaingreso?.toLowerCase().includes(searchLower) ||
+                      item.log?.toString().toLowerCase().includes(searchLower) ||
+                      item.idco?.toString().toLowerCase().includes(searchLower) ||
+                      item.bl?.toLowerCase().includes(searchLower) ||
+                      item.asesor?.toLowerCase().includes(searchLower) ||
                       item.suite?.toLowerCase().includes(searchLower) ||
-                      item.guiaunica?.toLowerCase().includes(searchLower) ||
-                      item.instruccion?.toLowerCase().includes(searchLower) ||
-                      item.state?.toLowerCase().includes(searchLower) ||
-                      item.tipgl?.toLowerCase().includes(searchLower) ||
-                      item.idco?.toLowerCase().includes(searchLower) ||
-                      item.guiaalas?.toLowerCase().includes(searchLower) ||
-                      item.cedisid?.toLowerCase().includes(searchLower)
+                      item.fechacreacion?.toLowerCase().includes(searchLower) ||
+                      item.fechallegada?.toLowerCase().includes(searchLower) ||
+                      item.estadotxt?.toLowerCase().includes(searchLower) ||
+                      item.week?.toString().toLowerCase().includes(searchLower) ||
+                      item.bultos?.toString().toLowerCase().includes(searchLower) ||
+                      item.fechaingreso?.toLowerCase().includes(searchLower) ||
+                      item.fechasalida?.toLowerCase().includes(searchLower) ||
+                      item.guiasalida?.toLowerCase().includes(searchLower)
                     );
                   })}
-                  rowKey={(record) => record.id || record.guia_ingreso}
+                  rowKey={(record) => record.id || record.bl || Math.random()}
                   scroll={{ x: 'max-content' }}
                   pagination={{
                     pageSize: pageSize,
@@ -909,7 +933,7 @@ export const NBox = () => {
                     Fecha de entrada
                   </div>
                   <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                    {selectedRecord.fechaentrada || '-'}
+                    {formatDate(selectedRecord.fechaentrada) || '-'}
                   </div>
                 </div>
 
@@ -993,7 +1017,7 @@ export const NBox = () => {
                     Fecha de salida
                   </div>
                   <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                    {selectedRecord.fechasalida || '-'}
+                    {formatDate(selectedRecord.fechasalida) || '-'}
                   </div>
                 </div>
 
@@ -1011,7 +1035,7 @@ export const NBox = () => {
                     Fecha de recepción CHINA
                   </div>
                   <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                    {selectedRecord.dsrecepcion || '-'}
+                    {formatDate(selectedRecord.dsrecepcion) || '-'}
                   </div>
                 </div>
 
@@ -1097,40 +1121,27 @@ export const NBox = () => {
           style={{ marginTop: '20px' }}
         >
           <Form.Item
-            label="Costo (US)"
-            name="costo"
-            rules={[{ required: false, message: 'Ingrese el costo' }]}
+            label="CBMs"
+            name="cbm"
+            rules={[{ required: false, message: 'Ingrese los CBMs del LOG' }]}
           >
             <Input
               type="number"
               step="0.01"
-              placeholder="Ingrese el costo en USD"
+              placeholder="Ingrese los CBMs del LOG"
               style={{ width: '100%' }}
             />
           </Form.Item>
 
           <Form.Item
-            label="Tipo de cambio"
-            name="tipodecambio"
-            rules={[{ required: false, message: 'Ingrese el tipo de cambio' }]}
+            label="Bultos"
+            name="bultos"
+            rules={[{ required: false, message: 'Ingrese los bultos del LOG' }]}
           >
             <Input
               type="number"
-              step="0.01"
-              placeholder="Ingrese el tipo de cambio"
-              style={{ width: '100%' }}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Costo de envío (MXN)"
-            name="costoenvio"
-            rules={[{ required: false, message: 'Ingrese el costo de envío' }]}
-          >
-            <Input
-              type="number"
-              step="0.01"
-              placeholder="Ingrese el costo de envío"
+              step="1"
+              placeholder="Ingrese los bultos del LOG"
               style={{ width: '100%' }}
             />
           </Form.Item>
@@ -1138,51 +1149,12 @@ export const NBox = () => {
           <Form.Item
             label="Peso"
             name="peso"
-            rules={[{ required: false, message: 'Ingrese el peso' }]}
+            rules={[{ required: false, message: 'Ingrese el peso del LOG' }]}
           >
             <Input
               type="number"
               step="0.01"
-              placeholder="Ingrese el peso"
-              style={{ width: '100%' }}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Largo"
-            name="largo"
-            rules={[{ required: false, message: 'Ingrese el largo' }]}
-          >
-            <Input
-              type="number"
-              step="0.01"
-              placeholder="Ingrese el largo"
-              style={{ width: '100%' }}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Ancho"
-            name="ancho"
-            rules={[{ required: false, message: 'Ingrese el ancho' }]}
-          >
-            <Input
-              type="number"
-              step="0.01"
-              placeholder="Ingrese el ancho"
-              style={{ width: '100%' }}
-            />
-          </Form.Item>
-
-          <Form.Item
-            label="Alto"
-            name="alto"
-            rules={[{ required: false, message: 'Ingrese el alto' }]}
-          >
-            <Input
-              type="number"
-              step="0.01"
-              placeholder="Ingrese el alto"
+              placeholder="Ingrese el peso del LOG"
               style={{ width: '100%' }}
             />
           </Form.Item>
@@ -1362,4 +1334,4 @@ export const NBox = () => {
   );
 };
 
-export default NBox;
+export default NBoxMaritimo;
