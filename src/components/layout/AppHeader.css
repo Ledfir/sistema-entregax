@@ -148,6 +148,21 @@
   display: inline-block;
 }
 
+/* Mobile Menu Button */
+.mobile-menu-btn {
+  display: none;
+  font-size: 20px;
+  color: #333;
+  padding: 8px;
+  margin-right: 12px;
+}
+
+.mobile-menu-btn:hover,
+.mobile-menu-btn:focus {
+  color: #f39915;
+  background: transparent;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .banner-content {
@@ -161,6 +176,10 @@
 }
 
 @media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: inline-flex;
+  }
+
   .app-header {
     left: 0;
     padding: 0 16px;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Button, Select, Spin, Table, Dropdown, Input, Modal, Form } from 'antd';
+import { Button, Select, Spin, Table, Dropdown, Input, Modal, Form, Popover, Checkbox } from 'antd';
 import type { MenuProps } from 'antd';
-import { UserOutlined, TeamOutlined, EditOutlined, HistoryOutlined, EyeOutlined, MoreOutlined, FileTextOutlined, SearchOutlined } from '@ant-design/icons';
+import { UserOutlined, TeamOutlined, EditOutlined, EyeOutlined, MoreOutlined, SearchOutlined, SwapOutlined, DeleteOutlined, SettingOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '@/api/axios';
 import Swal from 'sweetalert2';
@@ -19,12 +19,17 @@ export const NBoxMaritimo = () => {
   const [pageSize, setPageSize] = useState(10);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState<any>(null);
-  const [qrError, setQrError] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editForm] = Form.useForm();
-  const [isInstructionsModalOpen, setIsInstructionsModalOpen] = useState(false);
-  const [instructionsData, setInstructionsData] = useState<any>(null);
-  const [loadingInstructions, setLoadingInstructions] = useState(false);
+  const [loadingDetail, setLoadingDetail] = useState(false);
+  const [detailData, setDetailData] = useState<any>(null);
+  const [visibleColumns, setVisibleColumns] = useState<string[]>([
+    'name', 'ctz', 'bl', 'asesor', 'suite', 'created', 'arrived', 'instrucciones',
+    'estadotxt', 'week', 'cbm', 'bultos', 'peso', 'ingreso_date', 'salida_fecha', 'guiasalida'
+  ]);
+  const [isReassignModalOpen, setIsReassignModalOpen] = useState(false);
+  const [selectedClienteForReassign, setSelectedClienteForReassign] = useState<string | undefined>(undefined);
+  const [recordToReassign, setRecordToReassign] = useState<any>(null);
 
   useEffect(() => {
     document.title = 'Sistema Entregax | N.B.O.X. Marítimo';
@@ -190,37 +195,96 @@ export const NBoxMaritimo = () => {
     }
   };
 
-  const handleViewInstructions = async (record: any) => {
+  const handleViewAll = async (record: any) => {
     try {
-      setLoadingInstructions(true);
-      const response = await apiClient.post('/operations/get-delivery-address', {
-        id: record.id,
-        idu: record.idu
-      });
+      setLoadingDetail(true);
+      setIsModalOpen(true);
+      const response = await apiClient.get(`/operations/get-data-log/${record.name}`);
 
       if (response.data.status === 'success') {
-        setInstructionsData(response.data.data || response.data);
-        setIsInstructionsModalOpen(true);
+        setDetailData(response.data.data);
       } else {
         Swal.fire({
           icon: 'error',
           title: '',
-          text: response.data.message || 'Error al obtener las instrucciones',
+          text: response.data.message || 'Error al obtener los detalles',
+          showConfirmButton: false,
+          timer: 3500
+        });
+        setIsModalOpen(false);
+      }
+    } catch (error: any) {
+      console.error('Error al obtener detalles:', error);
+      Swal.fire({
+        icon: 'error',
+        title: '',
+        text: error.response?.data?.message || 'Error al obtener los detalles',
+        showConfirmButton: false,
+        timer: 3500
+      });
+      setIsModalOpen(false);
+    } finally {
+      setLoadingDetail(false);
+    }
+  };
+
+  const handleReassignLog = (record: any) => {
+    setRecordToReassign(record);
+    setSelectedClienteForReassign(undefined);
+    setIsReassignModalOpen(true);
+  };
+
+  const handleSaveReassign = async () => {
+    if (!selectedClienteForReassign) {
+      Swal.fire({
+        icon: 'warning',
+        title: '',
+        text: 'Por favor seleccione un cliente',
+        showConfirmButton: false,
+        timer: 2000
+      });
+      return;
+    }
+
+    try {
+      const response = await apiClient.post('/operations/update-customer-log-maritime', {
+        id: recordToReassign.id,
+        customer_id: selectedClienteForReassign
+      });
+
+      if (response.data.status === 'success') {
+        Swal.fire({
+          icon: 'success',
+          title: '',
+          text: response.data.message || 'LOG reasignado correctamente',
+          showConfirmButton: false,
+          timer: 2000
+        });
+
+        setIsReassignModalOpen(false);
+        setSelectedClienteForReassign(undefined);
+        setRecordToReassign(null);
+        
+        // Recargar la tabla
+        await reloadTableData();
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: '',
+          text: response.data.message || 'Error al reasignar el LOG',
           showConfirmButton: false,
           timer: 3500
         });
       }
     } catch (error: any) {
-      console.error('Error al obtener instrucciones:', error);
+      console.error('Error al reasignar LOG:', error);
       Swal.fire({
         icon: 'error',
         title: '',
-        text: error.response?.data?.message || 'Error al obtener las instrucciones',
+        text: error.response?.data?.message || 'Error al reasignar el LOG',
         showConfirmButton: false,
         timer: 3500
       });
-    } finally {
-      setLoadingInstructions(false);
     }
   };
 
@@ -316,85 +380,54 @@ export const NBoxMaritimo = () => {
     }
   };
 
-  const getActionItems = (record: any): MenuProps['items'] => [
-    {
-      key: 'editar',
-      icon: <EditOutlined />,
-      label: 'Editar',
-      onClick: () => {
-        setSelectedRecord(record);
-        editForm.setFieldsValue({
-          cbm: record.cbm || '',
-          bultos: record.bultos || '',
-          peso: record.peso || '',
-        });
-        setIsEditModalOpen(true);
+  const getActionItems = (record: any): MenuProps['items'] => {
+    const items: MenuProps['items'] = [
+      {
+        key: 'editar',
+        icon: <EditOutlined />,
+        label: 'Editar',
+        onClick: () => {
+          setSelectedRecord(record);
+          editForm.setFieldsValue({
+            cbm: record.cbm || '',
+            bultos: record.bultos || '',
+            peso: record.peso || '',
+          });
+          setIsEditModalOpen(true);
+        },
       },
-    },
-    {
-      key: 'ver-todo',
-      icon: <EyeOutlined />,
-      label: 'Ver todo',
-      onClick: () => {
-        setSelectedRecord(record);
-        setQrError(false);
-        setIsModalOpen(true);
+      {
+        key: 'ver-todo',
+        icon: <EyeOutlined />,
+        label: 'Ver todo',
+        onClick: () => {
+          handleViewAll(record);
+        },
       },
-    },
-    {
-      key: 'ver-instrucciones',
-      icon: <FileTextOutlined />,
-      label: 'Ver instrucciones',
-      onClick: () => {
-        handleViewInstructions(record);
+      {
+        key: 'reasignar-log',
+        icon: <SwapOutlined />,
+        label: 'Reasignar LOG',
+        onClick: () => {
+          handleReassignLog(record);
+        },
       },
-    },
-    {
-      key: 'historial',
-      icon: <HistoryOutlined />,
-      label: 'Historial',
-      onClick: () => {
-        // TODO: Implementar historial
-        console.log('Historial:', record);
-      },
-    },
-  ];
+    ];
 
-  const handleDownloadQR = async (guiaunica: string, tipo: string) => {
-    try {
-      const tipoLower = tipo.toLowerCase();
-      // Usar el backend como proxy para evitar problemas de CORS
-      const response = await apiClient.get(`/operations/download-qr/${tipoLower}/${guiaunica}`, {
-        responseType: 'blob'
-      });
-      
-      const blob = new Blob([response.data], { type: 'image/svg+xml' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `QR-${guiaunica}.svg`);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
-      
-      Swal.fire({
-        icon: 'success',
-        title: '',
-        text: 'QR descargado exitosamente',
-        showConfirmButton: false,
-        timer: 2000
-      });
-    } catch (error: any) {
-      console.error('Error al descargar QR:', error);
-      Swal.fire({
-        icon: 'error',
-        title: '',
-        text: 'Error al descargar el archivo QR',
-        showConfirmButton: false,
-        timer: 3500
+    // Agregar "Eliminar CTZ" solo si el registro tiene cotización
+    if (record.ctz && record.ctz !== '') {
+      items.push({
+        key: 'eliminar-ctz',
+        icon: <DeleteOutlined />,
+        label: 'Eliminar CTZ',
+        onClick: () => {
+          // TODO: Implementar eliminar CTZ
+          console.log('Eliminar CTZ:', record);
+        },
       });
     }
+
+    return items;
   };
 
   const handleSaveEdit = async () => {
@@ -527,7 +560,7 @@ export const NBoxMaritimo = () => {
     }
   };
 
-  const columns: ColumnsType<any> = [
+  const allColumns: ColumnsType<any> = [
     {
       title: 'OPCIONES',
       key: 'acciones',
@@ -682,6 +715,56 @@ export const NBoxMaritimo = () => {
     },
   ];
 
+  // Filtrar columnas según visibilidad
+  const columns = allColumns.filter(col => 
+    col.key === 'acciones' || visibleColumns.includes(col.key as string)
+  );
+
+  const columnOptions = [
+    { label: 'LOG', value: 'name' },
+    { label: 'COTIZACION', value: 'ctz' },
+    { label: 'BL', value: 'bl' },
+    { label: 'ASESOR', value: 'asesor' },
+    { label: 'CLIENTE', value: 'suite' },
+    { label: 'FECHA DE CREACION', value: 'created' },
+    { label: 'FECHA PROXIMA DE LLEGADA', value: 'arrived' },
+    { label: 'INSTRUCCIONES', value: 'instrucciones' },
+    { label: 'ESTADO', value: 'estadotxt' },
+    { label: 'WEEK', value: 'week' },
+    { label: 'CBM', value: 'cbm' },
+    { label: 'BULTOS', value: 'bultos' },
+    { label: 'PESO', value: 'peso' },
+    { label: 'FECHA DE INGRESO', value: 'ingreso_date' },
+    { label: 'FECHA DE SALIDA', value: 'salida_fecha' },
+    { label: 'GUIA DE SALIDA', value: 'guiasalida' },
+  ];
+
+  const columnSelectorContent = (
+    <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '8px' }}>
+      <Checkbox.Group
+        options={columnOptions}
+        value={visibleColumns}
+        onChange={(checkedValues) => setVisibleColumns(checkedValues)}
+        style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+      />
+      <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #f0f0f0' }}>
+        <Button 
+          size="small" 
+          onClick={() => setVisibleColumns(columnOptions.map(col => col.value))}
+          style={{ marginRight: '8px' }}
+        >
+          Seleccionar todas
+        </Button>
+        <Button 
+          size="small" 
+          onClick={() => setVisibleColumns([])}
+        >
+          Deseleccionar todas
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <div style={{ padding: '24px' }}>
       <div style={{ 
@@ -801,21 +884,38 @@ export const NBoxMaritimo = () => {
               </div>
             ) : tableData.length > 0 ? (
               <div style={{ marginTop: '32px' }}>
-                <Input
-                  placeholder="Buscar en la tabla..."
-                  prefix={<SearchOutlined />}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  size="large"
-                  style={{ marginBottom: '16px' }}
-                  allowClear
-                />
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', alignItems: 'center' }}>
+                  <Input
+                    placeholder="Buscar en la tabla..."
+                    prefix={<SearchOutlined />}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    size="large"
+                    style={{ flex: 1 }}
+                    allowClear
+                  />
+                  <Popover
+                    content={columnSelectorContent}
+                    title="Seleccionar columnas"
+                    trigger="click"
+                    placement="bottomRight"
+                  >
+                    <Button 
+                      size="large" 
+                      icon={<SettingOutlined />}
+                    >
+                      Columnas
+                    </Button>
+                  </Popover>
+                </div>
                 <Table
                   columns={columns}
                   dataSource={tableData.filter(item => {
                     if (!searchTerm) return true;
                     const searchLower = searchTerm.toLowerCase();
                     return (
+                      item.name?.toString().toLowerCase().includes(searchLower) ||
+                      item.ctz?.toString().toLowerCase().includes(searchLower) ||
                       item.log?.toString().toLowerCase().includes(searchLower) ||
                       item.idco?.toString().toLowerCase().includes(searchLower) ||
                       item.bl?.toLowerCase().includes(searchLower) ||
@@ -851,257 +951,270 @@ export const NBoxMaritimo = () => {
 
       {/* Modal Ver Todo */}
       <Modal
-        title="Detalle de la Guía"
+        title="Información"
         open={isModalOpen}
         onCancel={() => {
           setIsModalOpen(false);
-          setQrError(false);
+          setDetailData(null);
         }}
-        footer={null}
-        width={700}
+        footer={[
+          <Button 
+            key="close" 
+            danger
+            onClick={() => {
+              setIsModalOpen(false);
+              setDetailData(null);
+            }}
+          >
+            Cancelar
+          </Button>
+        ]}
+        width={600}
       >
-        {selectedRecord && (
+        {loadingDetail ? (
+          <div style={{ padding: '40px', textAlign: 'center' }}>
+            <Spin size="large" />
+          </div>
+        ) : detailData ? (
           <div style={{ padding: '20px 0' }}>
             {/* Cotización y Estado */}
             <div style={{ 
               display: 'grid', 
               gridTemplateColumns: '1fr 1fr',
               gap: '20px',
-              marginBottom: '30px',
-              paddingBottom: '20px',
+              marginBottom: '20px',
+              paddingBottom: '15px',
               borderBottom: '1px solid #f0f0f0'
             }}>
               <div>
-                <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                  Cotización
+                <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
+                  Cotizacion
                 </div>
-                <div style={{ fontSize: '16px', fontWeight: 600, color: '#1890ff' }}>
-                  {selectedRecord.idco || '-'}
+                <div style={{ fontSize: '14px', color: '#000', fontWeight: 600 }}>
+                  {detailData.quote?.ctz || ''}
                 </div>
               </div>
               <div>
-                <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
                   Estado de la cotización
                 </div>
                 <div style={{ 
-                  fontSize: '16px', 
+                  fontSize: '14px', 
                   fontWeight: 600,
-                  color: !selectedRecord.idco || selectedRecord.idco === '' ? '#8c8c8c' : '#52c41a',
-                  backgroundColor: !selectedRecord.idco || selectedRecord.idco === '' ? '#f5f5f5' : '#f6ffed',
-                  padding: '4px 12px',
-                  borderRadius: '4px',
-                  display: 'inline-block'
+                  color: detailData.quote?.state === '1' ? '#1890ff' :
+                         detailData.quote?.state === '2' ? '#faad14' :
+                         detailData.quote?.state === '3' ? '#52c41a' :
+                         detailData.quote?.state === '4' ? '#f5222d' :
+                         '#000'
                 }}>
-                  {!selectedRecord.idco || selectedRecord.idco === '' ? 'Sin cotizar' : (selectedRecord.estadoctz || 'Nuevo')}
+                  {detailData.quote?.state ? (
+                    detailData.quote.state === '1' ? 'Pendiente de pago' :
+                    detailData.quote.state === '2' ? 'Pendiente de aprobación' :
+                    detailData.quote.state === '3' ? 'Completada' :
+                    detailData.quote.state === '4' ? 'Cancelada' :
+                    `Estado ${detailData.quote.state}`
+                  ) : ''}
                 </div>
               </div>
+            </div>
+
+            
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px 30px', marginBottom: '15px' }}>
+                {/* LOG destacado */}
+                <div>
+                    <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
+                        LOG
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: 600, }}>
+                        {detailData.log?.name || ''}
+                    </div>
+                </div>
+                {/* BL */}
+                <div>
+                    <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
+                        BL
+                    </div>
+                    <div style={{ fontSize: '14px', color: '#000' }}>
+                        {detailData.log?.bl || ''}
+                    </div>
+                </div>
             </div>
 
             {/* Información en dos columnas */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              {/* Columna izquierda */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    Guía de ingreso
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                    {selectedRecord.guiaingreso || '-'}
-                  </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px 30px', marginBottom: '15px' }}>
+              <div>
+                <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
+                  Cliente
                 </div>
-
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    Tipo
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                    {selectedRecord.tipo || '-'}
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    Guía única
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                    {selectedRecord.guiaunica || '-'}
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    Fecha de entrada
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                    {formatDate(selectedRecord.fechaentrada) || '-'}
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    Instrucciones
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: selectedRecord.instruccion == 1 ? '#52c41a' : '#ff4d4f' }}>
-                    {selectedRecord.instruccion == 1 ? 'SI' : 'NO'}
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    Guía de salida
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                    {selectedRecord.regsa || '-'}
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    Costo
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#f5222d' }}>
-                    {selectedRecord.costo ? `$${parseFloat(selectedRecord.costo).toFixed(2)}` : '-'}
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    Tipo de cambio
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                    {selectedRecord.tipodecambio ? `$${parseFloat(selectedRecord.tipodecambio).toFixed(2)}` : '-'}
-                  </div>
-                </div>
-
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    Medidas
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                    {selectedRecord.largo || '0'} x {selectedRecord.ancho || '0'} x {selectedRecord.alto || '0'}
-                  </div>
+                <div style={{ fontSize: '14px', color: '#000' }}>
+                  {detailData.customer?.clavecliente || ''}
                 </div>
               </div>
 
-              {/* Columna derecha */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    Cliente
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 600 }}>
-                    {selectedRecord.suite || '-'}
-                  </div>
+              <div>
+                <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
+                  Asesor
                 </div>
-
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    Estado
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                    {selectedRecord.estadotxt || '-'}
-                  </div>
+                <div style={{ fontSize: '14px', color: '#000' }}>
+                  {detailData.user?.name || ''}
                 </div>
+              </div>
 
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    CEDIS
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                    {selectedRecord.cedis || '-'}
-                  </div>
+              <div>
+                <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
+                  Estado
                 </div>
-
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    Fecha de salida
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                    {formatDate(selectedRecord.fechasalida) || '-'}
-                  </div>
+                <div style={{ fontSize: '14px', color: '#000' }}>
+                  {detailData.log?.estadotxt || ''}
                 </div>
+              </div>
 
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    Paquetería
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                    {selectedRecord.paqueteriasalidad || '-'}
-                  </div>
+              <div>
+                <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
+                  Guía de salida
                 </div>
-
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    Fecha de recepción CHINA
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                    {formatDate(selectedRecord.dsrecepcion) || '-'}
-                  </div>
+                <div style={{ fontSize: '14px', color: '#000' }}>
+                  {detailData.log?.guiasalida || ''}
                 </div>
+              </div>
 
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    Costo de envío
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#f5222d' }}>
-                    {selectedRecord.costoenvio ? `$${parseFloat(selectedRecord.costoenvio).toFixed(2)}` : '-'}
-                  </div>
+              <div>
+                <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
+                  CEDIS
                 </div>
+                <div style={{ fontSize: '14px', color: '#000' }}>
+                  {detailData.log?.cedis || ''}
+                </div>
+              </div>
 
-                <div>
-                  <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
-                    Guía USA
-                  </div>
-                  <div style={{ fontSize: '14px', fontWeight: 500 }}>
-                    {selectedRecord.guiaalas || '-'}
-                  </div>
+              <div>
+                <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
+                  CBM
+                </div>
+                <div style={{ fontSize: '14px', color: '#000' }}>
+                  {detailData.log?.cbm || ''}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
+                  Fecha de creacion
+                </div>
+                <div style={{ fontSize: '14px', color: '#000' }}>
+                  {formatDate(detailData.log?.created) || ''}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
+                  Bultos
+                </div>
+                <div style={{ fontSize: '14px', color: '#000' }}>
+                  {detailData.log?.bultos || ''}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
+                  Fecha de llegada aproximada
+                </div>
+                <div style={{ fontSize: '14px', color: '#000' }}>
+                  {formatDate(detailData.log?.arrived) || ''}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
+                  Peso
+                </div>
+                <div style={{ fontSize: '14px', color: '#000' }}>
+                  {detailData.log?.peso + ' KG'|| ''}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
+                  Instrucciones
+                </div>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: detailData.log?.instrucciones == '1' ? '#52c41a' : '#ff4d4f' }}>
+                  {detailData.log?.instrucciones == '1' ? 'SI' : 'NO'}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
+                  Paquetería
+                </div>
+                <div style={{ fontSize: '14px', color: '#000' }}>
+                  {detailData.log?.paqueteria || ''}
+                </div>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '12px', color: '#333', marginBottom: '4px', fontWeight: 500 }}>
+                  WEEK
+                </div>
+                <div style={{ fontSize: '14px', color: '#000' }}>
+                  {detailData.log?.week || ''}
                 </div>
               </div>
             </div>
 
-            {/* Sección QR */}
-            {(selectedRecord.tipo === 'DHL' || selectedRecord.tipo === 'TDI') && selectedRecord.guiaunica && (
+            {/* Dirección de entrega */}
+            {detailData.address && (
               <div style={{ 
-                marginTop: '30px', 
-                paddingTop: '20px',
-                borderTop: '1px solid #f0f0f0',
-                textAlign: 'center'
+                marginTop: '20px', 
+                paddingTop: '15px',
+                borderTop: '1px solid #f0f0f0'
               }}>
-                <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '16px' }}>
-                  Archivo QR
+                <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '12px', color: '#000' }}>
+                  Dirección de entrega
                 </div>
-                {!qrError ? (
-                  <>
-                    <img
-                      src={`https://www.sistemaentregax.com/qr/guia/${selectedRecord.tipo.toLowerCase()}/${selectedRecord.guiaunica}.svg`}
-                      alt="QR Code"
-                      style={{ maxWidth: '250px', width: '100%', height: 'auto' }}
-                      onError={() => setQrError(true)}
-                    />
-                    <div style={{ marginTop: '16px' }}>
-                      <Button
-                        type="primary"
-                        onClick={() => handleDownloadQR(selectedRecord.guiaunica, selectedRecord.tipo)}
-                      >
-                        Descargar QR
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <div style={{
-                    padding: '40px',
-                    backgroundColor: '#f5f5f5',
-                    borderRadius: '8px',
-                    color: '#8c8c8c',
-                    fontSize: '14px'
-                  }}>
-                    QR sin crearse
+                <div style={{ fontSize: '13px', lineHeight: '1.8', color: '#000' }}>
+                  <div>
+                    <strong>¿Quien recibe?:</strong> {detailData.address.quienrecibe || ''}
                   </div>
-                )}
+                  <div>
+                    <strong>Calle:</strong> {detailData.address.calle || ''} #{detailData.address.numeroext || ''} 
+                    {detailData.address.numeroint && ` Numero interior: ${detailData.address.numeroint}`}
+                  </div>
+                  <div>
+                    <strong>Colonia:</strong> {detailData.address.colonia || ''}
+                  </div>
+                  <div>
+                    <strong>CP:</strong> {detailData.address.cp || ''}
+                  </div>
+                  <div>
+                    <strong>Municipio:</strong> {detailData.address.municipio || ''}
+                  </div>
+                  <div>
+                    <strong>Estado:</strong> {detailData.address.estado || ''}
+                  </div>
+                  <div>
+                    <strong>País:</strong> {detailData.address.pais || 'México'}
+                  </div>
+                  <div>
+                    <strong>Teléfono:</strong> {detailData.address.telefono || ''}
+                  </div>
+                  <div>
+                    <strong>Móvil:</strong> {detailData.address.movil || ''}
+                  </div>
+                  {detailData.address.refe && (
+                    <div>
+                      <strong>Referencias:</strong> {detailData.address.refe}
+                    </div>
+                  )}
+                  <div>
+                    <strong>Ciudad:</strong> {detailData.address.ciudad || ''}
+                  </div>
+                  <div>
+                    <strong>Lugar de entrega:</strong> {detailData.address.lugarentrega || ''}
+                  </div>
+                </div>
               </div>
             )}
           </div>
-        )}
+        ) : null}
       </Modal>
 
       {/* Modal Editar */}
@@ -1196,139 +1309,81 @@ export const NBoxMaritimo = () => {
         </Form>
       </Modal>
 
-      {/* Modal Ver Instrucciones */}
+      {/* Modal Reasignar LOG */}
       <Modal
-        title={<span style={{ fontWeight: 'bold', fontSize: '18px' }}>Instrucciones de envío</span>}
-        open={isInstructionsModalOpen}
+        title="Reasignar LOG"
+        open={isReassignModalOpen}
         onCancel={() => {
-          setIsInstructionsModalOpen(false);
-          setInstructionsData(null);
+          setIsReassignModalOpen(false);
+          setSelectedClienteForReassign(undefined);
+          setRecordToReassign(null);
         }}
-        footer={[
-          <Button
-            key="close"
-            onClick={() => {
-              setIsInstructionsModalOpen(false);
-              setInstructionsData(null);
-            }}
-            style={{
-              backgroundColor: '#dc3545',
-              borderColor: '#dc3545',
-              color: 'white',
-              padding: '6px 24px',
-              fontSize: '15px',
-              borderRadius: '4px'
-            }}
-          >
-            Cerrar
-          </Button>
-        ]}
+        footer={null}
         width={600}
       >
-        {loadingInstructions ? (
-          <div style={{ padding: '40px', textAlign: 'center' }}>
-            <Spin size="large" tip="Cargando instrucciones..." />
-          </div>
-        ) : instructionsData ? (
-          <div style={{ fontSize: '15px', lineHeight: '1.8' }}>
-            {/* Quien recibe */}
-            {instructionsData.quienrecibe && (
-              <div style={{ marginBottom: '8px' }}>
-                <span style={{ color: '#000', fontWeight: 'normal' }}>Quien recibe: </span>
-                <span style={{ color: '#000', fontWeight: 'bold' }}>
-                  {instructionsData.quienrecibe}
-                </span>
-              </div>
-            )}
-
-            {/* Teléfono */}
-            {instructionsData.telefono && (
-              <div style={{ marginBottom: '8px' }}>
-                <span style={{ color: '#000', fontWeight: 'normal' }}>Teléfono: </span>
-                <span style={{ color: '#000', fontWeight: 'bold' }}>{instructionsData.telefono}</span>
-              </div>
-            )}
-
-            {/* Teléfono móvil */}
-            {instructionsData.movil && (
-              <div style={{ marginBottom: '8px' }}>
-                <span style={{ color: '#000', fontWeight: 'normal' }}>Teléfono movil: </span>
-                <span style={{ color: '#000', fontWeight: 'bold' }}>{instructionsData.movil}</span>
-              </div>
-            )}
-
-            {/* Calle con número exterior */}
-            {instructionsData.calle && (
-              <div style={{ marginBottom: '6px' }}>
-                <span style={{ color: '#000', fontWeight: 'normal' }}>Calle: </span>
-                <span style={{ color: '#000', fontWeight: 'bold' }}>
-                  {instructionsData.calle}
-                  {instructionsData.numeroext && ` #${instructionsData.numeroext}`}
-                </span>
-              </div>
-            )}
-
-            {/* Número interior */}
-            {instructionsData.numeroint && (
-              <div style={{ marginBottom: '6px' }}>
-                <span style={{ color: '#000', fontWeight: 'normal' }}>Numero interior: </span>
-                <span style={{ color: '#000', fontWeight: 'bold' }}>{instructionsData.numeroint}</span>
-              </div>
-            )}
-
-            {/* Colonia y CP */}
-            {(instructionsData.colonia || instructionsData.cp) && (
-              <div style={{ marginBottom: '6px' }}>
-                {instructionsData.colonia && (
-                  <>
-                    <span style={{ color: '#000', fontWeight: 'normal' }}>Colonia: </span>
-                    <span style={{ color: '#000', fontWeight: 'bold' }}>{instructionsData.colonia}</span>
-                  </>
-                )}
-                {instructionsData.cp && (
-                  <>
-                    <span style={{ color: '#000', fontWeight: 'normal' }}>  CP: </span>
-                    <span style={{ color: '#000', fontWeight: 'bold' }}>{instructionsData.cp}</span>
-                  </>
-                )}
-              </div>
-            )}
-
-            {/* Municipio y Estado */}
-            {(instructionsData.municipio || instructionsData.estado) && (
-              <div style={{ marginBottom: '6px' }}>
-                {instructionsData.municipio && (
-                  <>
-                    <span style={{ color: '#000', fontWeight: 'normal' }}>Municipio: </span>
-                    <span style={{ color: '#000', fontWeight: 'bold' }}>{instructionsData.municipio}</span>
-                  </>
-                )}
-                {instructionsData.estado && (
-                  <>
-                    <span style={{ color: '#000', fontWeight: 'normal' }}>  Estado: </span>
-                    <span style={{ color: '#000', fontWeight: 'bold' }}>{instructionsData.estado}</span>
-                  </>
-                )}
-              </div>
-            )}
-
-            {/* Referencias visuales */}
-            {instructionsData.ref && (
-              <div style={{ marginBottom: '8px' }}>
-                <span style={{ color: '#000', fontWeight: 'normal' }}>Referencias visuales: </span>
-                <span style={{ color: '#000', fontWeight: 'bold' }}>{instructionsData.ref}</span>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div style={{ 
-            padding: '40px', 
-            textAlign: 'center',
-            color: '#8c8c8c'
+        <div style={{ marginTop: '20px' }}>
+          <label style={{ 
+            display: 'block', 
+            marginBottom: '12px',
+            fontSize: '15px',
+            fontWeight: 500,
+            color: '#333'
           }}>
-            No hay datos para mostrar
+            Seleccione el nuevo cliente
+          </label>
+          <Select
+            showSearch
+            placeholder="Seleccione un cliente"
+            value={selectedClienteForReassign}
+            onChange={setSelectedClienteForReassign}
+            style={{ width: '100%', marginBottom: '24px' }}
+            size="large"
+            suffixIcon={<UserOutlined />}
+            filterOption={(input, option) =>
+              (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+            }
+            options={clientes.map((cliente) => ({
+              value: cliente.id,
+              label: `(${cliente.clave}) ${cliente.nombre}`
+            }))}
+          />
+
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'flex-end', 
+            gap: '12px',
+            marginTop: '24px'
+          }}>
+            <Button
+              onClick={() => {
+                setIsReassignModalOpen(false);
+                setSelectedClienteForReassign(undefined);
+                setRecordToReassign(null);
+              }}
+              style={{
+                backgroundColor: '#dc3545',
+                color: 'white',
+                border: 'none',
+                padding: '8px 24px',
+                fontSize: '16px'
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="primary"
+              onClick={handleSaveReassign}
+              style={{
+                backgroundColor: '#ff6600',
+                borderColor: '#ff6600',
+                padding: '8px 24px',
+                fontSize: '16px'
+              }}
+            >
+              Guardar cambios
+            </Button>
           </div>
-        )}
+        </div>
       </Modal>
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Layout, Input, Avatar, Dropdown, Badge, Space } from 'antd';
+import { Layout, Input, Avatar, Dropdown, Badge, Space, Button } from 'antd';
 import {
   SearchOutlined,
   AppstoreOutlined,
@@ -8,6 +8,7 @@ import {
   UserOutlined,
   LogoutOutlined,
   ProfileOutlined,
+  MenuOutlined,
 } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { useNavigate } from 'react-router-dom';
@@ -16,7 +17,11 @@ import './AppHeader.css';
 
 const { Header } = Layout;
 
-export const AppHeader = () => {
+interface AppHeaderProps {
+  onMenuClick?: () => void;
+}
+
+export const AppHeader = ({ onMenuClick }: AppHeaderProps) => {
   const [searchValue, setSearchValue] = useState('');
   const navigate = useNavigate();
   const { logout, user } = useAuthStore();
@@ -53,6 +58,14 @@ export const AppHeader = () => {
   return (
     <>
       <Header className="app-header">
+        {onMenuClick && (
+          <Button
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={onMenuClick}
+            className="mobile-menu-btn"
+          />
+        )}
         <div className="header-left">
           <Input
             placeholder="Buscar..."

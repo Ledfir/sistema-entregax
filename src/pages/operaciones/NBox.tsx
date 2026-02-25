@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Button, Select, Spin, Table, Dropdown, Input, Modal, Form } from 'antd';
+import { Button, Select, Spin, Table, Dropdown, Input, Modal, Form, Popover, Checkbox } from 'antd';
 import type { MenuProps } from 'antd';
-import { UserOutlined, TeamOutlined, EditOutlined, HistoryOutlined, EyeOutlined, MoreOutlined, FileTextOutlined, SearchOutlined } from '@ant-design/icons';
+import { UserOutlined, TeamOutlined, EditOutlined, HistoryOutlined, EyeOutlined, MoreOutlined, FileTextOutlined, SearchOutlined, SettingOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import apiClient from '@/api/axios';
 import Swal from 'sweetalert2';
@@ -25,6 +25,14 @@ export const NBox = () => {
   const [isInstructionsModalOpen, setIsInstructionsModalOpen] = useState(false);
   const [instructionsData, setInstructionsData] = useState<any>(null);
   const [loadingInstructions, setLoadingInstructions] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState<string[]>([
+    'idco', 'guiaingreso', 'suite', 'tipo', 'estadotxt', 'guiaunica', 'instruccion',
+    'cedis', 'dsrecepcion', 'fechaentrada', 'fechasalida', 'paqueteriasalidad', 'regsa',
+    'costo', 'tipodecambio', 'costoenvio', 'medidas', 'guiaus'
+  ]);
+  const [isGuiausModalOpen, setIsGuiausModalOpen] = useState(false);
+  const [guiausForm] = Form.useForm();
+  const [recordToEditGuiaus, setRecordToEditGuiaus] = useState<any>(null);
 
   useEffect(() => {
     document.title = 'Sistema Entregax | N.B.O.X';
@@ -450,6 +458,64 @@ export const NBox = () => {
     }
   };
 
+  const handleOpenGuiausModal = (record: any) => {
+    setRecordToEditGuiaus(record);
+    guiausForm.setFieldsValue({
+      guiaus: record.guiaus || ''
+    });
+    setIsGuiausModalOpen(true);
+  };
+
+  const handleSaveGuiaus = async () => {
+    try {
+      const values = await guiausForm.validateFields();
+      
+      const response = await apiClient.post('/operations/update-waybill-nbox', {
+        id: recordToEditGuiaus.id,
+        idu: recordToEditGuiaus.idu,
+        guiaus: values.guiaus
+      });
+      
+      if (response.data.status === 'success') {
+        Swal.fire({
+          icon: 'success',
+          title: '',
+          text: response.data.message || 'Guía US actualizada exitosamente',
+          showConfirmButton: false,
+          timer: 2000
+        });
+        
+        // Actualizar los datos en la tabla
+        setTableData(prevData => 
+          prevData.map(item => 
+            item.id === recordToEditGuiaus.id ? { ...item, guiaus: values.guiaus } : item
+          )
+        );
+        
+        setIsGuiausModalOpen(false);
+        guiausForm.resetFields();
+        setRecordToEditGuiaus(null);
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: '',
+          text: response.data.message || 'Error al actualizar la Guía US',
+          showConfirmButton: false,
+          timer: 3500
+        });
+      }
+    } catch (error: any) {
+      console.error('Error al actualizar Guía US:', error);
+      Swal.fire({
+        icon: 'error',
+        title: '',
+        text: error.response?.data?.message || 'Error al actualizar la Guía US',
+        showConfirmButton: false,
+        timer: 3500
+      });
+    }
+  };
+
   const handleDownloadCtz = async (idco: string) => {
     try {
       const response = await apiClient.get(`/operations/download-ctz/${idco}`, {
@@ -493,7 +559,7 @@ export const NBox = () => {
     }
   };
 
-  const columns: ColumnsType<any> = [
+  const allColumns: ColumnsType<any> = [
     {
       title: 'Acciones',
       key: 'acciones',
@@ -656,11 +722,77 @@ export const NBox = () => {
     },
     {
       title: 'Guía US',
-      dataIndex: 'guiaalas',
-      key: 'guiaalas',
+      dataIndex: 'guiaus',
+      key: 'guiaus',
       align: 'center',
+      render: (value, record) => {
+        if (value && value !== '') {
+          return (
+            <Button
+              type="primary"
+              size="small"
+              onClick={() => handleOpenGuiausModal(record)}
+            >
+              {value}
+            </Button>
+          );
+        }
+        return '-';
+      },
     },
   ];
+
+  // Filtrar columnas según visibilidad
+  const columns = allColumns.filter(col => 
+    col.key === 'acciones' || visibleColumns.includes(col.key as string)
+  );
+
+  const columnOptions = [
+    { label: 'Cotización', value: 'idco' },
+    { label: 'Guía de ingreso', value: 'guiaingreso' },
+    { label: 'Cliente', value: 'suite' },
+    { label: 'Tipo', value: 'tipo' },
+    { label: 'Estado', value: 'estadotxt' },
+    { label: 'Guía única', value: 'guiaunica' },
+    { label: 'Instrucciones', value: 'instruccion' },
+    { label: 'CEDIS', value: 'cedis' },
+    { label: 'Fecha de recepción CHINA', value: 'dsrecepcion' },
+    { label: 'Fecha de entrada', value: 'fechaentrada' },
+    { label: 'Fecha de salida', value: 'fechasalida' },
+    { label: 'Paquetería de salida', value: 'paqueteriasalidad' },
+    { label: 'Guía de salida', value: 'regsa' },
+    { label: 'Costo', value: 'costo' },
+    { label: 'Tipo de cambio', value: 'tipodecambio' },
+    { label: 'Costo de envío', value: 'costoenvio' },
+    { label: 'Medidas', value: 'medidas' },
+    { label: 'Guía US', value: 'guiaus' },
+  ];
+
+  const columnSelectorContent = (
+    <div style={{ maxHeight: '400px', overflowY: 'auto', padding: '8px' }}>
+      <Checkbox.Group
+        options={columnOptions}
+        value={visibleColumns}
+        onChange={(checkedValues) => setVisibleColumns(checkedValues as string[])}
+        style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}
+      />
+      <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #f0f0f0' }}>
+        <Button 
+          size="small" 
+          onClick={() => setVisibleColumns(columnOptions.map(col => col.value))}
+          style={{ marginRight: '8px' }}
+        >
+          Seleccionar todas
+        </Button>
+        <Button 
+          size="small" 
+          onClick={() => setVisibleColumns([])}
+        >
+          Deseleccionar todas
+        </Button>
+      </div>
+    </div>
+  );
 
   return (
     <div style={{ padding: '24px' }}>
@@ -781,15 +913,30 @@ export const NBox = () => {
               </div>
             ) : tableData.length > 0 ? (
               <div style={{ marginTop: '32px' }}>
-                <Input
-                  placeholder="Buscar en la tabla..."
-                  prefix={<SearchOutlined />}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  size="large"
-                  style={{ marginBottom: '16px' }}
-                  allowClear
-                />
+                <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', alignItems: 'center' }}>
+                  <Input
+                    placeholder="Buscar en la tabla..."
+                    prefix={<SearchOutlined />}
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    size="large"
+                    style={{ flex: 1 }}
+                    allowClear
+                  />
+                  <Popover
+                    content={columnSelectorContent}
+                    title="Seleccionar columnas"
+                    trigger="click"
+                    placement="bottomRight"
+                  >
+                    <Button 
+                      size="large" 
+                      icon={<SettingOutlined />}
+                    >
+                      Columnas
+                    </Button>
+                  </Popover>
+                </div>
                 <Table
                   columns={columns}
                   dataSource={tableData.filter(item => {
@@ -1357,6 +1504,72 @@ export const NBox = () => {
             No hay datos para mostrar
           </div>
         )}
+      </Modal>
+
+      {/* Modal Editar Guía US */}
+      <Modal
+        title="Editar Guía US"
+        open={isGuiausModalOpen}
+        onCancel={() => {
+          setIsGuiausModalOpen(false);
+          guiausForm.resetFields();
+          setRecordToEditGuiaus(null);
+        }}
+        footer={null}
+        width={500}
+      >
+        <Form
+          form={guiausForm}
+          layout="vertical"
+          style={{ marginTop: '20px' }}
+        >
+          <Form.Item
+            label="Guía US"
+            name="guiaus"
+            rules={[{ required: true, message: 'Ingrese la Guía US' }]}
+          >
+            <Input
+              placeholder="Ingrese la Guía US"
+              style={{ width: '100%' }}
+            />
+          </Form.Item>
+
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'flex-end', 
+            gap: '12px',
+            marginTop: '24px'
+          }}>
+            <Button
+              onClick={() => {
+                setIsGuiausModalOpen(false);
+                guiausForm.resetFields();
+                setRecordToEditGuiaus(null);
+              }}
+              style={{
+                backgroundColor: '#dc3545',
+                color: 'white',
+                border: 'none',
+                padding: '8px 24px',
+                fontSize: '16px'
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="primary"
+              onClick={handleSaveGuiaus}
+              style={{
+                backgroundColor: '#ff6600',
+                borderColor: '#ff6600',
+                padding: '8px 24px',
+                fontSize: '16px'
+              }}
+            >
+              Guardar cambios
+            </Button>
+          </div>
+        </Form>
       </Modal>
     </div>
   );

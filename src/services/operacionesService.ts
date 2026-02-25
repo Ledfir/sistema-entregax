@@ -117,6 +117,34 @@ export const operacionesService = {
     const response = await apiClient.post(url, data);
     return response.data;
   },
+
+  // Obtener cotizaciones pendientes (registers y pending)
+  getCotizacionesPendientes: async (): Promise<any> => {
+    const url = '/operations/get-quote-pending';
+    const response = await apiClient.get(url);
+    return response.data;
+  },
+
+  // Obtener cajas en CTZ validadas (Paquete Express)
+  getCajasValidadasPaquete: async (): Promise<any> => {
+    const url = '/operations/get-waybills-apaquete';
+    const response = await apiClient.get(url);
+    return response.data;
+  },
+
+  // Obtener detalle de cotización pendiente para asignar costo
+  getDetalleCotizacionPendiente: async (id: string): Promise<any> => {
+    const url = `/operations/get-data-ctz-pending-shipping/${id}`;
+    const response = await apiClient.get(url);
+    return response.data;
+  },
+
+  // Asignar costos a las guías de una cotización
+  asignarCostosCotizacion: async (data: any): Promise<any> => {
+    const url = '/operations/assign-shipping-costs';
+    const response = await apiClient.post(url, data);
+    return response.data;
+  },
 };
 
 export default operacionesService;

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Layout, Menu } from 'antd';
 import {
   HomeOutlined,
@@ -20,6 +20,21 @@ const { Sider, Content } = Layout;
 
 export const MainLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const navigate = useNavigate();
   const location = useLocation();
   const { hasRole, user } = useAuthStore();
@@ -186,6 +201,10 @@ export const MainLayout = () => {
 
   const handleMenuClick = ({ key }: { key: string }) => {
     navigate(key);
+    // Cerrar el menú móvil después de navegar
+    if (isMobile) {
+      setMobileMenuOpen(false);
+    }
   };
   // Decidir qué item marcar como seleccionado en el sidebar
   const pathname = location.pathname || '';
@@ -199,13 +218,22 @@ export const MainLayout = () => {
 
   return (
     <Layout className="main-layout">
+      {/* Backdrop para móvil */}
+      {isMobile && mobileMenuOpen && (
+        <div 
+          className="sidebar-backdrop" 
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+      
       <Sider
-        collapsible
-        collapsed={collapsed}
+        collapsible={!isMobile}
+        collapsed={isMobile ? false : collapsed}
         onCollapse={setCollapsed}
         width={240}
-        className="main-sider"
+        className={`main-sider ${isMobile && mobileMenuOpen ? 'mobile-open' : ''} ${isMobile && !mobileMenuOpen ? 'mobile-closed' : ''}`}
         theme="light"
+        trigger={isMobile ? null : undefined}
       >
         <div className="logo-section">
           <img
@@ -227,7 +255,9 @@ export const MainLayout = () => {
         />
       </Sider>
       <Layout>
-        <AppHeader />
+        <AppHeader 
+          onMenuClick={isMobile ? () => setMobileMenuOpen(!mobileMenuOpen) : undefined}
+        />
         <Content className="main-content">
           <Outlet />
         </Content>
