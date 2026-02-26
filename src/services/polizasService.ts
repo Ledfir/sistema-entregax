@@ -40,7 +40,7 @@ export const polizasService = {
    * Rechazar una póliza
    */
   rechazarPoliza: async (token: string, motivo?: string) => {
-    const response = await axios.post('/policies/reject', { token, motivo });
+    const response = await axios.post('/policies/reject-policy-admin', { token, motivo });
     return response.data;
   },
 };

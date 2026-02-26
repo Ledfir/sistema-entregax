@@ -264,9 +264,6 @@ export const MainLayout = () => {
         </Content>
         <div className="main-footer">
           <span>2026 © Entregax Paquetería.</span>
-          <span className="footer-link">
-            Creado por <a href="https://appsync.mx" target="_blank" rel="noreferrer">Appsync Agencia Digital</a>
-          </span>
         </div>
       </Layout>
     </Layout>

@@ -172,9 +172,6 @@ export const Login = () => {
             <Text className="footer-text">
               © 2026 Entregax Paqueteria
             </Text>
-            <Text className="footer-text">
-              Creado por <Link href="https://appsync.mx" target="_blank">Appsync Agencia Digital</Link>
-            </Text>
           </div>
         </div>
       </Card>
