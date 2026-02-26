@@ -50,19 +50,62 @@ interface Destino {
 
 interface CajaConCosto {
   id: string;
-  idap: string;
-  guia: string;
-  guiaunica: string;
-  fecha: string;
-  largo: string;
-  alto: string;
-  ancho: string;
-  peso: string;
-  cajas: string;
-  idco: string;
-  costo: string;
-  volumen: string;
+  idap?: string;
+  guia?: string;
+  guiaunica?: string;
+  fecha?: string;
+  largo?: string;
+  alto?: string;
+  ancho?: string;
+  peso?: string;
+  cajas?: string;
+  idco?: string;
+  costo?: string;
+  volumen?: string;
   destino: Destino;
+  // Campos para tipo MARITIMO
+  name?: string;      // LOG
+  cbm?: string;       // Metros cúbicos
+  bultos?: string;    // Bultos
+  token?: string;
+  idbl?: string;
+  idu?: string;
+  idc?: string;
+  dated?: string;
+  arrived?: string;
+  type?: string;
+  estado?: string;
+  cedis?: string;
+  week?: string;
+  logo?: string;
+  sensible?: string;
+  pl?: string;
+  pl_tipo?: string;
+  pl_file?: string;
+  pl_date?: string;
+  ingreso_resp?: string;
+  ingreso_date?: string;
+  instrucciones?: string;
+  ide?: string;
+  factura?: string;
+  paqueteria?: string;
+  cotizado?: string;
+  pagado?: string;
+  pagado_fecha?: string;
+  cedis_fecha?: string | null;
+  ingresada?: string;
+  guiasalida?: string;
+  salida_resp?: string;
+  salida_fecha?: string | null;
+  ctz?: string;
+  boton?: string;
+  listpl?: string;
+  notif?: string;
+  oculto?: string;
+  desc?: string | null;
+  resp?: string;
+  state?: string;
+  created?: string;
 }
 
 interface DetalleCotizacion {
@@ -464,10 +507,10 @@ export const HomeServicioCliente = () => {
 
       const response = await operacionesService.asignarCostosCotizacion(data);
 
-      if (response.success) {
+      if (response.status === 'success') {
         Swal.fire({
           title: 'Éxito',
-          text: 'Costos asignados correctamente',
+          text: response.message || 'Costos asignados correctamente',
           icon: 'success',
           confirmButtonColor: '#ff6600'
         });
@@ -492,6 +535,63 @@ export const HomeServicioCliente = () => {
     }
   };
 
+  // Columnas para envíos MARITIMOS
+  const columnasCostosMaritimo: ColumnsType<CajaConCosto> = [
+    {
+      title: 'CTZ',
+      dataIndex: 'ctz',
+      key: 'ctz',
+      align: 'center',
+    },
+    {
+      title: 'LOG',
+      dataIndex: 'name',
+      key: 'name',
+      align: 'center',
+    },
+    {
+      title: 'CBM',
+      dataIndex: 'cbm',
+      key: 'cbm',
+      align: 'center',
+    },
+    {
+      title: 'BULTOS',
+      dataIndex: 'bultos',
+      key: 'bultos',
+      align: 'center',
+    },
+    {
+      title: 'DESTINO',
+      key: 'destino',
+      width: 300,
+      render: (_, record) => (
+        <div style={{ textAlign: 'left', fontSize: '12px' }}>
+          <div><strong>Calle:</strong> {record.destino.calle} #{record.destino.numeroext}</div>
+          {record.destino.numeroint && <div><strong>Numero interior:</strong> {record.destino.numeroint}</div>}
+          <div><strong>Colonia:</strong> {record.destino.colonia} <strong>CP:</strong> {record.destino.cp}</div>
+          <div><strong>Municipio:</strong> {record.destino.municipio} <strong>Estado:</strong> {record.destino.estado}</div>
+        </div>
+      ),
+    },
+    {
+      title: 'COSTO',
+      key: 'costo',
+      width: 150,
+      align: 'center',
+      render: (_, record) => (
+        <Input
+          type="number"
+          value={costosEditados[record.id] || ''}
+          onChange={(e) => handleCostoChange(record.id, e.target.value)}
+          placeholder="Ingrese costo"
+          style={{ width: '100%' }}
+        />
+      ),
+    },
+  ];
+
+  // Columnas para envíos normales (Paquete Express, etc.)
   const columnasCostos: ColumnsType<CajaConCosto> = [
     {
       title: 'CTZ',
@@ -620,13 +720,17 @@ export const HomeServicioCliente = () => {
             <p><strong>Fecha:</strong> {detalleCotizacion?.register?.fecha ? humanizarFecha(detalleCotizacion.register.fecha) : 'N/A'}</p>
           </div>
 
-          <h3 style={{ marginTop: '24px', marginBottom: '8px', textAlign: 'center' }}>Cotizaciones pendientes de asignar costo.</h3>
+          <h3 style={{ marginTop: '24px', marginBottom: '8px', textAlign: 'center' }}>
+            Cotizaciones pendientes de asignar costo para {detalleCotizacion?.paq?.name || 'paquetería'} {detalleCotizacion?.register?.tipo === 'MARITIMO' ? 'PREPAGADO' : ''}
+          </h3>
           <p style={{ marginBottom: '24px', color: '#666', textAlign: 'center' }}>
-            Recuerde ingresar el costo UNITARIO de una sola caja. El sistema calcula el costo TOTAL dependiendo de la cantidad de cajas.
+            {detalleCotizacion?.register?.tipo === 'MARITIMO' 
+              ? 'Ingrese el costo para cada registro marítimo.'
+              : 'Recuerde ingresar el costo UNITARIO de una sola caja. El sistema calcula el costo TOTAL dependiendo de la cantidad de cajas.'}
           </p>
 
           <Table
-            columns={columnasCostos}
+            columns={detalleCotizacion?.register?.tipo === 'MARITIMO' ? columnasCostosMaritimo : columnasCostos}
             dataSource={detalleCotizacion?.data?.boxes || []}
             loading={loadingDetalle}
             rowKey={(record) => record.id}
@@ -634,7 +738,7 @@ export const HomeServicioCliente = () => {
               pageSize: 10,
               showSizeChanger: true,
               pageSizeOptions: [10, 20, 50, 100],
-              showTotal: (total) => `Total: ${total} cajas`,
+              showTotal: (total) => `Total: ${total} ${detalleCotizacion?.register?.tipo === 'MARITIMO' ? 'registros' : 'cajas'}`,
             }}
             scroll={{ x: 1400 }}
             className="tabla-cotizaciones"

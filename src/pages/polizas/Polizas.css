@@ -1,0 +1,51 @@
+.polizas-container {
+  padding: 24px;
+  min-height: calc(100vh - 200px);
+}
+
+.polizas-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.polizas-card .ant-card-head {
+  background: linear-gradient(135deg, #ff6600 0%, #ff8533 100%);
+  color: white;
+  border-radius: 8px 8px 0 0;
+}
+
+.polizas-card .ant-card-head-title {
+  color: white;
+  font-weight: 600;
+}
+
+.tabla-polizas {
+  margin-top: 16px;
+}
+
+.tabla-polizas .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+  color: #262626;
+  border-bottom: 2px solid #ff6600;
+}
+
+.tabla-polizas .ant-table-tbody > tr:hover > td {
+  background: #fff7e6;
+}
+
+.tabla-polizas .ant-pagination {
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .polizas-container {
+    padding: 16px;
+  }
+
+  .polizas-card {
+    margin-bottom: 16px;
+  }
+}

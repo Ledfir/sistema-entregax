@@ -135,6 +135,7 @@ export const MainLayout = () => {
         { key: '/operaciones/reasignar-guia', label: 'Reasignar guía' },
         { key: '/operaciones/reasignar-cliente', label: 'Reasignar cliente' },
         { key: '/operaciones/usa-remp', label: 'USA REMP.' },
+        
       ],
     },
     {
@@ -142,8 +143,8 @@ export const MainLayout = () => {
       icon: <FileProtectOutlined />,
       label: 'Pólizas',
       children: [
-        { key: '/polizas/lista', label: 'Lista de pólizas' },
-        { key: '/polizas/nueva', label: 'Nueva póliza' },
+        { key: '/polizas/nuevas', label: 'Nuevas pólizas por aprobar' },
+        { key: '/polizas/pagadas', label: 'Pólizas pagadas pendientes de aprobación' },
       ],
     },
     {

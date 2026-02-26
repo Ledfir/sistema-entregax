@@ -12,6 +12,7 @@ import { CargoExtraCreate, CargoExtraList } from '@/pages/cargosextra';
 import { UserGrid, UserCreate, UserEdit } from '@/pages/usuarios';
 import { EncuestasPendientes, EncuestasRealizadas } from '@/pages/encuestas';
 import { AsesoresList } from '@/pages/asesores';
+import { PolizasNuevas, PolizasPagadas } from '@/pages/polizas';
 import { ActualizarCostoKiloTC } from '@/pages/operaciones/ActualizarCostoKiloTC';
 import { ActualizarTCAumentoMaritimo } from '@/pages/operaciones/ActualizarTCAumentoMaritimo';
 import { ActualizarTCCosto } from '@/pages/operaciones/ActualizarTCCosto';
@@ -279,6 +280,24 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
                 <UsaRemp />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Rutas de pólizas */}
+          <Route 
+            path="/polizas/nuevas" 
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
+                <PolizasNuevas />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/polizas/pagadas" 
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
+                <PolizasPagadas />
               </ProtectedRoute>
             } 
           />
