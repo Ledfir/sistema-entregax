@@ -152,8 +152,9 @@ export const MainLayout = () => {
       icon: <CustomerServiceOutlined />,
       label: 'Tickets',
       children: [
-        { key: '/tickets/lista', label: 'Lista de tickets' },
-        { key: '/tickets/nuevo', label: 'Nuevo ticket' },
+        { key: '/tickets/reporte-estadistico', label: 'Reporte estadístico' },
+        { key: '/tickets/activos', label: 'Tickets activos' },
+        { key: '/tickets/archivados', label: 'Tickets archivados' },
       ],
     },
   ];

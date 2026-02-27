@@ -1,0 +1,51 @@
+.tickets-container {
+  padding: 24px;
+}
+
+.tickets-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tickets-card .ant-card-head {
+  background: linear-gradient(90deg, #f37055 0%, #f39915 100%);
+  color: #fff;
+  border-radius: 8px 8px 0 0;
+}
+
+.tickets-card .ant-card-head-title {
+  color: #fff;
+}
+
+.glosario-colores {
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.tabla-tickets .ant-table-thead > tr > th {
+  background: #f5f5f5;
+  font-weight: 600;
+  text-align: center;
+}
+
+.tabla-tickets .ant-table-tbody > tr:hover > td {
+  background: #f0f0f0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .tickets-container {
+    padding: 16px;
+  }
+
+  .glosario-colores {
+    padding: 12px;
+  }
+
+  .glosario-colores h3 {
+    font-size: 16px;
+  }
+}

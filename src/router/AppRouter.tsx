@@ -13,6 +13,7 @@ import { UserGrid, UserCreate, UserEdit } from '@/pages/usuarios';
 import { EncuestasPendientes, EncuestasRealizadas } from '@/pages/encuestas';
 import { AsesoresList } from '@/pages/asesores';
 import { PolizasNuevas, PolizasPagadas } from '@/pages/polizas';
+import { TicketsReporteEstadistico, TicketsActivos, TicketsArchivados } from '@/pages/tickets';
 import { ActualizarCostoKiloTC } from '@/pages/operaciones/ActualizarCostoKiloTC';
 import { ActualizarTCAumentoMaritimo } from '@/pages/operaciones/ActualizarTCAumentoMaritimo';
 import { ActualizarTCCosto } from '@/pages/operaciones/ActualizarTCCosto';
@@ -298,6 +299,32 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
                 <PolizasPagadas />
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Rutas de tickets */}
+          <Route 
+            path="/tickets/reporte-estadistico" 
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
+                <TicketsReporteEstadistico />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/tickets/activos" 
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
+                <TicketsActivos />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/tickets/archivados" 
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
+                <TicketsArchivados />
               </ProtectedRoute>
             } 
           />
