@@ -56,3 +56,10 @@
     margin-top: 0;
   }
 }
+
+/* Tabla pagos - cabecera verde */
+.detail-pagos-table .ant-table-thead > tr > th {
+  background-color: #2da58e !important;
+  color: #fff !important;
+  font-weight: 600;
+}

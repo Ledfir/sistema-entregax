@@ -8,7 +8,7 @@ import { ClientesNew } from '@/pages/clientes/ClientesNew';
 import { ClienteEdit } from '@/pages/clientes/ClienteEdit';
 import { ClienteAddAddress } from '@/pages/clientes/ClienteAddAddress';
 import { ClienteEditAddress } from '@/pages/clientes/ClienteEditAddress';
-import { CargoExtraCreate, CargoExtraList } from '@/pages/cargosextra';
+import { CargoExtraCreate, CargoExtraList, CargoExtraHistorial } from '@/pages/cargosextra';
 import { UserGrid, UserCreate, UserEdit } from '@/pages/usuarios';
 import { EncuestasPendientes, EncuestasRealizadas } from '@/pages/encuestas';
 import { AsesoresList } from '@/pages/asesores';
@@ -117,6 +117,14 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['SISTEMAS', 'ADMINISTRACIÓN', 'TEAM LEADER', 'ASESOR', 'ATENCION A CLIENTES', 'SERVICIO AL CLIENTE']} permission="extra-charges.view">
                 <CargoExtraList />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/cargos-extras/historial" 
+            element={
+              <ProtectedRoute roles={['ASESOR']} permission="extra-charges.view">
+                <CargoExtraHistorial />
               </ProtectedRoute>
             } 
           />
