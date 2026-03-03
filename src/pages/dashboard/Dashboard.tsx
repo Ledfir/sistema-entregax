@@ -3,6 +3,7 @@ import { Card, Descriptions, Tag, Avatar } from 'antd';
 import { UserOutlined, MailOutlined, KeyOutlined, IdcardOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/store/authStore';
 import { HomeServicioCliente } from './HomeServicioCliente';
+import { HomeAsesor } from './HomeAsesor';
 import './Dashboard.css';
 
 export const Dashboard = () => {
@@ -12,7 +13,11 @@ export const Dashboard = () => {
     document.title = 'Sistema Entregax | Dashboard';
   }, []);
 
-  // Si el usuario es de tipo "SERVICIO AL CLIENTE", mostrar su Home específico
+  // Homes específicos por rol
+  if (user?.tipo_usuario === 'ASESOR') {
+    return <HomeAsesor />;
+  }
+
   if (user?.tipo_usuario === 'SERVICIO AL CLIENTE') {
     return <HomeServicioCliente />;
   }

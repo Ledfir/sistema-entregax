@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Table, Tag, Button, Badge, Input, Modal, Timeline } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { CheckOutlined, SearchOutlined, FileTextOutlined, FileExcelOutlined, FilePdfOutlined, ClockCircleOutlined, UnorderedListOutlined } from '@ant-design/icons';
+import { CheckOutlined, SearchOutlined, FileTextOutlined, FileExcelOutlined, FilePdfOutlined, ClockCircleOutlined, UnorderedListOutlined, InboxOutlined } from '@ant-design/icons';
 import ticketsService from '@/services/ticketsService';
 import Swal from 'sweetalert2';
 import './Tickets.css';
@@ -165,6 +165,35 @@ export const TicketsActivos = () => {
           icon: 'error',
           confirmButtonColor: '#ff6600'
         });
+      }
+    }
+  };
+
+  const handleArchive = async (record: Ticket) => {
+    const result = await Swal.fire({
+      title: '¿Archivar ticket?',
+      html: `¿Está seguro de archivar el ticket <b>${record.ticket}</b>?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#1890ff',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, archivar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await ticketsService.archiveTicket(record.token);
+        if (response.status === 'success') {
+          Swal.fire({ title: 'Archivado', text: 'El ticket ha sido archivado', icon: 'success', confirmButtonColor: '#ff6600' });
+          // Remover el ticket de la lista actual para actualizar UI
+          setTickets((prev) => prev.filter((t) => t.token !== record.token));
+        } else {
+          Swal.fire({ title: 'Error', text: response.message || 'No se pudo archivar el ticket', icon: 'error', confirmButtonColor: '#ff6600' });
+        }
+      } catch (error) {
+        console.error('Error al archivar ticket:', error);
+        Swal.fire({ title: 'Error', text: 'Ocurrió un error al archivar el ticket', icon: 'error', confirmButtonColor: '#ff6600' });
       }
     }
   };
@@ -526,13 +555,24 @@ export const TicketsActivos = () => {
       width: 100,
       align: 'center',
       render: (_, record) => (
-        <Button
-          type="primary"
-          icon={<CheckOutlined />}
-          onClick={() => handleFinalizar(record)}
-          size="small"
-          style={{ background: '#52c41a', borderColor: '#52c41a' }}
-        />
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+          <Button
+            type="primary"
+            icon={<CheckOutlined />}
+            onClick={() => handleFinalizar(record)}
+            size="small"
+            style={{ background: '#52c41a', borderColor: '#52c41a' }}
+            title="Finalizar ticket"
+          />
+          <Button
+            type="default"
+            icon={<InboxOutlined />}
+            onClick={() => handleArchive(record)}
+            size="small"
+            style={{ background: '#f0ad4e', borderColor: '#f0ad4e', color: '#fff' }}
+            title="Archivar ticket"
+          />
+        </div>
       ),
     },
     {

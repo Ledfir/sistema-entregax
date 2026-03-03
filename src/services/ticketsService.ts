@@ -1,18 +1,5 @@
 import axios from '@/api/axios';
 
-interface Ticket {
-  token: string;
-  ticket: string;
-  cliente: string;
-  asesor: string;
-  informacion: string;
-  estatus: string;
-  designado: string;
-  responsable: string;
-  creado: string;
-  ubicacion: 'MONTERREY' | 'GUADALAJARA' | 'CIUDAD DE MEXICO' | 'CHINA' | 'USA';
-}
-
 interface TicketsResponse {
   status: string;
   data: any[];
@@ -80,6 +67,13 @@ export const ticketsService = {
    */
   getTicketReferences: async (token: string) => {
     const response = await axios.get(`/tickets/references/${token}`);
+    return response.data;
+  },
+  /**
+   * Archiva un ticket
+   */
+  archiveTicket: async (token: string) => {
+    const response = await axios.post('/tickets/archive', { token });
     return response.data;
   },
 };

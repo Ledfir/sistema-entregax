@@ -1,0 +1,203 @@
+/* ─── Contenedor general ──────────────────────────────────── */
+.home-asesor-container {
+  padding: 20px;
+  min-height: calc(100vh - 120px);
+}
+
+/* ─── Cards base ──────────────────────────────────────────── */
+.home-asesor-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  height: 100%;
+}
+
+.home-asesor-card .ant-card-head {
+  border-bottom: 2px solid #f0f0f0;
+  padding: 16px 20px 0;
+  min-height: unset;
+}
+
+.home-asesor-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a2e;
+  letter-spacing: 0.3px;
+}
+
+/* ─── Spinner centrado ────────────────────────────────────── */
+.home-asesor-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 160px;
+}
+
+/* ─── Cajas de estadísticas ───────────────────────────────── */
+.stat-box {
+  border-radius: 10px;
+  padding: 18px 16px 14px;
+  position: relative;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-box .ant-statistic-title {
+  font-size: 12px;
+  color: #555;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.stat-box .ant-statistic-content {
+  font-size: 26px;
+}
+
+.stat-icon {
+  font-size: 22px;
+  margin-bottom: 8px;
+  opacity: 0.7;
+}
+
+.stat-blue  { background: #e8f4ff; }
+.stat-blue  .stat-icon { color: #1677ff; }
+
+.stat-orange { background: #fff7e6; }
+.stat-orange .stat-icon { color: #f39915; }
+
+.stat-green  { background: #f6ffed; }
+.stat-green  .stat-icon { color: #52c41a; }
+
+.stat-purple { background: #f9f0ff; }
+.stat-purple .stat-icon { color: #722ed1; }
+
+/* ─── Tendencia (flecha + %) ──────────────────────────────── */
+.stat-trend {
+  font-size: 11px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 4px;
+}
+
+.trend-up   { color: #52c41a; }
+.trend-down { color: #ff4d4f; }
+
+/* ─── Label gráficas ──────────────────────────────────────── */
+.chart-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-align: center;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* ─── Placeholder gráfica ─────────────────────────────────── */
+.stats-chart-placeholder {
+  background: #fafafa;
+  border: 1px dashed #d9d9d9;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Centro de información ───────────────────────────────── */
+.home-asesor-info-card .ant-card-body {
+  padding: 0;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+}
+
+.home-asesor-info-card .ant-card-body::-webkit-scrollbar {
+  width: 5px;
+}
+.home-asesor-info-card .ant-card-body::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 4px;
+}
+
+.comunicados-list {
+  padding: 16px 20px;
+}
+
+/* ─── Ítem de comunicado ──────────────────────────────────── */
+.comunicado-item {}
+
+.comunicado-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.comunicado-titulo {
+  margin: 0 !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  color: #1a1a2e !important;
+  flex: 1;
+}
+
+.comunicado-fecha {
+  font-size: 11px;
+  white-space: nowrap;
+  color: #999;
+  padding-top: 2px;
+}
+
+.comunicado-cuerpo {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.65;
+}
+
+.comunicado-cuerpo p {
+  margin: 0 0 8px;
+}
+
+.comunicado-cuerpo a {
+  color: #f39915;
+}
+
+/* ─── Responsable ─────────────────────────────────────────── */
+.comunicado-resp {
+  display: block;
+  font-size: 12px;
+  color: #999;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+/* ─── Logs de cambios ─────────────────────────────────────── */
+.comunicado-logs {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: #fafafa;
+  border-left: 3px solid #e8e8e8;
+  padding: 8px 12px;
+  border-radius: 0 6px 6px 0;
+}
+
+.comunicado-log-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.comunicado-log-item .ant-tag {
+  flex-shrink: 0;
+  margin: 0;
+  line-height: 1.8;
+}
