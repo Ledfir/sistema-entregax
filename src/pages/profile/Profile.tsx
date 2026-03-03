@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { Card, Descriptions, Avatar, Button, Form, Input, Upload, Modal, Row, Col, Spin } from 'antd';
-import { UserOutlined, MailOutlined, EditOutlined, CameraOutlined, LockOutlined } from '@ant-design/icons';
+import { UserOutlined, MailOutlined, EditOutlined, CameraOutlined, LockOutlined, ThunderboltOutlined, PlayCircleOutlined } from '@ant-design/icons';
 import { notification } from 'antd';
 import type { UploadProps } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import { authService } from '@/services/authService';
 import Croppie from 'croppie';
@@ -12,6 +13,7 @@ import { useSnackbar } from 'notistack';
 
 export const Profile = () => {
   const { user, setUser } = useAuthStore();
+  const navigate = useNavigate();
   const [editMode, setEditMode] = useState(false);
   const [changePasswordModal, setChangePasswordModal] = useState(false);
   const [imagePreviewModal, setImagePreviewModal] = useState(false);
@@ -253,6 +255,25 @@ export const Profile = () => {
             >
               Cambiar Contraseña
             </Button>
+
+            <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
+              <Button
+                icon={<ThunderboltOutlined />}
+                block
+                onClick={() => navigate('/juego')}
+                style={{ borderColor: '#f39915', color: '#f39915' }}
+              >
+                Juego
+              </Button>
+              <Button
+                icon={<PlayCircleOutlined />}
+                block
+                onClick={() => navigate('/snake')}
+                style={{ borderColor: '#52c41a', color: '#52c41a' }}
+              >
+                Snake
+              </Button>
+            </div>
           </Card>
         </Col>
 
