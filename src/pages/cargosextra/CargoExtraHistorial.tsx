@@ -22,7 +22,7 @@ interface CargoExtraHistorialItem {
 
 interface CargoDetalleCargo {
   concepto: string;
-  cantidad: string | number;
+  monto: string | number;
 }
 
 interface CargoDetallePago {
@@ -33,8 +33,9 @@ interface CargoDetallePago {
 }
 
 interface CargoExtraDetalle {
+  charge?: { cuenta?: string; num_cuenta?: string; [key: string]: unknown };
   cuenta?: string;
-  cargos: CargoDetalleCargo[];
+  detalles: CargoDetalleCargo[];
   pagos: CargoDetallePago[];
 }
 
@@ -91,9 +92,20 @@ export const CargoExtraHistorial = () => {
       });
       const payload = res.data;
       if (payload?.data) {
-        setDetailData(payload.data);
-      } else if (payload?.cargos || payload?.pagos) {
-        setDetailData(payload);
+        const raw = payload.data;
+        setDetailData({
+          charge: raw.charge,
+          cuenta: raw.charge?.cuenta,
+          detalles: Array.isArray(raw.detalles) ? raw.detalles : [],
+          pagos: Array.isArray(raw.pagos) ? raw.pagos : [],
+        });
+      } else if (payload?.detalles || payload?.pagos) {
+        setDetailData({
+          charge: payload.charge,
+          cuenta: payload.charge?.cuenta ?? payload.cuenta,
+          detalles: Array.isArray(payload.detalles) ? payload.detalles : [],
+          pagos: Array.isArray(payload.pagos) ? payload.pagos : [],
+        });
       }
     } catch {
       setDetailData(null);
@@ -374,7 +386,7 @@ export const CargoExtraHistorial = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {(detailData?.cargos ?? []).length === 0 ? (
+                  {(detailData?.detalles ?? []).length === 0 ? (
                     <tr>
                       <td
                         colSpan={2}
@@ -384,11 +396,11 @@ export const CargoExtraHistorial = () => {
                       </td>
                     </tr>
                   ) : (
-                    detailData!.cargos.map((c, i) => (
+                    detailData!.detalles.map((c, i) => (
                       <tr key={i} style={{ borderBottom: '1px solid #e8e8e8' }}>
                         <td style={{ padding: '8px 12px' }}>{c.concepto}</td>
                         <td style={{ padding: '8px 12px', textAlign: 'right' }}>
-                          {formatMonto(c.cantidad)}
+                          {formatMonto(c.monto)}
                         </td>
                       </tr>
                     ))
