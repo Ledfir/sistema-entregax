@@ -8,7 +8,8 @@ import { ClientesNew } from '@/pages/clientes/ClientesNew';
 import { ClienteEdit } from '@/pages/clientes/ClienteEdit';
 import { ClienteAddAddress } from '@/pages/clientes/ClienteAddAddress';
 import { ClienteEditAddress } from '@/pages/clientes/ClienteEditAddress';
-import { CargoExtraCreate, CargoExtraList, CargoExtraHistorial } from '@/pages/cargosextra';
+import { MisClientes } from '@/pages/clientes/MisClientes';
+import { CargoExtraCreate, CargoExtraList, CargoExtraHistorial, CargoExtraPendientes } from '@/pages/cargosextra';
 import { UserGrid, UserCreate, UserEdit } from '@/pages/usuarios';
 import { EncuestasPendientes, EncuestasRealizadas } from '@/pages/encuestas';
 import { AsesoresList } from '@/pages/asesores';
@@ -79,6 +80,14 @@ export const AppRouter = () => {
             } 
           />
           <Route 
+            path="/clientes/mis-clientes" 
+            element={
+              <ProtectedRoute roles={['ASESOR']} permission="clients.view">
+                <MisClientes />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
             path="/clientes/nuevo" 
             element={
               <ProtectedRoute roles={['SISTEMAS', 'ADMINISTRACIÓN', 'ATENCION A CLIENTES', 'SERVICIO AL CLIENTE']} permission="clients.create">
@@ -125,6 +134,14 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['ASESOR']} permission="extra-charges.view">
                 <CargoExtraHistorial />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/cargos-extras/pendientes" 
+            element={
+              <ProtectedRoute roles={['ASESOR']} permission="extra-charges.view">
+                <CargoExtraPendientes />
               </ProtectedRoute>
             } 
           />

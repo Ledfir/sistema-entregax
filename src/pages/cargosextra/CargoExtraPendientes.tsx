@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Card, Table, Tag, Input, Button, Dropdown } from 'antd';
+import { Card, Table, Input, Button, Dropdown, Tag } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { MenuProps } from 'antd';
 import { SearchOutlined, MoreOutlined, EyeOutlined, FilePdfOutlined } from '@ant-design/icons';
@@ -9,50 +9,59 @@ import { useSnackbar } from 'notistack';
 import { CargoExtraDetalleView } from './CargoExtraDetalleView';
 import './CargoExtra.css';
 
-interface CargoExtraHistorialItem {
+interface CargoExtraPendienteItem {
+  id: string;
   token: string;
   idce: string;
-  CLIENTE: string;
-  suite: string;
-  monto: string | number;
+  idu?: string;
+  idc?: string;
+  cta?: string;
+  pagado?: string | number;
+  listo?: string | number;
+  file?: string;
   fechap: string | null;
-  pagado: number | string;
+  resp?: string;
+  state?: string | number;
+  created: string | null;
   paid?: string | null;
-  estado?: string;
-  state?: number | string;
+  extencion?: string;
+  suite?: string;
+  cliente: string;
+  cuenta?: string;
+  monto: string | number;
 }
 
-export const CargoExtraHistorial = () => {
+export const CargoExtraPendientes = () => {
   const { user } = useAuthStore();
   const { enqueueSnackbar } = useSnackbar();
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<CargoExtraHistorialItem[]>([]);
-  const [filtered, setFiltered] = useState<CargoExtraHistorialItem[]>([]);
+  const [data, setData] = useState<CargoExtraPendienteItem[]>([]);
+  const [filtered, setFiltered] = useState<CargoExtraPendienteItem[]>([]);
   const [searchText, setSearchText] = useState('');
   const [pageSize, setPageSize] = useState(15);
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedRecord, setSelectedRecord] = useState<CargoExtraHistorialItem | null>(null);
+  const [selectedRecord, setSelectedRecord] = useState<CargoExtraPendienteItem | null>(null);
   const [loadingPdfId, setLoadingPdfId] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = 'Sistema Entregax | Historial de Cargos Extras';
-    if (user?.id) fetchHistorial();
+    document.title = 'Sistema Entregax | Pendientes de Pago';
+    if (user?.id) fetchPendientes();
   }, [user?.id]);
 
-  const fetchHistorial = async () => {
+  const fetchPendientes = async () => {
     setLoading(true);
     try {
       const token = user?.token || localStorage.getItem('token') || '';
-      const res = await axios.get(`/extra-charges/historial/${user?.id}`, {
+      const res = await axios.get(`/extra-charges/pending-payments/${user?.id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const payload = res.data;
-      let list: CargoExtraHistorialItem[] = [];
+      let list: CargoExtraPendienteItem[] = [];
       if (Array.isArray(payload)) {
         list = payload;
-      } else if (payload?.data && Array.isArray(payload.data)) {
-        list = payload.data;
       } else if (payload?.status === 'success' && Array.isArray(payload.data)) {
+        list = payload.data;
+      } else if (payload?.data && Array.isArray(payload.data)) {
         list = payload.data;
       }
       setData(list);
@@ -65,7 +74,6 @@ export const CargoExtraHistorial = () => {
     }
   };
 
-
   const handleSearch = (value: string) => {
     setSearchText(value);
     const q = value.toLowerCase();
@@ -73,8 +81,9 @@ export const CargoExtraHistorial = () => {
       data.filter(
         (r) =>
           r.idce?.toLowerCase().includes(q) ||
-          r.CLIENTE?.toLowerCase().includes(q) ||
-          String(r.monto)?.includes(q)
+          r.cliente?.toLowerCase().includes(q) ||
+          String(r.monto).includes(q) ||
+          r.cuenta?.toLowerCase().includes(q)
       )
     );
   };
@@ -98,6 +107,11 @@ export const CargoExtraHistorial = () => {
     }
   };
 
+  const isVencido = (fecha: string | null) => {
+    if (!fecha || fecha.startsWith('0000')) return false;
+    return new Date(fecha) < new Date();
+  };
+
   const generatePdf = async (idce: string) => {
     setLoadingPdfId(idce);
     try {
@@ -119,29 +133,18 @@ export const CargoExtraHistorial = () => {
     }
   };
 
-  const resolveEstado = (row: CargoExtraHistorialItem) => {
-    const val = row.state !== undefined ? Number(row.state) : Number(row.estado);
-    switch (val) {
-      case 0: return { label: 'Eliminado',  color: 'error'      };
-      case 1: return { label: 'Nuevo',       color: 'processing' };
-      case 2: return { label: 'Pagado',      color: 'success'    };
-      case 3: return { label: 'Cancelado',   color: 'default'    };
-      default: return { label: 'Desconocido', color: 'default'   };
-    }
-  };
-
-  const columns: ColumnsType<CargoExtraHistorialItem> = [
+  const columns: ColumnsType<CargoExtraPendienteItem> = [
     {
-      title: 'ACCIONES',
-      key: 'acciones',
+      title: 'Opciones',
+      key: 'opciones',
       align: 'center',
       width: 90,
       render: (_, record) => {
         const items: MenuProps['items'] = [
           {
-            key: 'detalles',
+            key: 'ver',
             icon: <EyeOutlined />,
-            label: 'Detalles',
+            label: 'Ver detalles',
             onClick: () => setSelectedRecord(record),
           },
           {
@@ -164,21 +167,23 @@ export const CargoExtraHistorial = () => {
       },
     },
     {
-      title: 'CE',
+      title: 'IDCE',
       dataIndex: 'idce',
       key: 'idce',
       align: 'center',
       render: (v) => <strong>{v || '—'}</strong>,
     },
     {
-      title: 'CLIENTE',
-      dataIndex: 'SUITE',
-      key: 'SUITE',
+      title: 'Cliente',
+      key: 'cliente',
       align: 'center',
-      render: (v, record) => (v ? <span style={{ fontWeight: 500 }}>({v}) {record.CLIENTE}</span> : '—'),
+      render: (_, record) =>
+        record.suite
+          ? <span style={{ fontWeight: 500 }}>({record.suite}) {record.cliente}</span>
+          : <span>{record.cliente || '—'}</span>,
     },
     {
-      title: 'MONTO',
+      title: 'Monto',
       dataIndex: 'monto',
       key: 'monto',
       align: 'center',
@@ -187,19 +192,43 @@ export const CargoExtraHistorial = () => {
       ),
     },
     {
-      title: 'FECHA DE PAGO',
+      title: 'Cuenta',
+      dataIndex: 'cuenta',
+      key: 'cuenta',
+      align: 'center',
+      render: (v) => v || '—',
+    },
+    {
+      title: 'Fecha límite de pago',
       dataIndex: 'fechap',
       key: 'fechap',
+      align: 'center',
+      render: (v) => (
+        <span style={{ color: isVencido(v) ? '#ff4d4f' : undefined, fontWeight: isVencido(v) ? 600 : undefined }}>
+          {formatFecha(v)}
+        </span>
+      ),
+    },
+    {
+      title: 'Fecha de creación',
+      dataIndex: 'created',
+      key: 'created',
       align: 'center',
       render: (v) => formatFecha(v),
     },
     {
-      title: 'ESTADO',
+      title: 'Estado',
       key: 'estado',
       align: 'center',
       render: (_, record) => {
-        const { label, color } = resolveEstado(record);
-        return <Tag color={color}>{label}</Tag>;
+        const val = Number(record.state);
+        switch (val) {
+          case 0: return <Tag color="error">Eliminado</Tag>;
+          case 1: return <Tag color="processing">Nuevo</Tag>;
+          case 2: return <Tag color="success">Pagado</Tag>;
+          case 3: return <Tag color="default">Cancelado</Tag>;
+          default: return <Tag color="warning">Pendiente</Tag>;
+        }
       },
     },
   ];
@@ -211,7 +240,7 @@ export const CargoExtraHistorial = () => {
           token={selectedRecord.token}
           idce={selectedRecord.idce}
           suite={selectedRecord.suite}
-          clienteName={selectedRecord.CLIENTE}
+          clienteName={selectedRecord.cliente}
           monto={selectedRecord.monto}
           fechap={selectedRecord.fechap}
           state={selectedRecord.state}
@@ -219,48 +248,47 @@ export const CargoExtraHistorial = () => {
           onBack={() => setSelectedRecord(null)}
         />
       ) : (
-        <Card
-          title={
-            <span style={{ fontWeight: 700, fontSize: 16, letterSpacing: 0.4 }}>
-              HISTORIAL DE CARGOS EXTRAS
-            </span>
-          }
-          extra={
-            <Input
-              placeholder="Buscar..."
-              prefix={<SearchOutlined style={{ color: '#bbb' }} />}
-              value={searchText}
-              onChange={(e) => handleSearch(e.target.value)}
-              allowClear
-              style={{ width: 220 }}
-            />
-          }
-          bordered={false}
-          style={{ borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}
-        >
-          <Table
-            columns={columns}
-            dataSource={filtered}
-            rowKey="token"
-            loading={loading}
-            pagination={{
-              current: currentPage,
-              pageSize: pageSize,
-              showSizeChanger: true,
-              pageSizeOptions: ['10', '15', '25', '50'],
-              showTotal: (total) => `Total: ${total} registros`,
-              onChange: (page, size) => {
-                setCurrentPage(page);
-                setPageSize(size);
-              },
-            }}
-            scroll={{ x: 'max-content' }}
-            size="middle"
-            locale={{ emptyText: 'Sin registros en el historial' }}
+      <Card
+        title={
+          <span style={{ fontWeight: 700, fontSize: 16, letterSpacing: 0.4 }}>
+            PENDIENTES DE PAGO
+          </span>
+        }
+        extra={
+          <Input
+            placeholder="Buscar..."
+            prefix={<SearchOutlined style={{ color: '#bbb' }} />}
+            value={searchText}
+            onChange={(e) => handleSearch(e.target.value)}
+            allowClear
+            style={{ width: 220 }}
           />
-        </Card>
+        }
+        bordered={false}
+        style={{ borderRadius: 12, boxShadow: '0 2px 12px rgba(0,0,0,0.07)' }}
+      >
+        <Table
+          columns={columns}
+          dataSource={filtered}
+          rowKey="token"
+          loading={loading}
+          pagination={{
+            current: currentPage,
+            pageSize: pageSize,
+            showSizeChanger: true,
+            pageSizeOptions: ['10', '15', '25', '50'],
+            showTotal: (total) => `Total: ${total} registros`,
+            onChange: (page, size) => {
+              setCurrentPage(page);
+              setPageSize(size);
+            },
+          }}
+          scroll={{ x: 'max-content' }}
+          size="middle"
+          locale={{ emptyText: 'Sin pendientes de pago' }}
+        />
+      </Card>
       )}
     </div>
   );
 };
-
