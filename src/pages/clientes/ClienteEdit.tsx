@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Form, Input, Button, Select, Card, Spin, Tabs, Modal } from 'antd';
+import { Form, Input, Button, Select, Card, Spin, Tabs, Modal, Row, Col, Divider } from 'antd';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import clienteService from '../../services/clienteService';
 import Swal from 'sweetalert2';
@@ -24,6 +24,20 @@ export const ClienteEdit = () => {
   const [deliveryAddresses, setDeliveryAddresses] = useState<any[]>([]);
   const [hiddenLoading, setHiddenLoading] = useState(false);
   const [hiddenAddresses, setHiddenAddresses] = useState<any[]>([]);
+  const [billingLoading, setBillingLoading] = useState(false);
+  const [billingAddresses, setBillingAddresses] = useState<any[]>([]);
+  const [billingModalOpen, setBillingModalOpen] = useState(false);
+  const [billingForm] = Form.useForm();
+  const [savingBilling, setSavingBilling] = useState(false);
+  const [billingSearching, setBillingSearching] = useState(false);
+  const [billingColonias, setBillingColonias] = useState<any[]>([]);
+  const [billingEstado, setBillingEstado] = useState<string>('');
+  const [billingMunicipio, setBillingMunicipio] = useState<string>('');
+  const [billingCedulaFile, setBillingCedulaFile] = useState<File | null>(null);
+  const [billingCedulaPreview, setBillingCedulaPreview] = useState<{ url: string; type: 'image' | 'pdf' } | null>(null);
+  const [regimenOptions, setRegimenOptions] = useState<any[]>([]);
+  const [usoCfdiOptions, setUsoCfdiOptions] = useState<any[]>([]);
+  const [loadingFiscalData, setLoadingFiscalData] = useState(false);
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
@@ -86,6 +100,124 @@ export const ClienteEdit = () => {
       });
     } finally {
       setHiddenLoading(false);
+    }
+  };
+
+  const handleBillingCPChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, '');
+    billingForm.setFieldValue('cp', value);
+    if (value.length === 5) {
+      try {
+        setBillingSearching(true);
+        const addressData = await clienteService.searchAddress(value);
+        const coloniasList = addressData?.colonias ?? addressData?.settlements ?? [];
+        const estadosObj = addressData?.estados ?? addressData?.states ?? null;
+        const municipiosObj = addressData?.municipios ?? addressData?.municipalities ?? null;
+        setBillingColonias(Array.isArray(coloniasList) ? coloniasList : []);
+        const estadoName = estadosObj?.nombre ?? estadosObj?.name ?? estadosObj?.descripcion ?? '';
+        const municipioName = municipiosObj?.nombre ?? municipiosObj?.name ?? municipiosObj?.descripcion ?? '';
+        setBillingEstado(estadoName);
+        setBillingMunicipio(municipioName);
+        billingForm.setFieldsValue({
+          estado: estadoName,
+          municipio: municipioName,
+          colonia: coloniasList.length === 1 ? (coloniasList[0]?.id ?? coloniasList[0]?.nombre ?? coloniasList[0]) : undefined,
+        });
+      } catch (e) {
+        console.error(e);
+        setBillingColonias([]);
+        setBillingEstado('');
+        setBillingMunicipio('');
+      } finally {
+        setBillingSearching(false);
+      }
+    } else {
+      setBillingColonias([]);
+      setBillingEstado('');
+      setBillingMunicipio('');
+    }
+  };
+
+  const handleSaveBillingData = async (values: any) => {
+    if (!id) return;
+    try {
+      setSavingBilling(true);
+      const formData = new FormData();
+      formData.append('customer_id', String(id));
+      formData.append('razon', values.razon ?? '');
+      formData.append('correo', values.correo_billing ?? '');
+      formData.append('rfc', values.rfc ?? '');
+      formData.append('regimen', values.regimen ?? '');
+      formData.append('uso_cfdi', values.uso_cfdi ?? '');
+      formData.append('calle', values.calle ?? '');
+      formData.append('numero', values.numero ?? '');
+      formData.append('numero_interior', values.numero_interior ?? '');
+      formData.append('cp', values.cp ?? '');
+      formData.append('colonia', values.colonia ?? '');
+      formData.append('estado', values.estado ?? '');
+      formData.append('municipio', values.municipio ?? '');
+      if (billingCedulaFile) formData.append('cedula_fiscal', billingCedulaFile);
+      // TODO: conectar con endpoint POST cuando esté disponible
+      // await clienteService.addBillingData(formData);
+      Swal.fire({ icon: 'success', title: '', text: 'Datos guardados correctamente', showConfirmButton: false, timer: 2500 });
+      setBillingModalOpen(false);
+      billingForm.resetFields();
+      setBillingCedulaFile(null);
+      setBillingColonias([]);
+      setBillingEstado('');
+      setBillingMunicipio('');
+      loadBillingAddresses(id);
+    } catch (e: any) {
+      console.error(e);
+      Swal.fire({ icon: 'error', title: '', text: 'Error al guardar datos fiscales', showConfirmButton: false, timer: 3000 });
+    } finally {
+      setSavingBilling(false);
+    }
+  };
+
+  const openBillingModal = async () => {
+    billingForm.resetFields();
+    setBillingCedulaFile(null);
+    if (billingCedulaPreview) { URL.revokeObjectURL(billingCedulaPreview.url); setBillingCedulaPreview(null); }
+    setBillingColonias([]);
+    setBillingEstado('');
+    setBillingMunicipio('');
+    const mainValues = form.getFieldsValue();
+    billingForm.setFieldsValue({ correo_billing: mainValues.correo ?? '' });
+    setBillingModalOpen(true);
+    // Cargar catálogos fiscales si aún no están cargados
+    if (regimenOptions.length === 0) {
+      try {
+        setLoadingFiscalData(true);
+        const fiscal = await clienteService.getFiscalData();
+        setRegimenOptions(fiscal.regimen);
+        setUsoCfdiOptions(fiscal.uso_cfdi);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingFiscalData(false);
+      }
+    }
+  };
+
+  const loadBillingAddresses = async (clientId: string | undefined) => {
+    if (!clientId) return;
+    try {
+      setBillingLoading(true);
+      const items = await clienteService.getBillingAddresses(clientId);
+      setBillingAddresses(Array.isArray(items) ? items : []);
+    } catch (e: any) {
+      console.error(e);
+      Swal.fire({
+        position: 'center',
+        title: '',
+        text: 'Error al cargar datos de facturación',
+        icon: 'error',
+        showConfirmButton: false,
+        timer: 4500,
+      });
+    } finally {
+      setBillingLoading(false);
     }
   };
 
@@ -472,6 +604,7 @@ export const ClienteEdit = () => {
             setActiveTab(key);
             if (key === 'entrega') loadDeliveryAddresses(id);
             if (key === 'ocultas') loadHiddenAddresses(id);
+            if (key === 'facturacion') loadBillingAddresses(id);
           }}>
             <Tabs.TabPane tab={<><FaUser /> Datos personales</>} key="datos">
               <div className="tab-panel-grid">
@@ -722,13 +855,115 @@ export const ClienteEdit = () => {
             </Tabs.TabPane>
 
             <Tabs.TabPane tab={<><FaFileInvoice /> Direcciones de facturacion</>} key="facturacion">
-              <div className="tab-panel-grid">
-                <Form.Item label="Dirección de facturación 1" name="direccion_fact_1">
-                  <Input />
-                </Form.Item>
-                <Form.Item label="RFC / ID fiscal" name="rfc">
-                  <Input />
-                </Form.Item>
+              <div style={{ padding: '8px 0' }}>
+                <div style={{ marginBottom: 16 }}>
+                  <Button
+                    style={{ backgroundColor: '#00897B', borderColor: '#00897B', color: '#fff' }}
+                    icon={<FaPlus style={{ marginRight: 6 }} />}
+                    onClick={openBillingModal}
+                  >
+                    Agregar nuevos datos de facturación
+                  </Button>
+                </div>
+
+                {billingLoading ? (
+                  <div style={{ textAlign: 'center', padding: 32 }}><Spin /></div>
+                ) : billingAddresses.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: 32, color: '#999' }}>No hay datos de facturación registrados</div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                    {billingAddresses.map((d: any, idx: number) => {
+                      const razon = d?.razon ?? d?.razon_social ?? d?.nombre ?? '';
+                      const rfc = d?.rfc ?? (typeof d?.cfdi === 'string' && d.cfdi.length > 5 ? d.cfdi : null) ?? '';
+                      const calle = d?.calle ?? '';
+                      const numero = d?.numero ?? '';
+                      const colonia = d?.colonia ?? '';
+                      const municipio = d?.municipio ?? '';
+                      const estado = d?.estado ?? '';
+                      const regimen = d?.regimen ?? null;
+                      const usoCfdi = d?.uso_cfdi ?? d?.usocfdi ?? (typeof d?.cfdi === 'string' && d.cfdi.length <= 5 ? d.cfdi : null) ?? null;
+                      const email = d?.email ?? '';
+
+                      const direccionFiscal = [calle, numero ? `#${numero}` : '', colonia ? `Colonia ${colonia}` : '', municipio, estado]
+                        .filter(Boolean).join(', ');
+
+                      return (
+                        <div key={d?.id ?? idx} style={{
+                          background: '#fff',
+                          border: '1px solid #e8e8e8',
+                          borderRadius: 6,
+                          padding: '14px 16px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'flex-start',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+                        }}>
+                          <div style={{ flex: 1 }}>
+                            <div style={{ marginBottom: 4 }}>
+                              <span style={{ color: '#E65100', fontWeight: 500 }}>Razón social:</span>{' '}
+                              <span>{razon}</span>
+                              {rfc && (
+                                <>
+                                  <span style={{ marginLeft: 16, color: '#E65100', fontWeight: 500 }}>RFC:</span>{' '}
+                                  <span>{rfc}</span>
+                                </>
+                              )}
+                            </div>
+
+                            {direccionFiscal && (
+                              <div style={{ marginBottom: 4 }}>
+                                <span style={{ color: '#E65100', fontWeight: 500 }}>Dirección fiscal:</span>{' '}
+                                <span>{direccionFiscal}</span>
+                              </div>
+                            )}
+
+                            <div style={{ marginBottom: 4 }}>
+                              <span style={{ color: '#E65100', fontWeight: 500 }}>Régimen fiscal (Default):</span>{' '}
+                              <span style={{ color: '#555' }}>{regimen ?? 'No se configuró régimen fiscal default'}</span>
+                            </div>
+
+                            <div style={{ marginBottom: email ? 4 : 0 }}>
+                              <span style={{ color: '#E65100', fontWeight: 500 }}>Uso de CFDI (Default):</span>{' '}
+                              <span style={{ color: '#555' }}>{usoCfdi ?? 'No se configuró uso de CFDI default'}</span>
+                            </div>
+
+                            {email && (
+                              <div>
+                                <span style={{ color: '#E65100', fontWeight: 500 }}>Email:</span>{' '}
+                                <span>{email}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginLeft: 12 }}>
+                            <button
+                              type="button"
+                              title="Eliminar"
+                              onClick={() => Swal.fire({ icon: 'info', title: '', text: 'Funcionalidad próximamente', showConfirmButton: false, timer: 2000 })}
+                              style={{
+                                width: 32, height: 32,
+                                background: '#e53935', border: 'none', borderRadius: 4,
+                                color: '#fff', fontSize: 14, cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              }}
+                            >✕</button>
+                            <button
+                              type="button"
+                              title="Editar"
+                              onClick={() => Swal.fire({ icon: 'info', title: '', text: 'Funcionalidad próximamente', showConfirmButton: false, timer: 2000 })}
+                              style={{
+                                width: 32, height: 32,
+                                background: '#1565C0', border: 'none', borderRadius: 4,
+                                color: '#fff', fontSize: 14, cursor: 'pointer',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                              }}
+                            >✎</button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </Tabs.TabPane>
 
@@ -766,6 +1001,253 @@ export const ClienteEdit = () => {
       <Modal title="Motivo de bloqueo" open={blockModalOpen} onCancel={() => setBlockModalOpen(false)} okText="Bloquear" onOk={submitBlockClient} confirmLoading={blockingSubmitting} centered>
         <p>Escribe el motivo por el cual se bloqueará este cliente:</p>
         <Input.TextArea rows={4} value={blockReason} onChange={(e) => setBlockReason(e.target.value)} placeholder="Motivo del bloqueo" />
+      </Modal>
+
+      {/* Modal: Agregar datos de facturación */}
+      <Modal
+        title={<><FaFileInvoice style={{ marginRight: 8 }} />Agregar nuevos datos fiscales</>}
+        open={billingModalOpen}
+        onCancel={() => {
+          setBillingModalOpen(false);
+          if (billingCedulaPreview) { URL.revokeObjectURL(billingCedulaPreview.url); setBillingCedulaPreview(null); }
+          setBillingCedulaFile(null);
+        }}
+        footer={null}
+        centered
+        width={720}
+        destroyOnClose
+      >
+        <Form form={billingForm} layout="vertical" onFinish={handleSaveBillingData}>
+          {/* Datos del cliente */}
+          <Divider orientation="center" style={{ color: '#1677ff', marginTop: 0 }}>Datos del cliente</Divider>
+          <Row gutter={12}>
+            <Col span={24}>
+              <Form.Item label="Nombre">
+                <Input disabled value={clientName ? `${clientName} (${clientClave ?? ''})` : (clientClave ?? '')} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Correo" name="correo_billing">
+                <Input />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Teléfono">
+                <Input disabled value={form.getFieldValue('telefono') ?? ''} />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          {/* Datos fiscales */}
+          <Divider orientation="center" style={{ color: '#1677ff' }}>Datos fiscales</Divider>
+          <Form.Item label="Razón social" name="razon" rules={[{ required: true, message: 'La razón social es requerida' }]}>
+            <Input placeholder="......" />
+          </Form.Item>
+          <Row gutter={12}>
+            <Col span={12}>
+              <Form.Item label="RFC" name="rfc">
+                <Input placeholder="..." />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Régimen fiscal" name="regimen">
+                <Select
+                  placeholder={loadingFiscalData ? 'Cargando...' : 'Selecciona el régimen fiscal'}
+                  allowClear
+                  loading={loadingFiscalData}
+                  showSearch
+                  optionFilterProp="children"
+                >
+                  {regimenOptions.map((r: any) => (
+                    <Select.Option key={r.id} value={r.tax_regime_code}>
+                      {r.tax_regime_code} - {r.tax_regime_name}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Uso de CFDI" name="uso_cfdi">
+                <Select
+                  placeholder={loadingFiscalData ? 'Cargando...' : 'Selecciona el uso del CFDI'}
+                  allowClear
+                  loading={loadingFiscalData}
+                  showSearch
+                  optionFilterProp="children"
+                >
+                  {usoCfdiOptions.map((u: any) => (
+                    <Select.Option key={u.id} value={u.clave}>
+                      {u.clave} - {u.uso}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+
+          {/* Dirección de facturación */}
+          <Divider orientation="center" style={{ color: '#1677ff' }}>Dirección de facturación</Divider>
+          <Form.Item label="Calle" name="calle">
+            <Input placeholder="Av. calle" />
+          </Form.Item>
+          <Row gutter={12}>
+            <Col span={12}>
+              <Form.Item label="Numero" name="numero">
+                <Input placeholder="999" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Numero interior" name="numero_interior">
+                <Input placeholder="999A" />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Form.Item label="Código postal" name="cp">
+            <Input
+              placeholder="99998"
+              maxLength={5}
+              suffix={billingSearching ? <Spin size="small" /> : null}
+              onChange={handleBillingCPChange}
+            />
+          </Form.Item>
+          <Form.Item label="Colonia" name="colonia">
+            {billingColonias.length > 0 ? (
+              <Select placeholder="Selecciona la colonia" allowClear>
+                {billingColonias.map((c: any, i: number) => (
+                  <Select.Option key={i} value={c?.id ?? c?.nombre ?? c}>
+                    {c?.nombre ?? c?.name ?? c?.descripcion ?? c}
+                  </Select.Option>
+                ))}
+              </Select>
+            ) : (
+              <Input placeholder="Colonia" />
+            )}
+          </Form.Item>
+          <Row gutter={12}>
+            <Col span={12}>
+              <Form.Item label="Estado" name="estado">
+                <Input placeholder="Estado" value={billingEstado} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Municipio" name="municipio">
+                <Input placeholder="Municipio" value={billingMunicipio} />
+              </Form.Item>
+            </Col>
+          </Row>
+
+          <Form.Item label="Cédula fiscal">
+            <div
+              style={{
+                border: '1px dashed #d9d9d9',
+                borderRadius: 6,
+                padding: '10px 14px',
+                background: '#fafafa',
+              }}
+            >
+              <label
+                htmlFor="cedula-fiscal-input"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                  cursor: 'pointer',
+                  background: '#fff', border: '1px solid #d9d9d9',
+                  borderRadius: 4, padding: '4px 12px', fontSize: 13,
+                }}
+              >
+                📎 Seleccionar archivo
+                <input
+                  id="cedula-fiscal-input"
+                  type="file"
+                  accept="image/*,.pdf"
+                  style={{ display: 'none' }}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0] ?? null;
+                    if (billingCedulaPreview) URL.revokeObjectURL(billingCedulaPreview.url);
+                    if (f) {
+                      const url = URL.createObjectURL(f);
+                      const type = f.type === 'application/pdf' ? 'pdf' : 'image';
+                      setBillingCedulaFile(f);
+                      setBillingCedulaPreview({ url, type });
+                    } else {
+                      setBillingCedulaFile(null);
+                      setBillingCedulaPreview(null);
+                    }
+                  }}
+                />
+              </label>
+              {billingCedulaFile && (
+                <span style={{ marginLeft: 10, fontSize: 12, color: '#555' }}>
+                  {billingCedulaFile.name}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (billingCedulaPreview) URL.revokeObjectURL(billingCedulaPreview.url);
+                      setBillingCedulaFile(null);
+                      setBillingCedulaPreview(null);
+                      const inp = document.getElementById('cedula-fiscal-input') as HTMLInputElement;
+                      if (inp) inp.value = '';
+                    }}
+                    style={{
+                      marginLeft: 8, background: 'none', border: 'none',
+                      color: '#e53935', cursor: 'pointer', fontSize: 14, lineHeight: 1,
+                    }}
+                    title="Quitar archivo"
+                  >✕</button>
+                </span>
+              )}
+
+              {billingCedulaPreview && (
+                <div style={{ marginTop: 12 }}>
+                  {billingCedulaPreview.type === 'image' ? (
+                    <img
+                      src={billingCedulaPreview.url}
+                      alt="Vista previa"
+                      style={{
+                        maxWidth: '100%', maxHeight: 260,
+                        borderRadius: 4, border: '1px solid #e8e8e8',
+                        objectFit: 'contain', display: 'block',
+                      }}
+                    />
+                  ) : (
+                    <iframe
+                      src={billingCedulaPreview.url}
+                      title="Vista previa PDF"
+                      style={{
+                        width: '100%', height: 280,
+                        border: '1px solid #e8e8e8', borderRadius: 4,
+                      }}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+          </Form.Item>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginTop: 8 }}>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={savingBilling}
+              icon={<FaSave style={{ marginRight: 6 }} />}
+              style={{ backgroundColor: '#4CAF50', borderColor: '#4CAF50' }}
+            >
+              Guardar
+            </Button>
+            <Button
+              danger
+              onClick={() => {
+                billingForm.resetFields();
+                setBillingCedulaFile(null);
+                if (billingCedulaPreview) { URL.revokeObjectURL(billingCedulaPreview.url); setBillingCedulaPreview(null); }
+                setBillingColonias([]);
+                setBillingEstado('');
+                setBillingMunicipio('');
+              }}
+            >
+              Limpiar
+            </Button>
+          </div>
+        </Form>
       </Modal>
     </>
   );

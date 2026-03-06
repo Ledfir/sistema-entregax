@@ -166,6 +166,26 @@ export const clienteService = {
     const response = await apiClient.post(url, { id: addressId });
     return response.data;
   },
+
+  // Obtener catálogos fiscales (regimen y uso_cfdi)
+  getFiscalData: async (): Promise<{ regimen: any[]; uso_cfdi: any[] }> => {
+    const url = '/customers/get-data-fiscal';
+    const response = await apiClient.get(url);
+    const raw = response.data?.data ?? response.data ?? {};
+    return {
+      regimen: Array.isArray(raw.regimen) ? raw.regimen : [],
+      uso_cfdi: Array.isArray(raw.uso_cfdi) ? raw.uso_cfdi : [],
+    };
+  },
+
+  // Obtener datos de facturación del cliente por token
+  getBillingAddresses: async (token: string | number): Promise<any[]> => {
+    const url = `/customers/billing-data/${token}`;
+    const response = await apiClient.get(url);
+    const raw = response.data ?? {};
+    const items = raw?.data ?? raw ?? [];
+    return Array.isArray(items) ? items : [];
+  },
 };
 
 export default clienteService;

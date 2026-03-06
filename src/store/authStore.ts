@@ -98,7 +98,7 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
 
   // Roles de asesores
   'ASESOR': [
-    'clients.view',
+    'clients.view', 'clients.edit',
     'tickets.view', 'tickets.create', 'tickets.own',
     'extra-charges.view',
     'reports.view',

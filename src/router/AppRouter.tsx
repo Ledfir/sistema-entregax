@@ -64,7 +64,7 @@ export const AppRouter = () => {
           <Route 
             path="/usuarios/editar/:token" 
             element={
-              <ProtectedRoute roles={['SISTEMAS']} permission="users.edit">
+              <ProtectedRoute roles={['SISTEMAS', 'ATENCION A CLIENTES', 'SERVICIO AL CLIENTE', 'ASESOR']} permission="users.edit">
                 <UserEdit />
               </ProtectedRoute>
             } 
@@ -98,7 +98,7 @@ export const AppRouter = () => {
           <Route 
             path="/clientes/editar/:id" 
             element={
-              <ProtectedRoute roles={['SISTEMAS', 'ADMINISTRACIÓN', 'ATENCION A CLIENTES', 'SERVICIO AL CLIENTE']} permission="clients.edit">
+              <ProtectedRoute roles={['SISTEMAS', 'ADMINISTRACIÓN', 'ASESOR', 'ATENCION A CLIENTES', 'SERVICIO AL CLIENTE']} permission="clients.edit">
                 <ClienteEdit />
               </ProtectedRoute>
             } 
@@ -106,7 +106,7 @@ export const AppRouter = () => {
           <Route 
             path="/clientes/:id/direcciones/nueva" 
             element={
-              <ProtectedRoute roles={['SISTEMAS', 'ADMINISTRACIÓN', 'ATENCION A CLIENTES', 'SERVICIO AL CLIENTE']} permission="clients.edit">
+              <ProtectedRoute roles={['SISTEMAS', 'ADMINISTRACIÓN', 'ASESOR', 'ATENCION A CLIENTES', 'SERVICIO AL CLIENTE']} permission="clients.edit">
                 <ClienteAddAddress />
               </ProtectedRoute>
             } 
@@ -114,7 +114,7 @@ export const AppRouter = () => {
           <Route 
             path="/clientes/:clientId/direccion/editar/:id" 
             element={
-              <ProtectedRoute roles={['SISTEMAS', 'ADMINISTRACIÓN', 'ATENCION A CLIENTES', 'SERVICIO AL CLIENTE']} permission="clients.edit">
+              <ProtectedRoute roles={['SISTEMAS', 'ADMINISTRACIÓN', 'ASESOR', 'ATENCION A CLIENTES', 'SERVICIO AL CLIENTE']} permission="clients.edit">
                 <ClienteEditAddress />
               </ProtectedRoute>
             } 
