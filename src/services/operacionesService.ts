@@ -145,6 +145,12 @@ export const operacionesService = {
     const response = await apiClient.post(url, data);
     return response.data;
   },
+
+  // Obtener instrucciones pendientes por usuario
+  getPendingInstructions: async (iduser: number | string): Promise<any> => {
+    const response = await apiClient.get(`/quotes/pending-instructions/${iduser}`);
+    return response.data;
+  },
 };
 
 export default operacionesService;

@@ -35,6 +35,9 @@ export const ClienteEdit = () => {
   const [billingMunicipio, setBillingMunicipio] = useState<string>('');
   const [billingCedulaFile, setBillingCedulaFile] = useState<File | null>(null);
   const [billingCedulaPreview, setBillingCedulaPreview] = useState<{ url: string; type: 'image' | 'pdf' } | null>(null);
+  const [billingEditId, setBillingEditId] = useState<string | number | null>(null);
+  const [billingExistingCedula, setBillingExistingCedula] = useState<{ name: string; ext: string } | null>(null);
+  const [loadingBillingEdit, setLoadingBillingEdit] = useState(false);
   const [regimenOptions, setRegimenOptions] = useState<any[]>([]);
   const [usoCfdiOptions, setUsoCfdiOptions] = useState<any[]>([]);
   const [loadingFiscalData, setLoadingFiscalData] = useState(false);
@@ -114,13 +117,15 @@ export const ClienteEdit = () => {
         const estadosObj = addressData?.estados ?? addressData?.states ?? null;
         const municipiosObj = addressData?.municipios ?? addressData?.municipalities ?? null;
         setBillingColonias(Array.isArray(coloniasList) ? coloniasList : []);
+        const estadoId = estadosObj?.id ?? '';
+        const municipioId = municipiosObj?.id ?? '';
         const estadoName = estadosObj?.nombre ?? estadosObj?.name ?? estadosObj?.descripcion ?? '';
         const municipioName = municipiosObj?.nombre ?? municipiosObj?.name ?? municipiosObj?.descripcion ?? '';
         setBillingEstado(estadoName);
         setBillingMunicipio(municipioName);
         billingForm.setFieldsValue({
-          estado: estadoName,
-          municipio: municipioName,
+          estado: estadoId,
+          municipio: municipioId,
           colonia: coloniasList.length === 1 ? (coloniasList[0]?.id ?? coloniasList[0]?.nombre ?? coloniasList[0]) : undefined,
         });
       } catch (e) {
@@ -140,9 +145,15 @@ export const ClienteEdit = () => {
 
   const handleSaveBillingData = async (values: any) => {
     if (!id) return;
+    // Cedula es obligatoria solo al crear (cuando no hay registro existente)
+    if (!billingEditId && !billingCedulaFile) {
+      Swal.fire({ icon: 'warning', title: '', text: 'La cédula fiscal es obligatoria', showConfirmButton: false, timer: 2500 });
+      return;
+    }
     try {
       setSavingBilling(true);
       const formData = new FormData();
+      if (billingEditId) formData.append('id', String(billingEditId));
       formData.append('customer_id', String(id));
       formData.append('razon', values.razon ?? '');
       formData.append('correo', values.correo_billing ?? '');
@@ -157,21 +168,75 @@ export const ClienteEdit = () => {
       formData.append('estado', values.estado ?? '');
       formData.append('municipio', values.municipio ?? '');
       if (billingCedulaFile) formData.append('cedula_fiscal', billingCedulaFile);
-      // TODO: conectar con endpoint POST cuando esté disponible
-      // await clienteService.addBillingData(formData);
-      Swal.fire({ icon: 'success', title: '', text: 'Datos guardados correctamente', showConfirmButton: false, timer: 2500 });
-      setBillingModalOpen(false);
-      billingForm.resetFields();
-      setBillingCedulaFile(null);
-      setBillingColonias([]);
-      setBillingEstado('');
-      setBillingMunicipio('');
-      loadBillingAddresses(id);
+
+      const res = billingEditId
+        ? await clienteService.updateBillingAddress(formData)
+        : await clienteService.saveBillingAddress(formData);
+      const ok = Boolean(
+        res && (
+          res.success === true ||
+          String(res.status).toLowerCase() === 'success' ||
+          res.ok === true ||
+          Number(res.code) === 200
+        )
+      );
+
+      if (ok) {
+        Swal.fire({ icon: 'success', title: '', text: res?.message ?? 'Datos de facturación guardados correctamente', showConfirmButton: false, timer: 2500 });
+        setBillingModalOpen(false);
+        billingForm.resetFields();
+        setBillingCedulaFile(null);
+        if (billingCedulaPreview) { URL.revokeObjectURL(billingCedulaPreview.url); setBillingCedulaPreview(null); }
+        setBillingColonias([]);
+        setBillingEstado('');
+        setBillingMunicipio('');
+        setBillingEditId(null);
+        setBillingExistingCedula(null);
+        loadBillingAddresses(id);
+      } else {
+        Swal.fire({ icon: 'error', title: '', text: res?.message ?? res?.error ?? 'No se pudo guardar los datos fiscales', showConfirmButton: false, timer: 4000 });
+      }
     } catch (e: any) {
       console.error(e);
-      Swal.fire({ icon: 'error', title: '', text: 'Error al guardar datos fiscales', showConfirmButton: false, timer: 3000 });
+      const serverMsg = e?.response?.data?.message ?? e?.response?.data?.error ?? 'Error al guardar datos fiscales';
+      Swal.fire({ icon: 'error', title: '', text: serverMsg, showConfirmButton: false, timer: 4000 });
     } finally {
       setSavingBilling(false);
+    }
+  };
+
+  const handleDeleteBillingAddress = async (billingId: string | number) => {
+    const confirm = await Swal.fire({
+      title: '¿Eliminar datos de facturación?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+    });
+    if (!confirm.isConfirmed) return;
+    try {
+      const res = await clienteService.deleteBillingAddress(billingId);
+      const ok = Boolean(
+        res && (
+          res.success === true ||
+          String(res.status).toLowerCase() === 'success' ||
+          res.ok === true ||
+          Number(res.code) === 200
+        )
+      );
+      if (ok) {
+        Swal.fire({ icon: 'success', title: '', text: res?.message ?? 'Registro eliminado correctamente', showConfirmButton: false, timer: 2500 });
+        loadBillingAddresses(id);
+      } else {
+        Swal.fire({ icon: 'error', title: '', text: res?.message ?? res?.error ?? 'No se pudo eliminar el registro', showConfirmButton: false, timer: 4000 });
+      }
+    } catch (e: any) {
+      console.error(e);
+      const serverMsg = e?.response?.data?.message ?? e?.response?.data?.error ?? 'Error al eliminar el registro';
+      Swal.fire({ icon: 'error', title: '', text: serverMsg, showConfirmButton: false, timer: 4000 });
     }
   };
 
@@ -182,10 +247,11 @@ export const ClienteEdit = () => {
     setBillingColonias([]);
     setBillingEstado('');
     setBillingMunicipio('');
+    setBillingEditId(null);
+    setBillingExistingCedula(null);
     const mainValues = form.getFieldsValue();
     billingForm.setFieldsValue({ correo_billing: mainValues.correo ?? '' });
     setBillingModalOpen(true);
-    // Cargar catálogos fiscales si aún no están cargados
     if (regimenOptions.length === 0) {
       try {
         setLoadingFiscalData(true);
@@ -197,6 +263,66 @@ export const ClienteEdit = () => {
       } finally {
         setLoadingFiscalData(false);
       }
+    }
+  };
+
+  const openEditBillingModal = async (recordId: string | number) => {
+    billingForm.resetFields();
+    setBillingCedulaFile(null);
+    if (billingCedulaPreview) { URL.revokeObjectURL(billingCedulaPreview.url); setBillingCedulaPreview(null); }
+    setBillingColonias([]);
+    setBillingEstado('');
+    setBillingMunicipio('');
+    setBillingExistingCedula(null);
+    setBillingEditId(recordId);
+    setBillingModalOpen(true);
+    try {
+      setLoadingBillingEdit(true);
+      // Cargar catálogos y datos en paralelo
+      const [res, fiscal] = await Promise.all([
+        clienteService.getBillingAddress(recordId),
+        regimenOptions.length === 0 ? clienteService.getFiscalData() : Promise.resolve(null),
+      ]);
+      if (fiscal) {
+        setRegimenOptions(fiscal.regimen);
+        setUsoCfdiOptions(fiscal.uso_cfdi);
+      }
+      const addr = res?.data?.address ?? res?.address ?? res?.data ?? {};
+      const cedula = res?.data?.cedula ?? res?.cedula ?? null;
+      if (cedula) setBillingExistingCedula({ name: cedula.name ?? cedula.token ?? 'archivo existente', ext: cedula.ext ?? 'pdf' });
+      // Si tiene CP, poblar colonias y nombres de estado/municipio
+      if (addr.cp && String(addr.cp).length === 5) {
+        try {
+          const addressData = await clienteService.searchAddress(String(addr.cp));
+          const coloniasList = addressData?.colonias ?? addressData?.settlements ?? [];
+          const estadosObj = addressData?.estados ?? addressData?.states ?? null;
+          const municipiosObj = addressData?.municipios ?? addressData?.municipalities ?? null;
+          setBillingColonias(Array.isArray(coloniasList) ? coloniasList : []);
+          setBillingEstado(estadosObj?.nombre ?? estadosObj?.name ?? '');
+          setBillingMunicipio(municipiosObj?.nombre ?? municipiosObj?.name ?? '');
+        } catch (e) { console.error(e); }
+      }
+      billingForm.setFieldsValue({
+        razon: addr.razon ?? '',
+        correo_billing: addr.email ?? '',
+        rfc: addr.rfc ?? '',
+        regimen: addr.id_reg ? String(addr.id_reg) : undefined,
+        uso_cfdi: addr.id_cfdi ? String(addr.id_cfdi) : undefined,
+        calle: addr.calle ?? '',
+        numero: addr.numero ?? '',
+        numero_interior: addr.inte ?? '',
+        cp: addr.cp ?? '',
+        colonia: addr.col ? String(addr.col) : undefined,
+        estado: addr.estado ? String(addr.estado) : '',
+        municipio: addr.municipio ? String(addr.municipio) : '',
+      });
+    } catch (e: any) {
+      console.error(e);
+      const msg = e?.response?.data?.message ?? 'Error al cargar los datos de facturación';
+      Swal.fire({ icon: 'error', title: '', text: msg, showConfirmButton: false, timer: 3500 });
+      setBillingModalOpen(false);
+    } finally {
+      setLoadingBillingEdit(false);
     }
   };
 
@@ -939,7 +1065,7 @@ export const ClienteEdit = () => {
                             <button
                               type="button"
                               title="Eliminar"
-                              onClick={() => Swal.fire({ icon: 'info', title: '', text: 'Funcionalidad próximamente', showConfirmButton: false, timer: 2000 })}
+                              onClick={() => handleDeleteBillingAddress(d?.id ?? idx)}
                               style={{
                                 width: 32, height: 32,
                                 background: '#e53935', border: 'none', borderRadius: 4,
@@ -950,7 +1076,7 @@ export const ClienteEdit = () => {
                             <button
                               type="button"
                               title="Editar"
-                              onClick={() => Swal.fire({ icon: 'info', title: '', text: 'Funcionalidad próximamente', showConfirmButton: false, timer: 2000 })}
+                              onClick={() => openEditBillingModal(d?.id ?? idx)}
                               style={{
                                 width: 32, height: 32,
                                 background: '#1565C0', border: 'none', borderRadius: 4,
@@ -1005,10 +1131,12 @@ export const ClienteEdit = () => {
 
       {/* Modal: Agregar datos de facturación */}
       <Modal
-        title={<><FaFileInvoice style={{ marginRight: 8 }} />Agregar nuevos datos fiscales</>}
+        title={<><FaFileInvoice style={{ marginRight: 8 }} />{billingEditId ? 'Editar datos fiscales' : 'Agregar nuevos datos fiscales'}</>}
         open={billingModalOpen}
         onCancel={() => {
           setBillingModalOpen(false);
+          setBillingEditId(null);
+          setBillingExistingCedula(null);
           if (billingCedulaPreview) { URL.revokeObjectURL(billingCedulaPreview.url); setBillingCedulaPreview(null); }
           setBillingCedulaFile(null);
         }}
@@ -1018,6 +1146,10 @@ export const ClienteEdit = () => {
         destroyOnClose
       >
         <Form form={billingForm} layout="vertical" onFinish={handleSaveBillingData}>
+          {loadingBillingEdit && (
+            <div style={{ textAlign: 'center', padding: '24px 0' }}><Spin size="large" /></div>
+          )}
+          <div style={{ display: loadingBillingEdit ? 'none' : 'block' }}>
           {/* Datos del cliente */}
           <Divider orientation="center" style={{ color: '#1677ff', marginTop: 0 }}>Datos del cliente</Divider>
           <Row gutter={12}>
@@ -1059,7 +1191,7 @@ export const ClienteEdit = () => {
                   optionFilterProp="children"
                 >
                   {regimenOptions.map((r: any) => (
-                    <Select.Option key={r.id} value={r.tax_regime_code}>
+                    <Select.Option key={r.id} value={r.id}>
                       {r.tax_regime_code} - {r.tax_regime_name}
                     </Select.Option>
                   ))}
@@ -1076,7 +1208,7 @@ export const ClienteEdit = () => {
                   optionFilterProp="children"
                 >
                   {usoCfdiOptions.map((u: any) => (
-                    <Select.Option key={u.id} value={u.clave}>
+                    <Select.Option key={u.id} value={u.id}>
                       {u.clave} - {u.uso}
                     </Select.Option>
                   ))}
@@ -1123,20 +1255,27 @@ export const ClienteEdit = () => {
               <Input placeholder="Colonia" />
             )}
           </Form.Item>
+          {/* Campos ocultos que almacenan los ids */}
+          <Form.Item name="estado" hidden><Input /></Form.Item>
+          <Form.Item name="municipio" hidden><Input /></Form.Item>
           <Row gutter={12}>
             <Col span={12}>
-              <Form.Item label="Estado" name="estado">
-                <Input placeholder="Estado" value={billingEstado} />
+              <Form.Item label="Estado">
+                <Input disabled value={billingEstado} placeholder="Estado" />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item label="Municipio" name="municipio">
-                <Input placeholder="Municipio" value={billingMunicipio} />
+              <Form.Item label="Municipio">
+                <Input disabled value={billingMunicipio} placeholder="Municipio" />
               </Form.Item>
             </Col>
           </Row>
 
-          <Form.Item label="Cédula fiscal">
+          <Form.Item
+            label="Cédula fiscal"
+            required={!billingEditId}
+            tooltip={billingEditId ? 'Sube un nuevo archivo para reemplazar la cédula existente' : 'Este campo es obligatorio'}
+          >
             <div
               style={{
                 border: '1px dashed #d9d9d9',
@@ -1175,6 +1314,14 @@ export const ClienteEdit = () => {
                   }}
                 />
               </label>
+              {/* Cedula existente (modo editar) */}
+              {billingEditId && billingExistingCedula && !billingCedulaFile && (
+                <div style={{ marginTop: 10, padding: '6px 10px', background: '#e6f7ff', border: '1px solid #91d5ff', borderRadius: 4, fontSize: 12, color: '#0050b3' }}>
+                  Archivo actual: <strong>{billingExistingCedula.name}</strong>
+                  {' '}<span style={{ color: '#555' }}>(sube un nuevo archivo para reemplazarlo)</span>
+                </div>
+              )}
+
               {billingCedulaFile && (
                 <span style={{ marginLeft: 10, fontSize: 12, color: '#555' }}>
                   {billingCedulaFile.name}
@@ -1242,11 +1389,13 @@ export const ClienteEdit = () => {
                 setBillingColonias([]);
                 setBillingEstado('');
                 setBillingMunicipio('');
+                setBillingExistingCedula(null);
               }}
             >
               Limpiar
             </Button>
           </div>
+        </div>
         </Form>
       </Modal>
     </>

@@ -179,6 +179,14 @@ export const MainLayout = () => {
       ],
     },
     {
+      key: 'cotizaciones',
+      icon: <FileTextOutlined />,
+      label: 'Cotizaciones',
+      children: [
+        { key: '/cotizaciones/instrucciones', label: 'Instrucciones' },
+      ],
+    },
+    {
       key: 'polizas',
       icon: <FileProtectOutlined />,
       label: 'Pólizas',

@@ -178,6 +178,35 @@ export const clienteService = {
     };
   },
 
+  // Obtener datos de una dirección de facturación por id
+  getBillingAddress: async (id: string | number): Promise<any> => {
+    const response = await apiClient.get(`/customers/get-data-billing-address/${id}`);
+    return response.data;
+  },
+
+  // Guardar datos de facturación del cliente
+  saveBillingAddress: async (data: FormData): Promise<any> => {
+    const url = '/customers/save-billing-address';
+    const response = await apiClient.post(url, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  // Actualizar datos de facturación del cliente
+  updateBillingAddress: async (data: FormData): Promise<any> => {
+    const response = await apiClient.post('/customers/update-billing-address', data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  // Eliminar datos de facturación del cliente
+  deleteBillingAddress: async (id: string | number): Promise<any> => {
+    const response = await apiClient.post('/customers/delete-billing-address', { id });
+    return response.data;
+  },
+
   // Obtener datos de facturación del cliente por token
   getBillingAddresses: async (token: string | number): Promise<any[]> => {
     const url = `/customers/billing-data/${token}`;

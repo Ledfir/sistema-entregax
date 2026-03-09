@@ -1,0 +1,1 @@
+export { Instrucciones } from './Instrucciones';
