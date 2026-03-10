@@ -181,6 +181,12 @@ export const operacionesService = {
     const response = await apiClient.post('/quotes/update-instruction', payload);
     return response.data;
   },
+
+  // Archivar guía
+  archivedWaybill: async (payload: { id: string; iduser: string }): Promise<any> => {
+    const response = await apiClient.post('/quotes/archived-waybill', payload);
+    return response.data;
+  },
 };
 
 export default operacionesService;

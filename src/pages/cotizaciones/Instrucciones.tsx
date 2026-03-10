@@ -287,8 +287,29 @@ export const Instrucciones = () => {
     console.log('Ver Tarimas', record);
   };
 
-  const handleArchivar = (row: PendienteRow) => {
-    console.log('Archivar', row);
+  const handleArchivar = async (row: PendienteRow) => {
+    const confirm = await Swal.fire({
+      icon: 'warning',
+      title: '¿Archivar registro?',
+      text: `Se archivará la guía ${row.guiaIngreso || row.id}.`,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, archivar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#F26522',
+    });
+    if (!confirm.isConfirmed) return;
+    try {
+      const res = await operacionesService.archivedWaybill({
+        id: String(row.id),
+        iduser: String(user?.id ?? ''),
+      });
+      const msg = res?.message ?? res?.data?.message ?? 'Registro archivado correctamente.';
+      Swal.fire({ icon: 'success', title: '¡Listo!', text: msg, showConfirmButton: false, timer: 3000 });
+      if (pendientesRecord) cargarPendientes(pendientesRecord);
+    } catch (e: any) {
+      const errMsg = e?.response?.data?.message ?? e?.message ?? 'Error al archivar el registro.';
+      Swal.fire({ icon: 'error', title: '', text: errMsg, showConfirmButton: false, timer: 4000 });
+    }
   };
 
   const handleVolver = () => {
