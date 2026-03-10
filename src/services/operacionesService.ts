@@ -151,6 +151,36 @@ export const operacionesService = {
     const response = await apiClient.get(`/quotes/pending-instructions/${iduser}`);
     return response.data;
   },
+
+  // Obtener lista de guías pendientes de un registro específico
+  getPendingInstructionsList: async (idc: number | string, idtp: number | string): Promise<any> => {
+    const response = await apiClient.get(`/quotes/pending-list/${idc}/${idtp}`);
+    return response.data;
+  },
+
+  // Obtener registros listos para asignar instrucciones
+  getReadyForInstructions: async (idc: number | string, idtp: number | string): Promise<any> => {
+    const response = await apiClient.get(`/quotes/ready-for-instructions/${idc}/${idtp}`);
+    return response.data;
+  },
+
+  // Obtener direcciones de entrega del cliente para el selector de instrucciones
+  getBillingAddressForQuote: async (idc: number | string): Promise<any> => {
+    const response = await apiClient.get(`/quotes/billing-address/${idc}`);
+    return response.data;
+  },
+
+  // Obtener listado de paqueterías
+  getPackings: async (): Promise<any> => {
+    const response = await apiClient.get('/quotes/packings');
+    return response.data;
+  },
+
+  // Asignar instrucciones a registros seleccionados
+  updateInstruction: async (payload: { ids: string[]; direccion: string; paqueteria: string; iduser: string; idtp: string }): Promise<any> => {
+    const response = await apiClient.post('/quotes/update-instruction', payload);
+    return response.data;
+  },
 };
 
 export default operacionesService;
