@@ -24,7 +24,7 @@ import { OperacionMaritima } from '@/pages/operaciones/OperacionMaritima';
 import { UsaRemp } from '@/pages/operaciones/UsaRemp';
 import { NBox } from '@/pages/operaciones/NBox';
 import { NBoxMaritimo } from '@/pages/operaciones/NBoxMaritimo';
-import { Instrucciones } from '@/pages/cotizaciones';
+import { Instrucciones, GuiasArchivadas, PendientesCotizar, MisCotizaciones } from '@/pages/cotizaciones';
 import { Juego, Snake } from '@/pages/juego';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
@@ -313,10 +313,34 @@ export const AppRouter = () => {
           
           {/* Rutas de cotizaciones */}
           <Route 
+            path="/cotizaciones/lista" 
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <MisCotizaciones />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
             path="/cotizaciones/instrucciones" 
             element={
               <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
                 <Instrucciones />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/cotizaciones/guias-archivadas" 
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <GuiasArchivadas />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/cotizaciones/pendientes" 
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <PendientesCotizar />
               </ProtectedRoute>
             } 
           />

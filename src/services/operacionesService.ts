@@ -176,6 +176,12 @@ export const operacionesService = {
     return response.data;
   },
 
+  // Listado de productos (para DHL)
+  getListProducts: async (): Promise<any> => {
+    const response = await apiClient.get('/quotes/list-products');
+    return response.data;
+  },
+
   // Asignar instrucciones a registros seleccionados
   updateInstruction: async (payload: { ids: string[]; direccion: string; paqueteria: string; iduser: string; idtp: string }): Promise<any> => {
     const response = await apiClient.post('/quotes/update-instruction', payload);
@@ -185,6 +191,42 @@ export const operacionesService = {
   // Archivar guía
   archivedWaybill: async (payload: { id: string; iduser: string }): Promise<any> => {
     const response = await apiClient.post('/quotes/archived-waybill', payload);
+    return response.data;
+  },
+
+  // Obtener listado de guías archivadas
+  getArchivedWaybills: async (iduser: number | string): Promise<any> => {
+    const response = await apiClient.get(`/quotes/archived/${iduser}`);
+    return response.data;
+  },
+
+  // Desarchivar guía
+  desarchivedWaybill: async (payload: { id: string | number; iduser: string | number }): Promise<any> => {
+    const response = await apiClient.post('/quotes/desarchived-waybill', payload);
+    return response.data;
+  },
+
+  // Pendientes de cotizar
+  getPendingQuotes: async (iduser: number | string): Promise<any> => {
+    const response = await apiClient.get(`/quotes/pending-quotes/${iduser}`);
+    return response.data;
+  },
+
+  // Detalle de pendientes a cotizar por suite e idtp
+  getListPendingQuotes: async (suite: string | number, idtp: string | number): Promise<any> => {
+    const response = await apiClient.get(`/quotes/list-pending-quotes/${suite}/${idtp}`);
+    return response.data;
+  },
+
+  // Mis cotizaciones
+  getMyQuotes: async (iduser: number | string): Promise<any> => {
+    const response = await apiClient.get(`/quotes/my-quotes/${iduser}`);
+    return response.data;
+  },
+
+  // Generar cotización
+  generateQuote: async (payload: { ids: (string | number)[]; idtp: string | number; iduser: string | number; idc: string | number }): Promise<any> => {
+    const response = await apiClient.post('/quotes/generate-quote', payload);
     return response.data;
   },
 };

@@ -28,6 +28,7 @@ interface InstruccionRow {
   idtp: string;    // tipo de cotización
   checked: number; // asignados
   resto: number;   // pendientes
+  seccionKey: string;
   raw: any;
 }
 
@@ -75,7 +76,7 @@ const SECCIONES_CONFIG: Omit<Seccion, 'data'>[] = [
   { key: 'tdi_express',titulo: 'Instrucciones Pendientes en TDI - DHL EXPRESS',  headerColor: '#F26522', cedisLabel: 'TDI - DHL EXPRESS' },
 ];
 
-function mapRows(items: any[]): InstruccionRow[] {
+function mapRows(items: any[], seccionKey = ''): InstruccionRow[] {
   if (!Array.isArray(items)) return [];
   return items.map((r) => ({
     id: r.id ?? r.token ?? '',
@@ -87,6 +88,7 @@ function mapRows(items: any[]): InstruccionRow[] {
     idtp: String(r.idtp ?? r.idtpc ?? ''),
     checked: Number(r.checked ?? 0),
     resto: Number(r.resto ?? 0),
+    seccionKey,
     raw: r,
   }));
 }
@@ -151,6 +153,9 @@ export const Instrucciones = () => {
   const [direcciones, setDirecciones] = useState<{ value: string; label: string }[]>([]);
   const [paqueterias, setPaqueterias] = useState<{ value: string; label: string }[]>([]);
   const [asignarSubmitting, setAsignarSubmitting] = useState(false);
+  const [asignarSeccionKey, setAsignarSeccionKey] = useState('');
+  const [selectedProducto, setSelectedProducto]   = useState<string | undefined>(undefined);
+  const [productos, setProductos]                 = useState<{ value: string; label: string }[]>([]);
 
   // ── Carga principal ─────────────────────────────────────────
   const cargarDatos = async () => {
@@ -159,7 +164,7 @@ export const Instrucciones = () => {
       setLoading(true);
       const res = await operacionesService.getPendingInstructions(user.id);
       const data = res?.data ?? {};
-      setSecciones(SECCIONES_CONFIG.map((s) => ({ ...s, data: mapRows(data[s.key] ?? []) })));
+      setSecciones(SECCIONES_CONFIG.map((s) => ({ ...s, data: mapRows(data[s.key] ?? [], s.key) })));
     } catch (e: any) {
       console.error(e);
       Swal.fire({ icon: 'error', title: '', text: e?.response?.data?.message ?? 'Error al cargar instrucciones pendientes', showConfirmButton: false, timer: 4000 });
@@ -188,6 +193,10 @@ export const Instrucciones = () => {
       Swal.fire({ icon: 'warning', title: '', text: 'Selecciona una paquetería.', showConfirmButton: false, timer: 3000 });
       return;
     }
+    if (asignarSeccionKey === 'dhl' && !selectedProducto) {
+      Swal.fire({ icon: 'warning', title: '', text: 'Selecciona un producto.', showConfirmButton: false, timer: 3000 });
+      return;
+    }
     try {
       setAsignarSubmitting(true);
       const res = await operacionesService.updateInstruction({
@@ -196,7 +205,8 @@ export const Instrucciones = () => {
         paqueteria: selectedPaqueteria,
         iduser: String(user?.id ?? ''),
         idtp: String(asignarRecord?.idtp ?? ''),
-      });
+        ...(asignarSeccionKey === 'dhl' && selectedProducto ? { producto: selectedProducto } : {}),
+      } as any);
       const msg = res?.message ?? res?.data?.message ?? 'Instrucciones asignadas correctamente.';
       Swal.fire({ icon: 'success', title: '¡Listo!', text: msg, showConfirmButton: false, timer: 3500 });
       handleVolver();
@@ -215,6 +225,9 @@ export const Instrucciones = () => {
     setAsignarSearch('');
     setSelectedDireccion(undefined);
     setSelectedPaqueteria(undefined);
+    setSelectedProducto(undefined);
+    setAsignarSeccionKey(record.seccionKey ?? '');
+    setProductos([]);
     try {
       setAsignarLoading(true);
       const idc  = record.suite || record.raw?.idc || record.id;
@@ -243,6 +256,19 @@ export const Instrucciones = () => {
         })));
       } catch {
         setPaqueterias([]);
+      }
+      // Cargar productos (solo DHL)
+      if (record.seccionKey === 'dhl') {
+        try {
+          const resProd = await operacionesService.getListProducts();
+          const prod: any[] = resProd?.data ?? [];
+          setProductos(prod.map((p: any) => ({
+            value: String(p.id),
+            label: String(p.name ?? '').trim(),
+          })));
+        } catch {
+          setProductos([]);
+        }
       }
     } catch (e: any) {
       console.error(e);
@@ -322,6 +348,9 @@ export const Instrucciones = () => {
     setAsignarSearch('');
     setSelectedDireccion(undefined);
     setSelectedPaqueteria(undefined);
+    setSelectedProducto(undefined);
+    setAsignarSeccionKey('');
+    setProductos([]);
   };
 
   // ── Filtro de búsqueda ──────────────────────────────────────
@@ -648,6 +677,23 @@ export const Instrucciones = () => {
                   }
                 />
               </div>
+              {asignarSeccionKey === 'dhl' && (
+                <div style={{ flex: 1, minWidth: 260 }}>
+                  <div style={{ fontWeight: 600, marginBottom: 6 }}>Productos</div>
+                  <Select
+                    placeholder="Selecciona un producto"
+                    style={{ width: '100%' }}
+                    value={selectedProducto}
+                    onChange={(v) => setSelectedProducto(v)}
+                    options={productos}
+                    allowClear
+                    showSearch
+                    filterOption={(input, opt) =>
+                      String(opt?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                    }
+                  />
+                </div>
+              )}
             </div>
 
             <div style={{ marginTop: 20, textAlign: 'center' }}>
@@ -657,7 +703,7 @@ export const Instrucciones = () => {
                 style={{ backgroundColor: '#F26522', borderColor: '#F26522', fontWeight: 600 }}
                 onClick={handleAsignarInstrucciones}
                 loading={asignarSubmitting}
-                disabled={!asignarSelectedKeys.length || !selectedDireccion || !selectedPaqueteria}
+                disabled={!asignarSelectedKeys.length || !selectedDireccion || !selectedPaqueteria || (asignarSeccionKey === 'dhl' && !selectedProducto)}
               >
                 Asignar Instrucciones
               </Button>
