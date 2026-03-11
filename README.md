@@ -24,21 +24,38 @@ EntregaX es una plataforma completa que permite gestionar todos los aspectos de 
 
 ### 👥 Gestión de Clientes
 - Registro completo de clientes
-- Múltiples direcciones por cliente
+- Múltiples direcciones de facturación por cliente (CRUD completo)
+- Vista "Mis Clientes" filtrada por asesor
 - Historial de operaciones
 - Gestión de suites
 
 ### 📊 Operaciones
-- Actualización de costos por kilo
-- Gestión de tarifas marítimas
+- Actualización de costos por kilo (TDI)
+- Gestión de tarifas marítimas (aumento marítimo)
+- Actualización de tipos de cambio y costos
 - Cambio de instrucciones de envío
 - Manejo de descuentos
 - Operaciones NBox y NBox Marítimo
+- Operación Marítima (contenedores LOG)
 - Sistema de reempaque USA
+- Reasignación de guías y clientes
+- Cotizaciones pasadas (solo administrador)
+
+### 📦 Cotizaciones
+- **Mis Cotizaciones**: listado general con costo, envío y total por cotización
+- **Instrucciones Pendientes**: flujo de 3 vistas
+  - Lista de secciones (USA, TDI, DHL, TDI Express)
+  - Pendientes por sección con búsqueda y selección múltiple
+  - Asignar instrucciones con dirección, paquetería y (para DHL) producto
+  - Archivar guías individuales
+- **Guías Archivadas**: tabla de guías archivadas con acción de desarchivar
+- **Pendientes de Cotizar**: flujo de 2 vistas
+  - Lista de pendientes por asesor
+  - Detalle por suite con selección múltiple y generación de cotización (`POST quotes/generate-quote`)
 
 ### 👤 Gestión de Usuarios
 - Sistema de roles y permisos
-- Roles: Administrador, Asesor, Operaciones, Servicio al Cliente
+- Roles: Administrador, Asesor, Operaciones, Servicio al Cliente, Sistemas
 - Protección de rutas según rol
 - Perfiles personalizables
 
@@ -49,85 +66,139 @@ EntregaX es una plataforma completa que permite gestionar todos los aspectos de 
 
 ### 💵 Cargos Extra
 - Creación y gestión de cargos adicionales
-- Aplicación a operaciones específicas
+- Historial de cargos
+- Pendientes de aprobación
+
+### 🎫 Tickets
+- Tickets activos y archivados
+- Reporte estadístico
+- Creación de nuevos tickets
+
+### 📰 Noticias y Comunicados
+- Gestión de noticias internas
+- Comunicados generales
+
+### 🏢 Proveedores y Paqueterías
+- CRUD de proveedores
+- Gestión de paqueterías
 
 ## 🛠️ Stack Tecnológico
 
 ### Frontend
-- **React 18** - Librería UI
-- **TypeScript** - Tipado estático
-- **Vite** - Build tool y dev server
-- **React Router DOM** - Navegación
-- **Ant Design** - Componentes UI
-- **Axios** - Cliente HTTP
-- **SweetAlert2** - Alertas y confirmaciones
-- **Zustand** - Gestión de estado (authStore)
+- **React 19.2.4** — Librería UI
+- **TypeScript** — Tipado estático
+- **Vite** — Build tool y dev server
+- **React Router DOM** — Navegación SPA
+- **Ant Design v5** — Componentes UI
+- **Axios** — Cliente HTTP con interceptores de token
+- **SweetAlert2** — Alertas y confirmaciones
+- **Zustand** — Gestión de estado global (authStore)
+- **dayjs** — Manipulación y humanización de fechas en español
+- **PWA (Vite PWA Plugin)** — Service Worker y soporte offline
 
 ### Backend
-- **CodeIgniter 4** - Framework PHP
-- **MySQL** - Base de datos
+- **CodeIgniter 4** — Framework PHP
+- **MySQL** — Base de datos
 
 ### Herramientas
-- **ESLint** - Linter
-- **PWA** - Service Worker para aplicación progresiva
+- **ESLint** — Linter
+- **TypeScript strict** — Comprobación de tipos en compilación
 
 ## 📁 Estructura del Proyecto
 
 ```
 src/
-├── api/              # Configuración de Axios
+├── api/              # Configuración de Axios (base URL + interceptor Bearer)
 ├── assets/           # Recursos estáticos
 ├── components/       # Componentes reutilizables
 │   ├── common/       # ProtectedRoute, RoleGuard
-│   └── layout/       # AppHeader, MainLayout
-├── config/           # Configuraciones
+│   └── layout/       # AppHeader, MainLayout (menú lateral)
+├── config/           # Configuraciones globales
 ├── hooks/            # Custom hooks
 ├── pages/            # Páginas de la aplicación
-│   ├── asesores/     # Gestión de asesores
+│   ├── asesores/     # Lista de asesores
 │   ├── auth/         # Login, Unauthorized
-│   ├── cargosextra/  # Cargos extra
-│   ├── clientes/     # CRUD de clientes
-│   ├── dashboard/    # Dashboards por rol
-│   ├── encuestas/    # Sistema de encuestas
-│   ├── juego/        # Juegos (Snake)
-│   ├── operaciones/  # Operaciones logísticas
-│   ├── polizas/      # Gestión de pólizas
+│   ├── cargosextra/  # Lista, historial y pendientes de cargos extra
+│   ├── clientes/     # CRUD clientes + direcciones de facturación + Mis Clientes
+│   ├── cotizaciones/ # Mis Cotizaciones, Instrucciones, Guías Archivadas, Pendientes de cotizar
+│   ├── dashboard/    # Dashboard general y Home Servicio al Cliente
+│   ├── encuestas/    # Encuestas pendientes y realizadas
+│   ├── juego/        # Juego Snake
+│   ├── operaciones/  # Módulos de operaciones logísticas
+│   ├── polizas/      # Pólizas nuevas y pagadas
 │   ├── profile/      # Perfil de usuario
+│   ├── tickets/      # Tickets activos, archivados y reporte estadístico
 │   └── usuarios/     # CRUD de usuarios
-├── router/           # Configuración de rutas
+├── router/           # AppRouter.tsx — todas las rutas protegidas por rol
 ├── services/         # Servicios API
 │   ├── authService.ts
+│   ├── cargoExtraService.ts
 │   ├── clienteService.ts
-│   ├── operacionesService.ts
-│   ├── polizasService.ts
+│   ├── encuestaService.ts
+│   ├── operacionesService.ts   # Operaciones + Cotizaciones (quotes/*)
 │   └── userService.ts
-├── store/            # Zustand stores
+├── store/            # Zustand stores (authStore)
 ├── types/            # Tipos TypeScript
 └── utils/            # Utilidades
-
 ```
 
 ## 🔐 Roles y Permisos
 
-### Administrador
-- Acceso completo al sistema
-- Gestión de usuarios
-- Configuración global
+| Rol | Acceso |
+|-----|--------|
+| **ADMIN** | Acceso completo al sistema, gestión de usuarios, configuración global |
+| **SISTEMAS** | Administración técnica, acceso a módulos de operaciones y cotizaciones |
+| **ASESOR** | Gestión de sus clientes, cotizaciones, instrucciones, guías archivadas |
+| **OPERACIONES** | Procesamiento de envíos, actualización de costos, operaciones logísticas |
+| **SERVICIO AL CLIENTE** | Gestión de pólizas, validación de costos, encuestas, cotizaciones |
 
-### Asesor
-- Gestión de clientes
-- Creación de cotizaciones
-- Seguimiento de envíos
+## 🗺️ Rutas de la Aplicación
 
-### Operaciones
-- Procesamiento de envíos
-- Actualización de costos
-- Gestión de operaciones
-
-### Servicio al Cliente
-- Gestión de pólizas
-- Validación de costos
-- Atención al cliente
+| Ruta | Módulo | Roles |
+|------|--------|-------|
+| `/dashboard` | Dashboard principal | Todos |
+| `/usuarios/lista` | Lista de usuarios | ADMIN, SISTEMAS |
+| `/usuarios/nuevo` | Crear usuario | ADMIN, SISTEMAS |
+| `/usuarios/editar/:token` | Editar usuario | ADMIN, SISTEMAS |
+| `/clientes/lista` | Lista de clientes | ADMIN, SISTEMAS, OPERACIONES, SC |
+| `/clientes/mis-clientes` | Mis clientes | ASESOR |
+| `/clientes/nuevo` | Crear cliente | ASESOR, ADMIN, SISTEMAS |
+| `/clientes/editar/:id` | Editar cliente | ASESOR, ADMIN, SISTEMAS |
+| `/clientes/:id/direcciones/nueva` | Nueva dirección | ASESOR, ADMIN, SISTEMAS |
+| `/clientes/:clientId/direccion/editar/:id` | Editar dirección | ASESOR, ADMIN, SISTEMAS |
+| `/cargos-extras/lista` | Lista cargos extra | ADMIN, SISTEMAS |
+| `/cargos-extras/historial` | Historial cargos extra | ASESOR, ADMIN, SISTEMAS |
+| `/cargos-extras/pendientes` | Pendientes cargos extra | ASESOR, ADMIN, SISTEMAS |
+| `/cargos-extras/crear` | Crear cargo extra | ASESOR, ADMIN, SISTEMAS |
+| `/encuestas/pendientes` | Encuestas pendientes | ASESOR, SC |
+| `/encuestas/realizadas` | Encuestas realizadas | ASESOR, SC |
+| `/asesores` | Lista de asesores | ADMIN, SISTEMAS |
+| `/operaciones/actualizar-costo-kilo-tc` | Costo kilo TDI | OPERACIONES, ADMIN, SISTEMAS |
+| `/operaciones/actualizar-tc-aumento-maritimo` | Aumento marítimo | OPERACIONES, ADMIN, SISTEMAS |
+| `/operaciones/actualizar-tc-costo` | TC Costo | OPERACIONES, ADMIN, SISTEMAS |
+| `/operaciones/cambio-inst` | Cambio instrucciones | OPERACIONES, ADMIN, SISTEMAS |
+| `/operaciones/descuentos` | Descuentos | OPERACIONES, ADMIN, SISTEMAS |
+| `/operaciones/editar-guia-dhl` | Editar guía DHL | OPERACIONES, ADMIN, SISTEMAS |
+| `/operaciones/nbox` | NBox | OPERACIONES, ADMIN, SISTEMAS |
+| `/operaciones/nbox-maritimo` | NBox Marítimo | OPERACIONES, ADMIN, SISTEMAS |
+| `/operaciones/operacion-maritima` | Operación Marítima | OPERACIONES, ADMIN, SISTEMAS |
+| `/operaciones/reasignar-guia` | Reasignar guía | OPERACIONES, ADMIN, SISTEMAS |
+| `/operaciones/reasignar-cliente` | Reasignar cliente | OPERACIONES, ADMIN, SISTEMAS |
+| `/operaciones/solo-adm-ctz-pasadas` | Cotizaciones pasadas | ADMIN |
+| `/operaciones/usa-remp` | Reempaque USA | OPERACIONES, ADMIN, SISTEMAS |
+| `/cotizaciones/lista` | Mis cotizaciones | ASESOR, SC, SISTEMAS, ADMIN |
+| `/cotizaciones/instrucciones` | Instrucciones pendientes | ASESOR, SC, SISTEMAS, ADMIN |
+| `/cotizaciones/guias-archivadas` | Guías archivadas | ASESOR, SC, SISTEMAS, ADMIN |
+| `/cotizaciones/pendientes` | Pendientes de cotizar | ASESOR, SC, SISTEMAS, ADMIN |
+| `/polizas/nuevas` | Pólizas nuevas | SC |
+| `/polizas/pagadas` | Pólizas pagadas | SC |
+| `/tickets/activos` | Tickets activos | ADMIN, SISTEMAS |
+| `/tickets/archivados` | Tickets archivados | ADMIN, SISTEMAS |
+| `/tickets/reporte-estadistico` | Reporte de tickets | ADMIN, SISTEMAS |
+| `/paqueterias/lista` | Lista paqueterías | ADMIN, SISTEMAS |
+| `/noticias/lista` | Lista noticias | ADMIN, SISTEMAS |
+| `/proveedores/lista` | Lista proveedores | ADMIN, SISTEMAS |
+| `/perfil` | Perfil de usuario | Todos |
 
 ## 🚀 Instalación
 
@@ -153,7 +224,6 @@ src/
 
 3. **Configurar variables de entorno**
    ```bash
-   # Crear archivo .env basado en .env.example
    cp .env.example .env
    ```
 
@@ -184,48 +254,66 @@ npm run lint         # Ejecuta ESLint
 ## 🎨 Características de UX
 
 - **Diseño Responsivo**: Adaptable a móviles, tablets y desktop
-- **Tema Corporativo**: Gradiente naranja (#ff6600) como color principal
-- **Fechas Humanizadas**: Formato en español legible ("25 de febrero de 2025, 1:40 PM")
-- **Moneda Formateada**: Separadores de miles automáticos ($1,234.56)
-- **Iconos Contextuales**: PDF y Excel con iconos específicos
-- **Búsqueda en Tiempo Real**: Filtrado instantáneo en tablas
-- **Confirmaciones**: SweetAlert2 para acciones críticas
-- **Feedback Visual**: Estados de carga y mensajes informativos
+- **Tema Corporativo**: Color principal naranja `#F26522`, secundario azul `#1d3557`
+- **Fechas Humanizadas**: Formato `DD MMM YYYY` con tooltip de fecha y hora completa (dayjs + locale es)
+- **Moneda Formateada**: Separadores de miles automáticos (`$1,234.56`)
+- **Búsqueda en Tiempo Real**: Filtrado instantáneo en todas las tablas
+- **Tablas con scroll horizontal**: `scroll={{ x: 'max-content' }}` en todas las tablas anchas
+- **Confirmaciones**: SweetAlert2 para acciones críticas (desarchivar, generar cotización, etc.)
+- **Feedback Visual**: Spinners de carga por sección, mensajes de éxito/error desde el API
+- **Vistas Inline**: Componentes multi-vista sin cambio de ruta (lista → detalle → acción)
 
 ## 🔧 Configuración de Desarrollo
 
 ### Axios
 La configuración de Axios incluye:
-- Base URL del backend
-- Interceptores para manejo de tokens
+- Base URL del backend (variable de entorno `VITE_API_URL`)
+- Interceptor de request: agrega `Authorization: Bearer <token>` automáticamente desde el authStore
 - Gestión automática de errores 401/403
 
 ### Rutas Protegidas
-Las rutas utilizan `ProtectedRoute` y `RoleGuard` para:
-- Verificar autenticación
+Las rutas utilizan `ProtectedRoute` con prop `roles` para:
+- Verificar autenticación (token en authStore)
 - Validar permisos por rol
-- Redireccionar usuarios no autorizados
+- Redirigir a `/unauthorized` si el rol no coincide
 
-## 📊 Módulos Principales
+### Patrones de Componentes
 
-### Cotizaciones
-- Soporte para envíos TERRESTRES y MARÍTIMOS
-- Cálculo automático de costos
-- Asignación de costos por caja/contenedor
-- Visualización diferenciada según tipo
+**Vista multi-step inline** (ej. Instrucciones, PendientesCotizar):
+```
+view: 'lista' | 'detalle' | 'asignar'
+```
+La vista cambia sin cambiar de ruta, manteniendo estado entre pasos.
 
-### Pólizas
-- Listado de pólizas pendientes
-- Aprobación/rechazo con motivos
-- Visualización de documentos adjuntos
-- Filtrado por múltiples campos
-- Exportación de datos
+**Mapeo de datos del API**:
+Todos los componentes usan funciones `mapRows()` que normalizan los campos del JSON del backend, aplicando fallbacks para nombres de campo alternativos (ej. `r.guiaunica ?? r.guia_unica`).
 
-### Clientes
-- CRUD completo
-- Múltiples direcciones
-- Historial de operaciones
-- Búsqueda avanzada
+## 📊 Módulos de Cotizaciones (detalle)
+
+### Mis Cotizaciones (`/cotizaciones/lista`)
+Tabla con: Cliente (suite), IDCO, Creada, Costo, Envío, Total, Detalles.
+Endpoint: `GET /quotes/my-quotes/{iduser}`
+
+### Instrucciones Pendientes (`/cotizaciones/instrucciones`)
+Flujo de 3 vistas:
+1. **Lista**: secciones USA, TDI, DHL, TDI Express con conteo de pendientes
+2. **Pendientes**: guías de la sección con búsqueda, selección múltiple, archivar individual
+3. **Asignar**: selección de dirección de facturación, paquetería, y producto (solo DHL) → `POST /quotes/update-instruction`
+
+Endpoints: `GET /quotes/pending-instructions/{iduser}`, `GET /quotes/pending-list/{idc}/{idtp}`, `GET /quotes/ready-for-instructions/{idc}/{idtp}`, `GET /quotes/billing-address/{idc}`, `GET /quotes/packings`, `GET /quotes/list-products`, `POST /quotes/archived-waybill`
+
+### Guías Archivadas (`/cotizaciones/guias-archivadas`)
+Tabla con 13 columnas. Acción de Desarchivar con confirmación SweetAlert2.
+Endpoints: `GET /quotes/archived/{iduser}`, `POST /quotes/desarchived-waybill`
+
+### Pendientes de Cotizar (`/cotizaciones/pendientes`)
+Flujo de 2 vistas:
+1. **Lista**: agrupación por suite con total, tipo y botón "Ver"
+2. **Detalle**: guías de la suite con checkboxes y botón "Generar cotización"
+
+Payload de generación: `{ ids[], idtp, iduser, idc }` → `POST /quotes/generate-quote`
+
+Endpoints: `GET /quotes/pending-quotes/{iduser}`, `GET /quotes/list-pending-quotes/{suite}/{idtp}`
 
 ## 🤝 Contribución
 
@@ -246,5 +334,5 @@ Para soporte técnico, contactar al equipo de desarrollo.
 
 ---
 
-**Última actualización**: Febrero 2026  
-**Versión**: 2.0.0 
+**Última actualización**: Marzo 2026  
+**Versión**: 2.1.0 
