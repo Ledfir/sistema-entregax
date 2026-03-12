@@ -200,6 +200,30 @@ export const operacionesService = {
     return response.data;
   },
 
+  // Quitar pago vinculado de cotización
+  removePayment: async (payload: { id: string | number }): Promise<any> => {
+    const response = await apiClient.post('/quotes/remove-payment', payload);
+    return response.data;
+  },
+
+  // Vincular pago a cotización
+  addPayment: async (payload: { id: string | number; ctz: string }): Promise<any> => {
+    const response = await apiClient.post('/quotes/add-payment', payload);
+    return response.data;
+  },
+
+  // Solicitar 5 días más a cargo extra
+  addDayToExtraCharge: async (payload: { id: string | number }): Promise<any> => {
+    const response = await apiClient.post('/quotes/add-day-to-extra-charge', payload);
+    return response.data;
+  },
+
+  // Generar PDF de cotización
+  getQuotePdf: async (ctz: string): Promise<any> => {
+    const response = await apiClient.get(`/quotes/quote-pdf/${ctz}`);
+    return response.data;
+  },
+
   // Desarchivar guía
   desarchivedWaybill: async (payload: { id: string | number; iduser: string | number }): Promise<any> => {
     const response = await apiClient.post('/quotes/desarchived-waybill', payload);
@@ -221,6 +245,12 @@ export const operacionesService = {
   // Mis cotizaciones
   getMyQuotes: async (iduser: number | string): Promise<any> => {
     const response = await apiClient.get(`/quotes/my-quotes/${iduser}`);
+    return response.data;
+  },
+
+  // Obtener detalle de una cotización por ctz
+  getQuote: async (ctz: string): Promise<any> => {
+    const response = await apiClient.get(`/quotes/quote/${ctz}`);
     return response.data;
   },
 
