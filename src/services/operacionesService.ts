@@ -224,6 +224,12 @@ export const operacionesService = {
     return response.data;
   },
 
+  // Eliminar cotización
+  deleteQuote: async (payload: { ctz: string; motivo: string }): Promise<any> => {
+    const response = await apiClient.post('/quotes/delete-quote', payload);
+    return response.data;
+  },
+
   // Desarchivar guía
   desarchivedWaybill: async (payload: { id: string | number; iduser: string | number }): Promise<any> => {
     const response = await apiClient.post('/quotes/desarchived-waybill', payload);

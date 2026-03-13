@@ -176,7 +176,6 @@ export const MisCotizaciones = () => {
     const cargosVencidos   = cargosExtra.filter((ce) => ce.fechap && !dayjs(ce.fechap).isAfter(dayjs(), 'day'));
     const cargosVigentes   = cargosExtra.filter((ce) => ce.fechap &&  dayjs(ce.fechap).isAfter(dayjs(), 'day'));
     const bloqueado = cargosVencidos.length > 0;
-    const totalNum  = cot.total != null ? Number(cot.total) : 0;
 
     return (
       <>
@@ -533,8 +532,15 @@ export const MisCotizaciones = () => {
             onClick={async () => {
               try {
                 setBorrandoCot(true);
-                console.log('Borrar cotización', detalleData?.cotizacion?.ctz, motivoBorrar);
-                setBorrarModal(false);
+                const res = await operacionesService.deleteQuote({ ctz: detalleData?.cotizacion?.ctz ?? '', motivo: motivoBorrar });
+                Swal.fire({ icon: res?.status === 'success' ? 'success' : 'info', title: '', text: res?.message ?? 'Cotización eliminada.', showConfirmButton: false, timer: 3000 });
+                if (res?.status === 'success') {
+                  setBorrarModal(false);
+                  handleVolver();
+                  cargarDatos();
+                }
+              } catch (e: any) {
+                Swal.fire({ icon: 'error', title: '', text: e?.response?.data?.message ?? 'Error al eliminar la cotización.', showConfirmButton: false, timer: 4000 });
               } finally {
                 setBorrandoCot(false);
               }
