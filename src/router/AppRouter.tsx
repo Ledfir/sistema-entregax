@@ -25,6 +25,7 @@ import { UsaRemp } from '@/pages/operaciones/UsaRemp';
 import { NBox } from '@/pages/operaciones/NBox';
 import { NBoxMaritimo } from '@/pages/operaciones/NBoxMaritimo';
 import { Instrucciones, GuiasArchivadas, PendientesCotizar, MisCotizaciones } from '@/pages/cotizaciones';
+import { EnvioConFactura } from '@/pages/dolares';
 import { Juego, Snake } from '@/pages/juego';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
@@ -345,6 +346,16 @@ export const AppRouter = () => {
             } 
           />
           
+          {/* Rutas de dólares */}
+          <Route
+            path="/dolares/solicitud/con-factura"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <EnvioConFactura />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Rutas de pólizas */}
           <Route 
             path="/polizas/nuevas" 
