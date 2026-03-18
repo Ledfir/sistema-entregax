@@ -236,6 +236,13 @@ export const operacionesService = {
     return response.data;
   },
 
+  // Tipos de servicio para catálogo de dólares
+  getDollarServiceTypes: async (): Promise<{ id: string | number; name: string }[]> => {
+    const response = await apiClient.get('/dolars/list-services');
+    const data = response.data?.data ?? response.data;
+    return Array.isArray(data) ? data : [];
+  },
+
   // Desarchivar guía
   desarchivedWaybill: async (payload: { id: string | number; iduser: string | number }): Promise<any> => {
     const response = await apiClient.post('/quotes/desarchived-waybill', payload);
