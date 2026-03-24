@@ -278,6 +278,24 @@ export const operacionesService = {
     const response = await apiClient.post('/quotes/generate-quote', payload);
     return response.data;
   },
+
+  // Buscar servicios en catálogo de dólares
+  searchDollarServices: async (payload: { clave?: string; ids?: string; servicio?: string }): Promise<any> => {
+    const response = await apiClient.post('/dolars/search-service', payload);
+    return response.data;
+  },
+
+  // Buscar clave en catálogo de dólares
+  searchClave: async (payload: { clave: string; idprov: number }): Promise<any> => {
+    const response = await apiClient.post('/dolars/search-clave', payload);
+    return response.data;
+  },
+
+  // Obtener cuentas con factura para envío de dólares
+  listAccountsWithInvoice: async (payload: { idprov: number }): Promise<any> => {
+    const response = await apiClient.post('/dolars/list-acounts-with-invoice', payload);
+    return response.data;
+  },
 };
 
 export default operacionesService;

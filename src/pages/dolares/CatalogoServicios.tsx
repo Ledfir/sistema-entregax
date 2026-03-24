@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Button, Card, Col, Input, Row, Select, Table } from 'antd';
+import { Button, Card, Col, Input, Row, Select, Table, message } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import { SearchOutlined } from '@ant-design/icons';
 import operacionesService from '@/services/operacionesService';
+import Swal from 'sweetalert2';
 
 interface TipoServicio {
   id: string | number;
@@ -13,13 +15,15 @@ interface Servicio {
   clave: string;
   tipo: string;
   nombre: string;
+  proveedor?: string;
   [key: string]: any;
 }
 
-const columns = [
-  { title: 'Clave', dataIndex: 'clave', key: 'clave' },
-  { title: 'Tipo de servicio', dataIndex: 'tipo', key: 'tipo' },
-  { title: 'Nombre', dataIndex: 'nombre', key: 'nombre' },
+const columns: ColumnsType<Servicio> = [
+  { title: 'Clave', dataIndex: 'clave', key: 'clave', align: 'center' },
+  { title: 'Tipo de servicio', dataIndex: 'tipo', key: 'tipo', align: 'center' },
+  { title: 'Nombre', dataIndex: 'nombre', key: 'nombre', align: 'center' },
+  { title: 'Proveedor', dataIndex: 'proveedor', key: 'proveedor', align: 'center' }
 ];
 
 export const CatalogoServicios = () => {
@@ -39,9 +43,88 @@ export const CatalogoServicios = () => {
 
   const handleBuscar = async () => {
     setLoading(true);
-    // TODO: conectar con servicio real
-    setData([]);
-    setLoading(false);
+    try {
+      const payload: { clave?: string; ids?: string; servicio?: string } = {};
+      
+      if (clave) payload.clave = clave;
+      if (tipo) payload.ids = tipo;
+      if (nombre) payload.servicio = nombre;
+      
+      const response = await operacionesService.searchDollarServices(payload);
+      
+      console.log('Respuesta completa:', response);
+      
+      // Verificar si la respuesta tiene un status de error en el JSON
+      if (response?.status && (response.status === 404 || response.status >= 400)) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Sin resultados',
+          text: response?.message || 'No se encontraron datos',
+          showConfirmButton: false,
+          timer: 2500,
+        });
+        setData([]);
+        return;
+      }
+      
+      const items = response?.data ?? response ?? [];
+      
+      if (Array.isArray(items) && items.length > 0) {
+        setData(items);
+        message.success(`Se encontraron ${items.length} servicio(s)`);
+      } else {
+        setData([]);
+        Swal.fire({
+          icon: 'info',
+          title: 'Sin resultados',
+          text: response?.message || 'No se encontraron servicios',
+          showConfirmButton: false,
+          timer: 2500,
+        });
+      }
+    } catch (error: any) {
+      console.error('Error completo:', error);
+      console.error('Error response:', error?.response);
+      console.error('Error response data:', error?.response?.data);
+      
+      // Priorizar el mensaje del response.data si existe
+      const errorData = error?.response?.data;
+      let errorMsg = 'Error al buscar servicios';
+      
+      if (errorData) {
+        // Si el servidor devuelve un objeto con message
+        if (errorData.message) {
+          errorMsg = errorData.message;
+        } else if (typeof errorData === 'string') {
+          errorMsg = errorData;
+        }
+      } else if (error?.message) {
+        errorMsg = error.message;
+      }
+      
+      // Determinar el tipo de notificación según el status
+      if (error?.response?.status === 404) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'No encontrado',
+          text: errorMsg,
+          showConfirmButton: false,
+          timer: 2500,
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: errorMsg,
+          showConfirmButton: false,
+          timer: 2500,
+        });
+      }
+      
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLimpiar = () => {
@@ -60,6 +143,7 @@ export const CatalogoServicios = () => {
             placeholder="CLAVE"
             value={clave}
             onChange={(e) => setClave(e.target.value)}
+            onPressEnter={handleBuscar}
             style={{ minWidth: 100 }}
           />
         </Col>
@@ -82,6 +166,7 @@ export const CatalogoServicios = () => {
             placeholder="Servicio"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
+            onPressEnter={handleBuscar}
             style={{ minWidth: 100 }}
           />
         </Col>
