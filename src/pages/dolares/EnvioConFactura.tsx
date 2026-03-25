@@ -283,16 +283,63 @@ export const EnvioConFactura = () => {
 
   const handleGuardar = async () => {
     try {
+      // Validar que haya al menos un servicio fiscal
+      if (servicios.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Servicios requeridos',
+          text: 'Debe agregar al menos un servicio fiscal antes de guardar',
+          showConfirmButton: false,
+          timer: 2500,
+        });
+        return;
+      }
+
       const values = await form.validateFields();
-      console.log('Datos del formulario:', values);
-      console.log('Servicios:', servicios);
       
-      // Aquí irá la lógica para guardar el envío
+      // Validar que se haya seleccionado un archivo
+      if (!values.archivo || values.archivo.fileList.length === 0) {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Archivo requerido',
+          text: 'Debe seleccionar un archivo',
+          showConfirmButton: false,
+          timer: 2500,
+        });
+        return;
+      }
+
+      // Construir el array de servicios
+      const serviciosData = servicios.map(servicio => ({
+        clave: servicio.clave,
+        concepto: servicio.descripcionAlternativa || '',
+        id: servicio.servicio,
+        piezas: servicio.cantidad,
+        preciounit: servicio.precioUnitario
+      }));
+
+      // Construir FormData
+      const formData = new FormData();
+      formData.append('cliente', values.cliente);
+      formData.append('monto', values.monto.toString());
+      formData.append('pct', values.pct.toString());
+      formData.append('tc', values.tipoCambio.toString());
+      formData.append('total', values.total.toString());
+      formData.append('cuenta', values.cuenta);
+      formData.append('idprov', proveedorSeleccionado?.id?.toString() || '');
+      formData.append('servicios', JSON.stringify(serviciosData));
+      
+      // Agregar el archivo
+      const file = values.archivo.fileList[0].originFileObj;
+      formData.append('archivo', file);
+
+      // Enviar al backend
+      const response = await operacionesService.saveOrderWithInvoice(formData);
       
       Swal.fire({
         icon: 'success',
         title: 'Envío creado',
-        text: 'El envío de dólares se ha creado exitosamente',
+        text: response.message || 'El envío de dólares se ha creado exitosamente',
         showConfirmButton: false,
         timer: 2500,
       });
@@ -302,10 +349,11 @@ export const EnvioConFactura = () => {
       if (error.errorFields) {
         return;
       }
+      console.error('Error al guardar:', error);
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'No se pudo crear el envío',
+        text: error.response?.data?.message || 'No se pudo crear el envío',
         showConfirmButton: false,
         timer: 2500,
       });

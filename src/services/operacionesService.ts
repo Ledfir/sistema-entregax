@@ -296,6 +296,16 @@ export const operacionesService = {
     const response = await apiClient.post('/dolars/list-acounts-with-invoice', payload);
     return response.data;
   },
+
+  // Guardar orden de dólares con factura
+  saveOrderWithInvoice: async (formData: FormData): Promise<any> => {
+    const response = await apiClient.post('/dolars/save-order-with-invoice', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+    return response.data;
+  },
 };
 
 export default operacionesService;
