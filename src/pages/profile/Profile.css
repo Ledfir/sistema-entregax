@@ -67,3 +67,42 @@
     font-size: 20px;
   }
 }
+
+/* ─── Modo oscuro ──────────────────────────────────────────── */
+body.dark-mode .avatar-section {
+  border-bottom-color: var(--border-color);
+}
+
+body.dark-mode .user-info-section h2 {
+  color: var(--text-primary);
+}
+
+body.dark-mode .user-email {
+  color: var(--text-secondary);
+}
+
+body.dark-mode .user-type {
+  color: #f39915;
+}
+
+/* Descriptions items - asegurar legibilidad */
+body.dark-mode .ant-descriptions-item-label {
+  color: var(--text-primary) !important;
+  background-color: var(--bg-tertiary) !important;
+}
+
+body.dark-mode .ant-descriptions-item-content {
+  color: var(--text-secondary) !important;
+  background-color: var(--card-bg) !important;
+}
+
+body.dark-mode .ant-descriptions-bordered .ant-descriptions-item-label,
+body.dark-mode .ant-descriptions-bordered .ant-descriptions-item-content {
+  border-color: var(--border-color) !important;
+}
+
+/* SVG icons within descriptions */
+body.dark-mode .ant-descriptions-item-label svg,
+body.dark-mode .ant-descriptions-item-content svg {
+  opacity: 0.9;
+}

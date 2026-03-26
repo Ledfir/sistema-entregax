@@ -49,3 +49,20 @@
     font-size: 16px;
   }
 }
+
+/* Dark Mode */
+body.dark-mode .tickets-card {
+  background: var(--card-bg);
+}
+
+body.dark-mode .glosario-colores {
+  background: var(--bg-tertiary);
+}
+
+body.dark-mode .tabla-tickets .ant-table-thead > tr > th {
+  background: var(--bg-tertiary);
+}
+
+body.dark-mode .tabla-tickets .ant-table-tbody > tr:hover > td {
+  background: var(--bg-tertiary);
+}

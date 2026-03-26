@@ -201,3 +201,17 @@
   margin: 0;
   line-height: 1.8;
 }
+
+/* ─── Modo oscuro: mantener legibilidad en stat-boxes ──────── */
+body.dark-mode .home-asesor-card-title {
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .stat-box .ant-statistic-title {
+  color: #555 !important;
+}
+
+body.dark-mode .stat-box .ant-statistic-content {
+  /* Los valores ya tienen inline styles, pero reforzamos */
+  opacity: 1 !important;
+}

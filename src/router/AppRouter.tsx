@@ -13,8 +13,8 @@ import { CargoExtraCreate, CargoExtraList, CargoExtraHistorial, CargoExtraPendie
 import { UserGrid, UserCreate, UserEdit } from '@/pages/usuarios';
 import { EncuestasPendientes, EncuestasRealizadas } from '@/pages/encuestas';
 import { AsesoresList } from '@/pages/asesores';
-import { PolizasNuevas, PolizasPagadas } from '@/pages/polizas';
-import { TicketsReporteEstadistico, TicketsActivos, TicketsArchivados } from '@/pages/tickets';
+import { PolizasNuevas, PolizasPagadas, GenerarPoliza, MisPolizas } from '@/pages/polizas';
+import { TicketCreate, TicketsReporteEstadistico, TicketsActivos, TicketsArchivados } from '@/pages/tickets';
 import { ActualizarCostoKiloTC } from '@/pages/operaciones/ActualizarCostoKiloTC';
 import { ActualizarTCAumentoMaritimo } from '@/pages/operaciones/ActualizarTCAumentoMaritimo';
 import { ActualizarTCCosto } from '@/pages/operaciones/ActualizarTCCosto';
@@ -25,7 +25,11 @@ import { UsaRemp } from '@/pages/operaciones/UsaRemp';
 import { NBox } from '@/pages/operaciones/NBox';
 import { NBoxMaritimo } from '@/pages/operaciones/NBoxMaritimo';
 import { Instrucciones, GuiasArchivadas, PendientesCotizar, MisCotizaciones } from '@/pages/cotizaciones';
-import { EnvioConFactura, CatalogoServicios } from '@/pages/dolares';
+import { EnvioConFactura, CatalogoServicios, MisEnvios, EnviosArchivados } from '@/pages/dolares';
+import { Cotizaciones, PanelPLInstrucciones } from '@/pages/maritimos';
+import { Historial, Saldo, SubirPagos } from '@/pages/monedero';
+import { MisEnvios as MisEnviosRMB, EnviosArchivados as EnviosArchivadosRMB, EnvioConFactura as EnvioConFacturaRMB, EnvioSinFactura as EnvioSinFacturaRMB, CatalogoServicios as CatalogoServiciosRMB } from '@/pages/rmbs';
+import { MisEnvios as MisEnviosUSDT, EnviosArchivados as EnviosArchivadosUSDT, EnvioConFactura as EnvioConFacturaUSDT, EnvioSinFactura as EnvioSinFacturaUSDT, CatalogoServicios as CatalogoServiciosUSDT } from '@/pages/usdts';
 import { Juego, Snake } from '@/pages/juego';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
@@ -363,8 +367,58 @@ export const AppRouter = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/dolares/mis-envios"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <MisEnvios />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dolares/envios-archivados"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <EnviosArchivados />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Rutas de marítimos */}
+          <Route
+            path="/maritimos/cotizaciones"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <Cotizaciones />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/maritimos/panel-pl-instrucciones"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <PanelPLInstrucciones />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Rutas de pólizas */}
+          <Route 
+            path="/polizas/crear" 
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'ASESOR', 'SISTEMAS', 'ADMIN']}>
+                <GenerarPoliza />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/polizas/mis-polizas" 
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'ASESOR', 'SISTEMAS', 'ADMIN']}>
+                <MisPolizas />
+              </ProtectedRoute>
+            } 
+          />
           <Route 
             path="/polizas/nuevas" 
             element={
@@ -382,7 +436,141 @@ export const AppRouter = () => {
             } 
           />
           
+          {/* Rutas de monedero */}
+          <Route
+            path="/monedero/historial"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <Historial />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/monedero/saldo"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <Saldo />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/monedero/subir-pagos"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <SubirPagos />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Rutas de RMBs */}
+          <Route
+            path="/rmbs/solicitud/con-factura"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <EnvioConFacturaRMB />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/rmbs/solicitud/sin-factura"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <EnvioSinFacturaRMB />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/rmbs/mis-envios"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <MisEnviosRMB />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/rmbs/envios-archivados"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <EnviosArchivadosRMB />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/rmbs/catalogo-servicios"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <CatalogoServiciosRMB />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Rutas de USDTs */}
+          <Route
+            path="/usdts/solicitud/con-factura"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <EnvioConFacturaUSDT />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/usdts/solicitud/sin-factura"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <EnvioSinFacturaUSDT />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/usdts/mis-envios"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <MisEnviosUSDT />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/usdts/envios-archivados"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <EnviosArchivadosUSDT />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/usdts/catalogo-servicios"
+            element={
+              <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
+                <CatalogoServiciosUSDT />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Rutas de tickets */}
+          <Route 
+            path="/tickets/crear" 
+            element={
+              <ProtectedRoute roles={['SISTEMAS', 'ADMINISTRACIÓN', 'TEAM LEADER', 'ASESOR', 'ATENCION A CLIENTES', 'SERVICIO AL CLIENTE']}>
+                <TicketCreate />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/tickets/mis-tickets" 
+            element={
+              <ProtectedRoute roles={['SISTEMAS', 'ADMINISTRACIÓN', 'TEAM LEADER', 'ASESOR', 'ATENCION A CLIENTES', 'SERVICIO AL CLIENTE']}>
+                <TicketsActivos />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/tickets/archivados" 
+            element={
+              <ProtectedRoute roles={['SISTEMAS', 'ADMINISTRACIÓN', 'TEAM LEADER', 'ASESOR', 'ATENCION A CLIENTES', 'SERVICIO AL CLIENTE']}>
+                <TicketsArchivados />
+              </ProtectedRoute>
+            } 
+          />
           <Route 
             path="/tickets/reporte-estadistico" 
             element={
@@ -396,14 +584,6 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
                 <TicketsActivos />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/tickets/archivados" 
-            element={
-              <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
-                <TicketsArchivados />
               </ProtectedRoute>
             } 
           />
