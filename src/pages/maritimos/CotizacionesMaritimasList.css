@@ -1,0 +1,121 @@
+.cotizaciones-maritimas-list {
+  padding: 24px;
+  min-height: calc(100vh - 140px);
+}
+
+.cotizaciones-maritimas-list .ant-table {
+  font-size: 14px;
+}
+
+.cotizaciones-maritimas-list .ant-table-thead > tr > th {
+  background: #f5f7fa;
+  color: #333;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Dark mode support */
+body.dark-mode .cotizaciones-maritimas-list {
+  background-color: var(--bg-primary);
+}
+
+body.dark-mode .cotizaciones-maritimas-list .cotizaciones-card {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-mode .cotizaciones-maritimas-list .cotizaciones-card .ant-card-head {
+  background-color: var(--card-bg) !important;
+  border-bottom-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .cotizaciones-card .ant-card-head-title {
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .cotizaciones-card .ant-card-body {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .ant-table {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .ant-table-thead > tr > th {
+  background-color: var(--hover-bg) !important;
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .ant-table-tbody > tr > td {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .ant-table-tbody > tr:hover > td {
+  background-color: var(--hover-bg) !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .ant-pagination-item,
+body.dark-mode .cotizaciones-maritimas-list .ant-pagination-item-link {
+  background-color: var(--card-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .ant-pagination-item-active {
+  background-color: #1890ff !important;
+  border-color: #1890ff !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .ant-pagination-item-active a {
+  color: white !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .ant-select-selector {
+  background-color: var(--input-bg) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .ant-btn {
+  border-color: var(--border-color) !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .ant-btn:not(.ant-btn-primary) {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .ant-btn:not(.ant-btn-primary):hover {
+  background-color: var(--hover-bg) !important;
+  border-color: #1890ff !important;
+  color: #1890ff !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .ant-table-filter-dropdown {
+  background-color: var(--card-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .ant-dropdown-menu {
+  background-color: var(--card-bg) !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .ant-dropdown-menu-item {
+  color: var(--text-primary) !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .ant-dropdown-menu-item:hover {
+  background-color: var(--hover-bg) !important;
+}
+
+body.dark-mode .cotizaciones-maritimas-list .ant-dropdown-menu-item-disabled {
+  color: var(--text-secondary) !important;
+  opacity: 0.5;
+}

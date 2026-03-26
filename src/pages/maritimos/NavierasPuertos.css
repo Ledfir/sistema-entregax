@@ -1,0 +1,182 @@
+.navieras-puertos-wrapper {
+  padding: 24px;
+  min-height: calc(100vh - 64px);
+}
+
+.navieras-puertos-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.navieras-section,
+.puertos-section {
+  margin-bottom: 32px;
+}
+
+.puertos-section {
+  margin-bottom: 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.section-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary, rgba(0, 0, 0, 0.88));
+}
+
+/* Estilos para las tablas */
+.navieras-puertos-card .ant-table {
+  background: transparent;
+}
+
+.navieras-puertos-card .ant-table-thead > tr > th {
+  background: var(--bg-secondary, #fafafa);
+  font-weight: 600;
+}
+
+.navieras-puertos-card .ant-table-tbody > tr:hover > td {
+  background: var(--hover-bg, #f5f5f5);
+}
+
+/* Estilos del modal */
+.navieras-puertos-wrapper .ant-modal-header {
+  background: var(--card-bg, #ffffff);
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+}
+
+.navieras-puertos-wrapper .ant-modal-body {
+  background: var(--card-bg, #ffffff);
+}
+
+.navieras-puertos-wrapper .ant-modal-footer {
+  background: var(--card-bg, #ffffff);
+  border-top: 1px solid var(--border-color, #f0f0f0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .navieras-puertos-wrapper {
+    padding: 16px;
+  }
+
+  .section-header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .section-header button {
+    width: 100%;
+  }
+}
+
+/* Dark mode */
+.dark-mode .navieras-puertos-wrapper {
+  background: var(--bg-primary);
+}
+
+.dark-mode .navieras-puertos-card {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.dark-mode .navieras-puertos-card .ant-card-head {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-mode .navieras-puertos-card .ant-card-body {
+  background: var(--card-bg);
+  color: var(--text-primary);
+}
+
+.dark-mode .section-header h3 {
+  color: var(--text-primary);
+}
+
+.dark-mode .navieras-puertos-card .ant-table {
+  background: var(--card-bg);
+  color: var(--text-primary);
+}
+
+.dark-mode .navieras-puertos-card .ant-table-thead > tr > th {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.dark-mode .navieras-puertos-card .ant-table-tbody > tr > td {
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-mode .navieras-puertos-card .ant-table-tbody > tr:hover > td {
+  background: var(--hover-bg);
+}
+
+.dark-mode .navieras-puertos-card .ant-pagination {
+  color: var(--text-primary);
+}
+
+.dark-mode .navieras-puertos-card .ant-pagination .ant-pagination-item {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.dark-mode .navieras-puertos-card .ant-pagination .ant-pagination-item a {
+  color: var(--text-primary);
+}
+
+.dark-mode .navieras-puertos-card .ant-pagination .ant-pagination-item-active {
+  border-color: var(--primary-color, #1890ff);
+}
+
+.dark-mode .navieras-puertos-card .ant-pagination .ant-pagination-item-active a {
+  color: var(--primary-color, #1890ff);
+}
+
+.dark-mode .navieras-puertos-wrapper .ant-modal-content {
+  background: var(--card-bg);
+  color: var(--text-primary);
+}
+
+.dark-mode .navieras-puertos-wrapper .ant-modal-header {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.dark-mode .navieras-puertos-wrapper .ant-modal-title {
+  color: var(--text-primary);
+}
+
+.dark-mode .navieras-puertos-wrapper .ant-modal-body {
+  background: var(--card-bg);
+}
+
+.dark-mode .navieras-puertos-wrapper .ant-modal-footer {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.dark-mode .navieras-puertos-wrapper .ant-form-item-label > label {
+  color: var(--text-primary);
+}
+
+.dark-mode .navieras-puertos-wrapper .ant-input {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-mode .navieras-puertos-wrapper .ant-input:hover,
+.dark-mode .navieras-puertos-wrapper .ant-input:focus {
+  border-color: var(--primary-color, #1890ff);
+  background: var(--bg-secondary);
+}

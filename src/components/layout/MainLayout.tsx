@@ -17,6 +17,15 @@ import {
   WalletOutlined,
   PayCircleOutlined,
   SwapOutlined,
+  SolutionOutlined,
+  ShopOutlined,
+  CalculatorOutlined,
+  ControlOutlined,
+  ClockCircleOutlined,
+  CloudUploadOutlined,
+  RocketOutlined,
+  TruckOutlined,
+  SafetyCertificateOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { AppHeader } from './AppHeader';
@@ -263,6 +272,70 @@ export const MainLayout = () => {
     ] },
   ];
 
+  // Menú para OPERACION MARITIMA
+  const operacionMaritimaMenuItems = [
+    {
+      key: '/dashboard',
+      icon: <HomeOutlined />,
+      label: 'Home',
+    },
+    {
+      key: '/maritima/clientes',
+      icon: <UserOutlined />,
+      label: 'Clientes',
+    },
+    {
+      key: '/maritima/consignatarios',
+      icon: <SolutionOutlined />,
+      label: 'Consignatarios',
+    },
+    {
+      key: '/maritima/cotizaciones',
+      icon: <FileTextOutlined />,
+      label: 'Cotizaciones Maritimas',
+    },
+    {
+      key: '/maritima/control-gastos',
+      icon: <CalculatorOutlined />,
+      label: 'Control de gastos',
+    },
+    {
+      key: '/maritima/navieras',
+      icon: <ShopOutlined />,
+      label: 'Navieras',
+    },
+    {
+      key: '/maritima/pctl',
+      icon: <ControlOutlined />,
+      label: 'PCTL',
+    },
+    {
+      key: '/maritima/pls-pendientes',
+      icon: <ClockCircleOutlined />,
+      label: 'PLs Pendientes',
+    },
+    {
+      key: '/maritima/subir-week',
+      icon: <CloudUploadOutlined />,
+      label: 'Subir nuevo Week',
+    },
+    {
+      key: '/maritima/dhl',
+      icon: <RocketOutlined />,
+      label: 'DHL',
+    },
+    {
+      key: '/maritima/tdi-dhl',
+      icon: <TruckOutlined />,
+      label: 'TDI-DHL',
+    },
+    {
+      key: '/maritima/validar-manifiesto',
+      icon: <SafetyCertificateOutlined />,
+      label: 'Validar Manifiesto',
+    },
+  ];
+
   // Menú para otros roles (sin Usuarios)
   const generalMenuItems = [
     {
@@ -303,6 +376,8 @@ export const MainLayout = () => {
       return asesorMenuItems;
     } else if (hasRole(['ATENCION A CLIENTES', 'SERVICIO AL CLIENTE'])) {
       return servicioClienteMenuItems;
+    } else if (hasRole(['OPERACION MARITIMA'])) {
+      return operacionMaritimaMenuItems;
     }
     return generalMenuItems;
   }, [hasRole, user?.tipo_usuario]);

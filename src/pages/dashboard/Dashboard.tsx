@@ -4,6 +4,7 @@ import { UserOutlined, MailOutlined, KeyOutlined, IdcardOutlined } from '@ant-de
 import { useAuthStore } from '@/store/authStore';
 import { HomeServicioCliente } from './HomeServicioCliente';
 import { HomeAsesor } from './HomeAsesor';
+import { HomeOperacionMaritima } from './HomeOperacionMaritima';
 import './Dashboard.css';
 
 export const Dashboard = () => {
@@ -20,6 +21,10 @@ export const Dashboard = () => {
 
   if (user?.tipo_usuario === 'SERVICIO AL CLIENTE') {
     return <HomeServicioCliente />;
+  }
+
+  if (user?.tipo_usuario === 'OPERACION MARITIMA') {
+    return <HomeOperacionMaritima />;
   }
 
   return (

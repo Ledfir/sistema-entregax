@@ -26,7 +26,7 @@ import { NBox } from '@/pages/operaciones/NBox';
 import { NBoxMaritimo } from '@/pages/operaciones/NBoxMaritimo';
 import { Instrucciones, GuiasArchivadas, PendientesCotizar, MisCotizaciones } from '@/pages/cotizaciones';
 import { EnvioConFactura, CatalogoServicios, MisEnvios, EnviosArchivados } from '@/pages/dolares';
-import { Cotizaciones, PanelPLInstrucciones } from '@/pages/maritimos';
+import { Cotizaciones, PanelPLInstrucciones, ClientesMaritima, ConsignatariosMaritima, CotizacionesMaritimasList, NavierasPuertos } from '@/pages/maritimos';
 import { Historial, Saldo, SubirPagos } from '@/pages/monedero';
 import { MisEnvios as MisEnviosRMB, EnviosArchivados as EnviosArchivadosRMB, EnvioConFactura as EnvioConFacturaRMB, EnvioSinFactura as EnvioSinFacturaRMB, CatalogoServicios as CatalogoServiciosRMB } from '@/pages/rmbs';
 import { MisEnvios as MisEnviosUSDT, EnviosArchivados as EnviosArchivadosUSDT, EnvioConFactura as EnvioConFacturaUSDT, EnvioSinFactura as EnvioSinFacturaUSDT, CatalogoServicios as CatalogoServiciosUSDT } from '@/pages/usdts';
@@ -398,6 +398,96 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
                 <PanelPLInstrucciones />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Rutas de Operación Marítima */}
+          <Route
+            path="/maritima/clientes"
+            element={
+              <ProtectedRoute roles={['OPERACION MARITIMA', 'SISTEMAS', 'ADMIN']}>
+                <ClientesMaritima />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/maritima/consignatarios"
+            element={
+              <ProtectedRoute roles={['OPERACION MARITIMA', 'SISTEMAS', 'ADMIN']}>
+                <ConsignatariosMaritima />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/maritima/cotizaciones"
+            element={
+              <ProtectedRoute roles={['OPERACION MARITIMA', 'SISTEMAS', 'ADMIN']}>
+                <CotizacionesMaritimasList />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/maritima/control-gastos"
+            element={
+              <ProtectedRoute roles={['OPERACION MARITIMA', 'SISTEMAS', 'ADMIN']}>
+                <div style={{ padding: 24 }}>Control de gastos</div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/maritima/navieras"
+            element={
+              <ProtectedRoute roles={['OPERACION MARITIMA', 'SISTEMAS', 'ADMIN']}>
+                <NavierasPuertos />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/maritima/pctl"
+            element={
+              <ProtectedRoute roles={['OPERACION MARITIMA', 'SISTEMAS', 'ADMIN']}>
+                <div style={{ padding: 24 }}>PCTL</div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/maritima/pls-pendientes"
+            element={
+              <ProtectedRoute roles={['OPERACION MARITIMA', 'SISTEMAS', 'ADMIN']}>
+                <div style={{ padding: 24 }}>PLs Pendientes</div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/maritima/subir-week"
+            element={
+              <ProtectedRoute roles={['OPERACION MARITIMA', 'SISTEMAS', 'ADMIN']}>
+                <div style={{ padding: 24 }}>Subir nuevo Week</div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/maritima/dhl"
+            element={
+              <ProtectedRoute roles={['OPERACION MARITIMA', 'SISTEMAS', 'ADMIN']}>
+                <div style={{ padding: 24 }}>DHL</div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/maritima/tdi-dhl"
+            element={
+              <ProtectedRoute roles={['OPERACION MARITIMA', 'SISTEMAS', 'ADMIN']}>
+                <div style={{ padding: 24 }}>TDI-DHL</div>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/maritima/validar-manifiesto"
+            element={
+              <ProtectedRoute roles={['OPERACION MARITIMA', 'SISTEMAS', 'ADMIN']}>
+                <div style={{ padding: 24 }}>Validar Manifiesto</div>
               </ProtectedRoute>
             }
           />
