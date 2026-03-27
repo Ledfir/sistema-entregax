@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Card, Table, Button, Modal, Form, Input, Dropdown, message } from 'antd';
-import type { ColumnsType, TableProps } from 'antd/es/table';
+import { Card, Carousel, Button, Modal, Form, Input, Dropdown, message } from 'antd';
 import { PlusOutlined, MoreOutlined } from '@ant-design/icons';
 import './NavierasPuertos.css';
 
@@ -18,8 +17,6 @@ const NavierasPuertos = () => {
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalType, setModalType] = useState<'naviera' | 'puerto'>('naviera');
-  const [loadingNavieras] = useState(false);
-  const [loadingPuertos] = useState(false);
 
   // Mock data para navieras
   const [navieras, setNavieras] = useState<Naviera[]>([
@@ -109,13 +106,9 @@ const NavierasPuertos = () => {
     });
   };
 
-  const navierasColumns: ColumnsType<Naviera> = [
-    {
-      title: 'Acciones',
-      key: 'acciones',
-      width: 100,
-      fixed: 'left',
-      render: (_, record) => (
+  const renderNavieraCard = (naviera: Naviera) => (
+    <div className="carousel-card-wrapper" key={naviera.key}>
+      <Card className="carousel-item-card">
         <Dropdown
           menu={{
             items: [
@@ -127,31 +120,29 @@ const NavierasPuertos = () => {
                 key: 'eliminar',
                 label: 'Eliminar',
                 danger: true,
-                onClick: () => handleEliminarNaviera(record.key),
+                onClick: () => handleEliminarNaviera(naviera.key),
               },
             ],
           }}
           trigger={['click']}
+          placement="bottomRight"
         >
-          <Button type="text" icon={<MoreOutlined />} />
+          <Button 
+            type="text" 
+            icon={<MoreOutlined />} 
+            className="carousel-card-actions"
+          />
         </Dropdown>
-      ),
-    },
-    {
-      title: 'Nombre',
-      dataIndex: 'nombre',
-      key: 'nombre',
-      sorter: (a, b) => a.nombre.localeCompare(b.nombre),
-    },
-  ];
+        <div className="carousel-card-content">
+          <h2>{naviera.nombre}</h2>
+        </div>
+      </Card>
+    </div>
+  );
 
-  const puertosColumns: ColumnsType<Puerto> = [
-    {
-      title: 'Acciones',
-      key: 'acciones',
-      width: 100,
-      fixed: 'left',
-      render: (_, record) => (
+  const renderPuertoCard = (puerto: Puerto) => (
+    <div className="carousel-card-wrapper" key={puerto.key}>
+      <Card className="carousel-item-card">
         <Dropdown
           menu={{
             items: [
@@ -163,27 +154,25 @@ const NavierasPuertos = () => {
                 key: 'eliminar',
                 label: 'Eliminar',
                 danger: true,
-                onClick: () => handleEliminarPuerto(record.key),
+                onClick: () => handleEliminarPuerto(puerto.key),
               },
             ],
           }}
           trigger={['click']}
+          placement="bottomRight"
         >
-          <Button type="text" icon={<MoreOutlined />} />
+          <Button 
+            type="text" 
+            icon={<MoreOutlined />} 
+            className="carousel-card-actions"
+          />
         </Dropdown>
-      ),
-    },
-    {
-      title: 'Nombre',
-      dataIndex: 'nombre',
-      key: 'nombre',
-      sorter: (a, b) => a.nombre.localeCompare(b.nombre),
-    },
-  ];
-
-  const onTableChange: TableProps<Naviera>['onChange'] = (pagination, filters, sorter) => {
-    console.log('Table changed:', pagination, filters, sorter);
-  };
+        <div className="carousel-card-content">
+          <h2>{puerto.nombre}</h2>
+        </div>
+      </Card>
+    </div>
+  );
 
   return (
     <div className="navieras-puertos-wrapper">
@@ -202,18 +191,31 @@ const NavierasPuertos = () => {
               Agregar Naviera
             </Button>
           </div>
-          <Table
-            columns={navierasColumns}
-            dataSource={navieras}
-            loading={loadingNavieras}
-            onChange={onTableChange}
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total) => `Total ${total} navieras`,
-            }}
-            scroll={{ x: 500 }}
-          />
+          <div className="carousel-container">
+            <Carousel
+              dots={true}
+              arrows={true}
+              autoplay={false}
+              slidesToShow={3}
+              slidesToScroll={1}
+              responsive={[
+                {
+                  breakpoint: 1024,
+                  settings: {
+                    slidesToShow: 2,
+                  },
+                },
+                {
+                  breakpoint: 768,
+                  settings: {
+                    slidesToShow: 1,
+                  },
+                },
+              ]}
+            >
+              {navieras.map((naviera) => renderNavieraCard(naviera))}
+            </Carousel>
+          </div>
         </div>
 
         <div className="puertos-section">
@@ -227,18 +229,31 @@ const NavierasPuertos = () => {
               Agregar Puerto
             </Button>
           </div>
-          <Table
-            columns={puertosColumns}
-            dataSource={puertos}
-            loading={loadingPuertos}
-            onChange={onTableChange}
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total) => `Total ${total} puertos`,
-            }}
-            scroll={{ x: 500 }}
-          />
+          <div className="carousel-container">
+            <Carousel
+              dots={true}
+              arrows={true}
+              autoplay={false}
+              slidesToShow={3}
+              slidesToScroll={1}
+              responsive={[
+                {
+                  breakpoint: 1024,
+                  settings: {
+                    slidesToShow: 2,
+                  },
+                },
+                {
+                  breakpoint: 768,
+                  settings: {
+                    slidesToShow: 1,
+                  },
+                },
+              ]}
+            >
+              {puertos.map((puerto) => renderPuertoCard(puerto))}
+            </Carousel>
+          </div>
         </div>
       </Card>
 

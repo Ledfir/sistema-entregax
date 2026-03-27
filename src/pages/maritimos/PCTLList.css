@@ -1,0 +1,212 @@
+.pctl-list-wrapper {
+  padding: 24px;
+  min-height: calc(100vh - 64px);
+}
+
+.pctl-list-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para la tabla */
+.pctl-list-card .ant-table {
+  background: transparent;
+}
+
+.pctl-list-card .ant-table-thead > tr > th {
+  background: var(--bg-secondary, #fafafa);
+  font-weight: 600;
+}
+
+.pctl-list-card .ant-table-tbody > tr:hover > td {
+  background: var(--hover-bg, #f5f5f5);
+}
+
+/* Estilos del modal */
+.pctl-list-wrapper .ant-modal-header {
+  background: var(--card-bg, #ffffff);
+  border-bottom: 1px solid var(--border-color, #f0f0f0);
+}
+
+.pctl-list-wrapper .ant-modal-body {
+  background: var(--card-bg, #ffffff);
+}
+
+.pctl-list-wrapper .ant-modal-footer {
+  background: var(--card-bg, #ffffff);
+  border-top: 1px solid var(--border-color, #f0f0f0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pctl-list-wrapper {
+    padding: 16px;
+  }
+}
+
+/* Dark mode */
+.dark-mode .pctl-list-wrapper {
+  background: var(--bg-primary);
+}
+
+.dark-mode .pctl-list-card {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.dark-mode .pctl-list-card .ant-card-head {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-mode .pctl-list-card .ant-card-body {
+  background: var(--card-bg);
+  color: var(--text-primary);
+}
+
+.dark-mode .pctl-list-card .ant-table {
+  background: var(--card-bg);
+  color: var(--text-primary);
+}
+
+.dark-mode .pctl-list-card .ant-table-thead > tr > th {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.dark-mode .pctl-list-card .ant-table-tbody > tr > td {
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-mode .pctl-list-card .ant-table-tbody > tr:hover > td {
+  background: var(--hover-bg);
+}
+
+.dark-mode .pctl-list-card .ant-pagination {
+  color: var(--text-primary);
+}
+
+.dark-mode .pctl-list-card .ant-pagination .ant-pagination-item {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.dark-mode .pctl-list-card .ant-pagination .ant-pagination-item a {
+  color: var(--text-primary);
+}
+
+.dark-mode .pctl-list-card .ant-pagination .ant-pagination-item-active {
+  border-color: var(--primary-color, #1890ff);
+}
+
+.dark-mode .pctl-list-card .ant-pagination .ant-pagination-item-active a {
+  color: var(--primary-color, #1890ff);
+}
+
+.dark-mode .pctl-list-wrapper .ant-modal-content {
+  background: var(--card-bg);
+  color: var(--text-primary);
+}
+
+.dark-mode .pctl-list-wrapper .ant-modal-header {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.dark-mode .pctl-list-wrapper .ant-modal-title {
+  color: var(--text-primary);
+}
+
+.dark-mode .pctl-list-wrapper .ant-modal-body {
+  background: var(--card-bg);
+}
+
+.dark-mode .pctl-list-wrapper .ant-modal-footer {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+.dark-mode .pctl-list-wrapper .ant-form-item-label > label {
+  color: var(--text-primary);
+}
+
+.dark-mode .pctl-list-wrapper .ant-input,
+.dark-mode .pctl-list-wrapper .ant-input-number,
+.dark-mode .pctl-list-wrapper .ant-select-selector {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-mode .pctl-list-wrapper .ant-input:hover,
+.dark-mode .pctl-list-wrapper .ant-input:focus,
+.dark-mode .pctl-list-wrapper .ant-input-number:hover,
+.dark-mode .pctl-list-wrapper .ant-input-number:focus,
+.dark-mode .pctl-list-wrapper .ant-select-selector:hover {
+  border-color: var(--primary-color, #1890ff);
+  background: var(--bg-secondary);
+}
+
+.dark-mode .pctl-list-wrapper .ant-select-dropdown {
+  background: var(--card-bg);
+}
+
+.dark-mode .pctl-list-wrapper .ant-select-item {
+  color: var(--text-primary);
+}
+
+.dark-mode .pctl-list-wrapper .ant-select-item-option-selected {
+  background: var(--hover-bg);
+}
+
+.dark-mode .pctl-list-wrapper .ant-select-item-option-active {
+  background: var(--hover-bg);
+}
+
+/* Estilos para modales de direcci\u00f3n */
+.pctl-list-wrapper h4 {
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.pctl-list-wrapper p {
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.dark-mode .pctl-list-wrapper h4 {
+  color: var(--text-primary);
+}
+
+.dark-mode .pctl-list-wrapper p {
+  color: var(--text-secondary, rgba(255, 255, 255, 0.65));
+}
+
+.dark-mode .pctl-list-wrapper a {
+  color: var(--primary-color, #1890ff);
+}
+
+/* Estilos para lista de notas de gesti\u00f3n */
+.pctl-list-wrapper .ant-list-item-meta-title {
+  margin-bottom: 0;
+}
+
+.pctl-list-wrapper .ant-list-item-meta-description {
+  margin-top: 8px;
+}
+
+.dark-mode .pctl-list-wrapper .ant-list-item {
+  border-color: var(--border-color);
+}
+
+.dark-mode .pctl-list-wrapper .ant-list-item-meta-title {
+  color: var(--text-primary);
+}
+
+.dark-mode .pctl-list-wrapper .ant-list-item-meta-description {
+  color: var(--text-secondary, rgba(255, 255, 255, 0.65));
+}
+
+.dark-mode .pctl-list-wrapper .ant-list-item-meta-title span {
+  color: var(--text-primary);
+}

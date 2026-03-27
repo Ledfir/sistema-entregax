@@ -4,3 +4,8 @@ export { ClientesMaritima } from './ClientesMaritima';
 export { ConsignatariosMaritima } from './ConsignatariosMaritima';
 export { CotizacionesMaritimasList } from './CotizacionesMaritimasList';
 export { default as NavierasPuertos } from './NavierasPuertos';
+export { default as PCTLList } from './PCTLList';
+export { default as PLsPendientes } from './PLsPendientes';
+export { default as SubirNuevoWeek } from './SubirNuevoWeek';
+export { default as DHLValidar } from './DHLValidar';
+export { default as ValidarManifiesto } from './ValidarManifiesto';

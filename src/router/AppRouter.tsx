@@ -26,7 +26,7 @@ import { NBox } from '@/pages/operaciones/NBox';
 import { NBoxMaritimo } from '@/pages/operaciones/NBoxMaritimo';
 import { Instrucciones, GuiasArchivadas, PendientesCotizar, MisCotizaciones } from '@/pages/cotizaciones';
 import { EnvioConFactura, CatalogoServicios, MisEnvios, EnviosArchivados } from '@/pages/dolares';
-import { Cotizaciones, PanelPLInstrucciones, ClientesMaritima, ConsignatariosMaritima, CotizacionesMaritimasList, NavierasPuertos } from '@/pages/maritimos';
+import { Cotizaciones, PanelPLInstrucciones, ClientesMaritima, ConsignatariosMaritima, CotizacionesMaritimasList, NavierasPuertos, PCTLList, PLsPendientes, SubirNuevoWeek, DHLValidar, ValidarManifiesto } from '@/pages/maritimos';
 import { Historial, Saldo, SubirPagos } from '@/pages/monedero';
 import { MisEnvios as MisEnviosRMB, EnviosArchivados as EnviosArchivadosRMB, EnvioConFactura as EnvioConFacturaRMB, EnvioSinFactura as EnvioSinFacturaRMB, CatalogoServicios as CatalogoServiciosRMB } from '@/pages/rmbs';
 import { MisEnvios as MisEnviosUSDT, EnviosArchivados as EnviosArchivadosUSDT, EnvioConFactura as EnvioConFacturaUSDT, EnvioSinFactura as EnvioSinFacturaUSDT, CatalogoServicios as CatalogoServiciosUSDT } from '@/pages/usdts';
@@ -447,7 +447,7 @@ export const AppRouter = () => {
             path="/maritima/pctl"
             element={
               <ProtectedRoute roles={['OPERACION MARITIMA', 'SISTEMAS', 'ADMIN']}>
-                <div style={{ padding: 24 }}>PCTL</div>
+                <PCTLList />
               </ProtectedRoute>
             }
           />
@@ -455,7 +455,7 @@ export const AppRouter = () => {
             path="/maritima/pls-pendientes"
             element={
               <ProtectedRoute roles={['OPERACION MARITIMA', 'SISTEMAS', 'ADMIN']}>
-                <div style={{ padding: 24 }}>PLs Pendientes</div>
+                <PLsPendientes />
               </ProtectedRoute>
             }
           />
@@ -463,7 +463,7 @@ export const AppRouter = () => {
             path="/maritima/subir-week"
             element={
               <ProtectedRoute roles={['OPERACION MARITIMA', 'SISTEMAS', 'ADMIN']}>
-                <div style={{ padding: 24 }}>Subir nuevo Week</div>
+                <SubirNuevoWeek />
               </ProtectedRoute>
             }
           />
@@ -471,7 +471,7 @@ export const AppRouter = () => {
             path="/maritima/dhl"
             element={
               <ProtectedRoute roles={['OPERACION MARITIMA', 'SISTEMAS', 'ADMIN']}>
-                <div style={{ padding: 24 }}>DHL</div>
+                <DHLValidar />
               </ProtectedRoute>
             }
           />
@@ -487,7 +487,7 @@ export const AppRouter = () => {
             path="/maritima/validar-manifiesto"
             element={
               <ProtectedRoute roles={['OPERACION MARITIMA', 'SISTEMAS', 'ADMIN']}>
-                <div style={{ padding: 24 }}>Validar Manifiesto</div>
+                <ValidarManifiesto />
               </ProtectedRoute>
             }
           />

@@ -24,7 +24,6 @@ import {
   ClockCircleOutlined,
   CloudUploadOutlined,
   RocketOutlined,
-  TruckOutlined,
   SafetyCertificateOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
@@ -323,11 +322,6 @@ export const MainLayout = () => {
       key: '/maritima/dhl',
       icon: <RocketOutlined />,
       label: 'DHL',
-    },
-    {
-      key: '/maritima/tdi-dhl',
-      icon: <TruckOutlined />,
-      label: 'TDI-DHL',
     },
     {
       key: '/maritima/validar-manifiesto',

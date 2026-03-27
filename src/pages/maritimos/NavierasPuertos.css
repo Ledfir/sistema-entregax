@@ -20,7 +20,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .section-header h3 {
@@ -30,18 +30,97 @@
   color: var(--text-primary, rgba(0, 0, 0, 0.88));
 }
 
-/* Estilos para las tablas */
-.navieras-puertos-card .ant-table {
-  background: transparent;
+/* Estilos para el carrusel */
+.carousel-container {
+  padding: 20px 40px;
 }
 
-.navieras-puertos-card .ant-table-thead > tr > th {
-  background: var(--bg-secondary, #fafafa);
+.carousel-card-wrapper {
+  padding: 0 12px;
+}
+
+.carousel-item-card {
+  position: relative;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.carousel-item-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+}
+
+.carousel-item-card .ant-card-body {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.carousel-card-actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  font-size: 20px;
+}
+
+.carousel-card-content {
+  text-align: center;
+  width: 100%;
+}
+
+.carousel-card-content h2 {
+  margin: 0;
+  font-size: 20px;
   font-weight: 600;
+  color: var(--text-primary, rgba(0, 0, 0, 0.88));
+  word-wrap: break-word;
+  line-height: 1.4;
 }
 
-.navieras-puertos-card .ant-table-tbody > tr:hover > td {
-  background: var(--hover-bg, #f5f5f5);
+/* Estilos para los indicadores del carousel */
+.carousel-container .ant-carousel .slick-dots {
+  bottom: -30px;
+}
+
+.carousel-container .ant-carousel .slick-dots li button {
+  background: var(--border-color, #d9d9d9);
+}
+
+.carousel-container .ant-carousel .slick-dots li.slick-active button {
+  background: var(--primary-color, #1890ff);
+}
+
+/* Flechas de navegación del carousel */
+.carousel-container .ant-carousel .slick-prev,
+.carousel-container .ant-carousel .slick-next {
+  color: var(--text-primary, rgba(0, 0, 0, 0.88));
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  z-index: 2;
+}
+
+.carousel-container .ant-carousel .slick-prev {
+  left: -40px;
+}
+
+.carousel-container .ant-carousel .slick-next {
+  right: -40px;
+}
+
+.carousel-container .ant-carousel .slick-prev:hover,
+.carousel-container .ant-carousel .slick-next:hover {
+  color: var(--primary-color, #1890ff);
 }
 
 /* Estilos del modal */
@@ -101,47 +180,43 @@
   color: var(--text-primary);
 }
 
-.dark-mode .navieras-puertos-card .ant-table {
-  background: var(--card-bg);
-  color: var(--text-primary);
-}
-
-.dark-mode .navieras-puertos-card .ant-table-thead > tr > th {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
-  border-color: var(--border-color);
-}
-
-.dark-mode .navieras-puertos-card .ant-table-tbody > tr > td {
-  border-color: var(--border-color);
-  color: var(--text-primary);
-}
-
-.dark-mode .navieras-puertos-card .ant-table-tbody > tr:hover > td {
-  background: var(--hover-bg);
-}
-
-.dark-mode .navieras-puertos-card .ant-pagination {
-  color: var(--text-primary);
-}
-
-.dark-mode .navieras-puertos-card .ant-pagination .ant-pagination-item {
+/* Estilos dark mode para carousel cards */
+.dark-mode .carousel-item-card {
   background: var(--card-bg);
   border-color: var(--border-color);
 }
 
-.dark-mode .navieras-puertos-card .ant-pagination .ant-pagination-item a {
+.dark-mode .carousel-item-card .ant-card-body {
+  background: var(--card-bg);
+}
+
+.dark-mode .carousel-card-content h2 {
   color: var(--text-primary);
 }
 
-.dark-mode .navieras-puertos-card .ant-pagination .ant-pagination-item-active {
-  border-color: var(--primary-color, #1890ff);
+.dark-mode .carousel-card-actions {
+  color: var(--text-primary);
 }
 
-.dark-mode .navieras-puertos-card .ant-pagination .ant-pagination-item-active a {
+.dark-mode .carousel-container .ant-carousel .slick-dots li button {
+  background: var(--border-color);
+}
+
+.dark-mode .carousel-container .ant-carousel .slick-dots li.slick-active button {
+  background: var(--primary-color, #1890ff);
+}
+
+.dark-mode .carousel-container .ant-carousel .slick-prev,
+.dark-mode .carousel-container .ant-carousel .slick-next {
+  color: var(--text-primary);
+}
+
+.dark-mode .carousel-container .ant-carousel .slick-prev:hover,
+.dark-mode .carousel-container .ant-carousel .slick-next:hover {
   color: var(--primary-color, #1890ff);
 }
 
+/* Dark mode para modales */
 .dark-mode .navieras-puertos-wrapper .ant-modal-content {
   background: var(--card-bg);
   color: var(--text-primary);

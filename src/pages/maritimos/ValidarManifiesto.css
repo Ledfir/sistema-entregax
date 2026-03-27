@@ -1,0 +1,89 @@
+.validar-manifiesto-wrapper {
+  padding: 24px;
+  min-height: calc(100vh - 64px);
+}
+
+.validar-manifiesto-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.validar-manifiesto-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.validar-manifiesto-form .ant-form-item-label > label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.validar-btn {
+  width: fit-content;
+  padding: 0 48px;
+  align-self: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .validar-manifiesto-wrapper {
+    padding: 16px;
+  }
+
+  .validar-btn {
+    width: 100%;
+  }
+}
+
+/* Dark Mode */
+[data-theme='dark'] .validar-manifiesto-wrapper {
+  background: var(--bg-primary);
+}
+
+[data-theme='dark'] .validar-manifiesto-card {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+[data-theme='dark'] .validar-manifiesto-card .ant-card-head {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .validar-manifiesto-card .ant-card-body {
+  background: var(--card-bg);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .validar-manifiesto-form .ant-form-item-label > label {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .ant-upload.ant-upload-select {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+[data-theme='dark'] .ant-upload .ant-btn {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .ant-upload .ant-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+[data-theme='dark'] .ant-upload-list-item {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .ant-upload-list-item-name {
+  color: var(--text-primary);
+}
