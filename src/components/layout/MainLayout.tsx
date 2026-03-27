@@ -25,6 +25,11 @@ import {
   CloudUploadOutlined,
   RocketOutlined,
   SafetyCertificateOutlined,
+  BankOutlined,
+  ContainerOutlined,
+  EditOutlined,
+  BarChartOutlined,
+  DollarCircleOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { AppHeader } from './AppHeader';
@@ -362,9 +367,85 @@ export const MainLayout = () => {
     },
   ];
 
+  // Menú para el rol ADMIN
+  const adminMenuItems = [
+    {
+      key: '/dashboard',
+      icon: <HomeOutlined />,
+      label: 'Home',
+    },
+    {
+      key: '/admin/bancos',
+      icon: <BankOutlined />,
+      label: 'Bancos',
+    },
+    {
+      key: '/admin/bls',
+      icon: <FileTextOutlined />,
+      label: 'BLs',
+    },
+    {
+      key: '/admin/clientes',
+      icon: <UserOutlined />,
+      label: 'Clientes',
+    },
+    {
+      key: '/admin/comisiones',
+      icon: <PercentageOutlined />,
+      label: 'Comisiones',
+    },
+    {
+      key: '/admin/configuracion',
+      icon: <SettingOutlined />,
+      label: 'Configuracion',
+    },
+    {
+      key: '/admin/cotizaciones',
+      icon: <FormOutlined />,
+      label: 'Cotizaciones',
+    },
+    {
+      key: '/admin/examen',
+      icon: <EditOutlined />,
+      label: 'Examen',
+    },
+    {
+      key: '/admin/control-gastos',
+      icon: <CalculatorOutlined />,
+      label: 'Control de gastos',
+    },
+    {
+      key: '/admin/pctl',
+      icon: <ContainerOutlined />,
+      label: 'PCTL',
+    },
+    {
+      key: '/admin/polizas',
+      icon: <FileProtectOutlined />,
+      label: 'Polizas',
+    },
+    {
+      key: '/admin/proveedores',
+      icon: <ShopOutlined />,
+      label: 'Proveedores',
+    },
+    {
+      key: '/admin/reporte-gastos-week',
+      icon: <BarChartOutlined />,
+      label: 'Reporte de gastos Week',
+    },
+    {
+      key: '/admin/reporte-us',
+      icon: <DollarCircleOutlined />,
+      label: 'Reporte US',
+    },
+  ];
+
   // Seleccionar menú según el rol
   const menuItems = useMemo(() => {
-    if (hasRole(['SISTEMAS'])) {
+    if (hasRole(['ADMIN'])) {
+      return adminMenuItems;
+    } else if (hasRole(['SISTEMAS'])) {
       return sistemasMenuItems;
     } else if (hasRole(['ASESOR'])) {
       return asesorMenuItems;
