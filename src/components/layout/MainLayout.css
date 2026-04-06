@@ -83,6 +83,7 @@ body.dark-mode .menu-label {
 .sidebar-menu {
   border-right: none;
   flex: 1;
+  padding-bottom: 60px;
 }
 
 .sidebar-menu .ant-menu-item,

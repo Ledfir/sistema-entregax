@@ -1,0 +1,115 @@
+.listado-archivos-cuentas-wrapper {
+  padding: 24px;
+  min-height: calc(100vh - 64px);
+}
+
+.listado-archivos-cuentas-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.listado-archivos-cuentas-card .ant-table {
+  background: #fff;
+}
+
+.listado-archivos-cuentas-card .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+  color: #262626;
+}
+
+.listado-archivos-cuentas-card .ant-table-tbody > tr:hover > td {
+  background: #f5f5f5;
+}
+
+.listado-archivos-cuentas-card .ant-table .ant-tag {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+.listado-archivos-cuentas-card .ant-input-affix-wrapper {
+  max-width: 400px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .listado-archivos-cuentas-wrapper {
+    padding: 16px;
+  }
+}
+
+/* Dark Mode */
+[data-theme='dark'] .listado-archivos-cuentas-wrapper {
+  background: var(--bg-primary);
+}
+
+[data-theme='dark'] .listado-archivos-cuentas-card {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+}
+
+[data-theme='dark'] .listado-archivos-cuentas-card .ant-card-head {
+  background: var(--card-bg);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .listado-archivos-cuentas-card .ant-card-body {
+  background: var(--card-bg);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .listado-archivos-cuentas-card .ant-input-affix-wrapper {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+[data-theme='dark'] .listado-archivos-cuentas-card .ant-input {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .listado-archivos-cuentas-card .ant-input::placeholder {
+  color: var(--text-secondary);
+}
+
+[data-theme='dark'] .listado-archivos-cuentas-card .ant-table {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .listado-archivos-cuentas-card .ant-table-thead > tr > th {
+  background: var(--bg-tertiary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .listado-archivos-cuentas-card .ant-table-tbody > tr > td {
+  border-color: var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .listado-archivos-cuentas-card .ant-table-tbody > tr:hover > td {
+  background: var(--bg-tertiary);
+}
+
+[data-theme='dark'] .listado-archivos-cuentas-card .ant-pagination-item {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+[data-theme='dark'] .listado-archivos-cuentas-card .ant-pagination-item a {
+  color: var(--text-primary);
+}
+
+[data-theme='dark'] .listado-archivos-cuentas-card .ant-pagination-item-active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+[data-theme='dark'] .listado-archivos-cuentas-card .ant-pagination-item-active a {
+  color: #fff;
+}

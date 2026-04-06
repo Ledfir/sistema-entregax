@@ -375,14 +375,46 @@ export const MainLayout = () => {
       label: 'Home',
     },
     {
-      key: '/admin/bancos',
+      key: 'bancos',
       icon: <BankOutlined />,
       label: 'Bancos',
+      children: [
+        { 
+          key: 'estado-cuenta',
+          label: 'Estado cuenta',
+          children: [
+            { key: '/admin/bancos/estado-cuenta/ctz-lsd', label: 'CTZ LSD' },
+            { key: '/admin/bancos/estado-cuenta/ctz-ece', label: 'CTZ ECE' },
+            { key: '/admin/bancos/estado-cuenta/ctz-urban', label: 'CTZ URBAN' },
+            { key: '/admin/bancos/estado-cuenta/ctz-rcm', label: 'CTZ RCM' },
+            { key: '/admin/bancos/estado-cuenta/ctz-ba', label: 'CTZ BA' },
+          ],
+        },
+        { 
+          key: 'validar-estado-cuenta',
+          label: 'Validar estado cuenta',
+          children: [
+            { key: '/admin/bancos/validar-estado-cuenta/lsd', label: 'LSD' },
+            { key: '/admin/bancos/validar-estado-cuenta/ece', label: 'ECE' },
+            { key: '/admin/bancos/validar-estado-cuenta/urban', label: 'URBAN' },
+            { key: '/admin/bancos/validar-estado-cuenta/rcm', label: 'RCM' },
+            { key: '/admin/bancos/validar-estado-cuenta/ba', label: 'BA' },
+          ],
+        },
+        { key: '/admin/bancos/listado-archivos', label: 'Listado de archivos de cuentas' },
+        { key: '/admin/bancos/reporte-estado-cuenta', label: 'Reporte estado cuenta (Multiple)' },
+        { key: '/admin/bancos/subir-estado-cuenta', label: 'Subir estado cuenta (Multiple)' },
+        { key: '/admin/bancos/transferir-saldo', label: 'Transferir saldo' },
+      ],
     },
     {
-      key: '/admin/bls',
+      key: 'bls',
       icon: <FileTextOutlined />,
       label: 'BLs',
+      children: [
+        { key: '/admin/bls/agregar-usuario-maritimo', label: 'Agregar nuevo usuario marítimo' },
+        { key: '/admin/bls/cargados', label: "BL'S cargados" },
+      ],
     },
     {
       key: '/admin/clientes',
@@ -395,24 +427,50 @@ export const MainLayout = () => {
       label: 'Comisiones',
     },
     {
-      key: '/admin/configuracion',
+      key: 'configuracion',
       icon: <SettingOutlined />,
       label: 'Configuracion',
+      children: [
+        {
+          key: 'beneficios',
+          label: 'Beneficios',
+          children: [
+            { key: '/admin/configuracion/beneficios/listado', label: 'Listado' },
+            { key: '/admin/configuracion/beneficios/estadisticas', label: 'Estadísticas' },
+          ],
+        },
+        { key: '/admin/configuracion/activar-desactivar-pagos', label: "Activar/Desactivar pagos de CTZ'S" },
+        { key: '/admin/configuracion/bancos', label: 'Bancos' },
+        { key: '/admin/configuracion/cuentas', label: 'Cuentas' },
+        { key: '/admin/configuracion/servicios', label: 'Servicios' },
+      ],
     },
     {
-      key: '/admin/cotizaciones',
+      key: 'cotizaciones',
       icon: <FormOutlined />,
       label: 'Cotizaciones',
+      children: [
+        { key: '/admin/cotizaciones/maritimas', label: 'Marítimas' },
+        { key: '/admin/cotizaciones/tdi-usa', label: 'TDI-USA' },
+      ],
     },
     {
-      key: '/admin/examen',
+      key: 'examen',
       icon: <EditOutlined />,
       label: 'Examen',
+      children: [
+        { key: '/admin/examen/generar-pin', label: 'Generar PIN' },
+        { key: '/admin/examen/observar-resultados', label: 'Observar resultados' },
+      ],
     },
     {
-      key: '/admin/control-gastos',
+      key: 'control-gastos',
       icon: <CalculatorOutlined />,
       label: 'Control de gastos',
+      children: [
+        { key: '/admin/control-gastos/tdi', label: 'TDI' },
+        { key: '/admin/control-gastos/maritimo', label: 'Marítimo' },
+      ],
     },
     {
       key: '/admin/pctl',
@@ -425,9 +483,15 @@ export const MainLayout = () => {
       label: 'Polizas',
     },
     {
-      key: '/admin/proveedores',
+      key: 'proveedores',
       icon: <ShopOutlined />,
       label: 'Proveedores',
+      children: [
+        { key: '/admin/proveedores/agregar', label: 'Agregar proveedor' },
+        { key: '/admin/proveedores/en-espera', label: 'En espera de aprobación' },
+        { key: '/admin/proveedores/listado', label: 'Listado de proveedores' },
+        { key: '/admin/proveedores/solicitudes-pago', label: 'Lista de solicitudes de pago' },
+      ],
     },
     {
       key: '/admin/reporte-gastos-week',
