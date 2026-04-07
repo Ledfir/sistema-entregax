@@ -276,7 +276,7 @@ export const HomeAsesor = () => {
                             <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
                             <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                             <Tooltip
-                              formatter={(v: number | undefined) => [v ?? 0, "CTZ's"]}
+                              formatter={(v) => [Number(v) ?? 0, "CTZ's"]}
                               contentStyle={{ fontSize: 12 }}
                             />
                             <Bar dataKey="cantidad" fill="#1677ff" radius={[4, 4, 0, 0]} maxBarSize={40} />
@@ -296,7 +296,7 @@ export const HomeAsesor = () => {
                             <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
                             <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
                             <Tooltip
-                              formatter={(v: number | undefined) => [v ?? 0, "CTZ's"]}
+                              formatter={(v) => [Number(v) ?? 0, "CTZ's"]}
                               contentStyle={{ fontSize: 12 }}
                             />
                             <Bar dataKey="cantidad" fill="#f39915" radius={[4, 4, 0, 0]} maxBarSize={40} />
@@ -324,8 +324,8 @@ export const HomeAsesor = () => {
                               tick={{ fontSize: 11 }}
                             />
                             <Tooltip
-                              formatter={(v: number | undefined) => [
-                                `$${(v ?? 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+                              formatter={(v) => [
+                                `$${(Number(v) ?? 0).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
                                 'Total pagos',
                               ]}
                               contentStyle={{ fontSize: 12 }}
