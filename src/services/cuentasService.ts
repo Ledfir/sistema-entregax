@@ -25,4 +25,29 @@ export const cuentasService = {
     const response = await apiClient.post(url, payload);
     return response.data;
   },
+
+  // Obtener detalles de cotización para el reporte
+  getDetailsReportQuote: async (ctz: string): Promise<any> => {
+    const url = '/cuentas/details-report-quote';
+    const response = await apiClient.post(url, { ctz });
+    return response.data;
+  },
+
+  // Guardar línea manual
+  saveLineaManual: async (payload: any): Promise<any> => {
+    const url = '/cuentas/save-line-manual';
+    const response = await apiClient.post(url, payload);
+    return response.data;
+  },
+
+  // Subir estado de cuenta (archivo)
+  subirEstadoCuenta: async (formData: FormData): Promise<any> => {
+    const url = '/cuentas/upload-file-account';
+    const response = await apiClient.post(url, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  },
 };

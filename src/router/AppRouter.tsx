@@ -28,7 +28,7 @@ import { Instrucciones, GuiasArchivadas, PendientesCotizar, MisCotizaciones } fr
 import { EnvioConFactura, CatalogoServicios, MisEnvios, EnviosArchivados } from '@/pages/dolares';
 import { Cotizaciones, PanelPLInstrucciones, ClientesMaritima, ConsignatariosMaritima, CotizacionesMaritimasList, NavierasPuertos, PCTLList, PLsPendientes, SubirNuevoWeek, DHLValidar, ValidarManifiesto } from '@/pages/maritimos';
 import { Historial, Saldo, SubirPagos } from '@/pages/monedero';
-import { ListadoArchivosCuentas, ReporteEstadoCuenta } from '@/pages/admin/bancos';
+import { ListadoArchivosCuentas, ReporteEstadoCuenta, SubirEstadoCuenta } from '@/pages/admin/bancos';
 import { MisEnvios as MisEnviosRMB, EnviosArchivados as EnviosArchivadosRMB, EnvioConFactura as EnvioConFacturaRMB, EnvioSinFactura as EnvioSinFacturaRMB, CatalogoServicios as CatalogoServiciosRMB } from '@/pages/rmbs';
 import { MisEnvios as MisEnviosUSDT, EnviosArchivados as EnviosArchivadosUSDT, EnvioConFactura as EnvioConFacturaUSDT, EnvioSinFactura as EnvioSinFacturaUSDT, CatalogoServicios as CatalogoServiciosUSDT } from '@/pages/usdts';
 import { Juego, Snake } from '@/pages/juego';
@@ -508,6 +508,15 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['ADMIN']}>
                 <ReporteEstadoCuenta />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/bancos/subir-estado-cuenta"
+            element={
+              <ProtectedRoute roles={['ADMIN']}>
+                <SubirEstadoCuenta />
               </ProtectedRoute>
             }
           />

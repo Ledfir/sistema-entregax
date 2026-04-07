@@ -1,0 +1,130 @@
+.subir-estado-cuenta-wrapper {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.subir-estado-cuenta-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para botones principales */
+.subir-estado-cuenta-card .ant-btn-primary {
+  background-color: #ff6600 !important;
+  border-color: #ff6600 !important;
+}
+
+.subir-estado-cuenta-card .ant-btn-primary:hover {
+  background-color: #ff8533 !important;
+  border-color: #ff8533 !important;
+}
+
+.tab-content {
+  padding: 24px 0;
+}
+
+.form-title {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.form-subtitle {
+  text-align: center;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.45);
+  margin-bottom: 32px;
+}
+
+.upload-form,
+.linea-form {
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.upload-section {
+  margin-bottom: 24px;
+}
+
+.upload-label {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.no-file-text {
+  margin-top: 8px;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.form-row-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-item-half {
+  margin-bottom: 24px;
+}
+
+.submit-section {
+  text-align: center;
+  margin-top: 32px;
+  margin-bottom: 0;
+}
+
+.submit-btn {
+  min-width: 200px;
+  height: 44px;
+  font-size: 15px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .subir-estado-cuenta-wrapper {
+    padding: 16px;
+  }
+
+  .tab-content {
+    padding: 16px 0;
+  }
+
+  .form-row-two {
+    grid-template-columns: 1fr;
+  }
+
+  .submit-btn {
+    width: 100%;
+  }
+}
+
+/* Estilos para la sección de previsualización */
+.preview-section {
+  margin: 32px 0 24px 0;
+  padding: 20px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #d9d9d9;
+  width: 100%;
+}
+
+.preview-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.preview-section .ant-table {
+  background: white;
+}
+
+.preview-section .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+}
+

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Form, Select, Button, DatePicker, Typography, message, Table, Modal } from 'antd';
-import { SearchOutlined, EyeOutlined, FileTextOutlined, ExportOutlined } from '@ant-design/icons';
+import { Card, Form, Select, Button, DatePicker, Typography, message, Table, Modal, Row, Col, Spin, Descriptions, Divider } from 'antd';
+import { SearchOutlined, EyeOutlined, FileTextOutlined, ExportOutlined, DollarOutlined, UserOutlined, BankOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs, { Dayjs } from 'dayjs';
 import { cuentasService } from '@/services/cuentasService';
@@ -44,6 +44,9 @@ const ReporteEstadoCuenta: React.FC = () => {
   const [registros, setRegistros] = useState<RegistroReporte[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalUrl, setModalUrl] = useState<string>('');
+  const [modalDetallesVisible, setModalDetallesVisible] = useState(false);
+  const [detallesCotizacion, setDetallesCotizacion] = useState<any>(null);
+  const [loadingDetalles, setLoadingDetalles] = useState(false);
 
   // Valores por defecto - ayer y hoy
   const defaultDates: [Dayjs, Dayjs] = [
@@ -57,6 +60,20 @@ const ReporteEstadoCuenta: React.FC = () => {
     cargarClientes();
   }, []);
 
+  // Función para extraer mensaje de error del API
+  const getErrorMessage = (error: any): string => {
+    if (error?.response?.data?.message) {
+      return error.response.data.message;
+    }
+    if (error?.response?.data?.error) {
+      return error.response.data.error;
+    }
+    if (error?.message) {
+      return error.message;
+    }
+    return 'Ha ocurrido un error inesperado';
+  };
+
   const cargarCuentas = async () => {
     try {
       setLoadingCuentas(true);
@@ -64,7 +81,7 @@ const ReporteEstadoCuenta: React.FC = () => {
       setCuentas(data);
     } catch (error) {
       console.error('Error al cargar cuentas:', error);
-      message.error('Error al cargar las cuentas');
+      message.error(getErrorMessage(error));
     } finally {
       setLoadingCuentas(false);
     }
@@ -77,7 +94,7 @@ const ReporteEstadoCuenta: React.FC = () => {
       setClientes(data);
     } catch (error) {
       console.error('Error al cargar clientes:', error);
-      message.error('Error al cargar los clientes');
+      message.error(getErrorMessage(error));
     } finally {
       setLoadingClientes(false);
     }
@@ -116,7 +133,7 @@ const ReporteEstadoCuenta: React.FC = () => {
 
     } catch (error) {
       console.error('Error al generar reporte:', error);
-      message.error('Error al generar el reporte');
+      message.error(getErrorMessage(error));
     } finally {
       setLoading(false);
     }
@@ -135,6 +152,33 @@ const ReporteEstadoCuenta: React.FC = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setModalUrl('');
+  };
+
+  // Funciones para manejar el modal de detalles
+  const handleOpenDetalles = async (ctz: string) => {
+    if (!ctz) {
+      message.warning('No hay información de cotización disponible');
+      return;
+    }
+
+    try {
+      setLoadingDetalles(true);
+      setModalDetallesVisible(true);
+      const response = await cuentasService.getDetailsReportQuote(ctz);
+      // El API retorna { status: "success", data: {...} }
+      setDetallesCotizacion(response.data || response);
+    } catch (error) {
+      console.error('Error al cargar detalles:', error);
+      message.error(getErrorMessage(error));
+      setModalDetallesVisible(false);
+    } finally {
+      setLoadingDetalles(false);
+    }
+  };
+
+  const handleCloseDetalles = () => {
+    setModalDetallesVisible(false);
+    setDetallesCotizacion(null);
   };
 
   // Definir columnas de la tabla
@@ -184,8 +228,8 @@ const ReporteEstadoCuenta: React.FC = () => {
           type="link" 
           size="small"
           icon={<EyeOutlined />}
-          disabled={!record.enlace_monedero}
-          onClick={() => record.enlace_monedero && window.open(record.enlace_monedero, '_blank')}
+          disabled={!record.ctz}
+          onClick={() => record.ctz && handleOpenDetalles(record.ctz)}
         />
       ),
     },
@@ -354,11 +398,7 @@ const ReporteEstadoCuenta: React.FC = () => {
               icon={<SearchOutlined />}
               loading={loading}
               size="large"
-              style={{
-                backgroundColor: '#ff6600',
-                borderColor: '#ff6600',
-                minWidth: '150px',
-              }}
+              style={{ minWidth: '150px' }}
             >
               Buscar
             </Button>
@@ -422,6 +462,280 @@ const ReporteEstadoCuenta: React.FC = () => {
                 objectFit: 'contain',
               }}
             />
+          </div>
+        )}
+      </Modal>
+
+      {/* Modal de Detalles de Cotización */}
+      <Modal
+        title={`DETALLES DE COTIZACIÓN ${detallesCotizacion?.cotizacion?.ctz || ''}`}
+        open={modalDetallesVisible}
+        onCancel={handleCloseDetalles}
+        footer={[
+          <Button key="close" onClick={handleCloseDetalles}>
+            Cerrar
+          </Button>,
+        ]}
+        width={1200}
+        centered
+        destroyOnClose
+        bodyStyle={{ padding: '24px', maxHeight: '80vh', overflow: 'auto' }}
+      >
+        {loadingDetalles ? (
+          <div style={{ textAlign: 'center', padding: '40px' }}>
+            <Spin size="large" />
+          </div>
+        ) : detallesCotizacion ? (
+          <>
+            <Row gutter={[16, 16]}>
+              {/* Información General */}
+              <Col xs={24} md={12} lg={6}>
+                <Card size="small" title={<><FileTextOutlined /> Información General</>} style={{ height: '100%' }}>
+                  <Descriptions column={1} size="small">
+                    <Descriptions.Item label="CTZ">
+                      {detallesCotizacion?.cotizacion?.ctz || 'N/A'}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Tipo de servicio">
+                      {detallesCotizacion?.servicio || 'N/A'}
+                    </Descriptions.Item>
+                  </Descriptions>
+                </Card>
+              </Col>
+
+              {/* Cliente y Asesor */}
+              <Col xs={24} md={12} lg={6}>
+                <Card size="small" title={<><UserOutlined /> Cliente y Asesor</>} style={{ height: '100%' }}>
+                  <Descriptions column={1} size="small">
+                    <Descriptions.Item label="Cliente">
+                      {detallesCotizacion?.cliente || 'N/A'}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Asesor">
+                      {detallesCotizacion?.asesor || 'N/A'}
+                    </Descriptions.Item>
+                  </Descriptions>
+                </Card>
+              </Col>
+
+              {/* Resumen Financiero */}
+              <Col xs={24} md={12} lg={6}>
+                <Card size="small" title={<><DollarOutlined /> Resumen Financiero</>} style={{ height: '100%' }}>
+                  <Descriptions column={1} size="small">
+                    <Descriptions.Item label="Costo">
+                      ${parseFloat(detallesCotizacion?.cotizacion?.costo || '0').toFixed(2)}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Costo de envío">
+                      ${parseFloat(detallesCotizacion?.cotizacion?.costoenvio || '0').toFixed(2)}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Total">
+                      <strong>${parseFloat(detallesCotizacion?.cotizacion?.total || '0').toFixed(2)}</strong>
+                    </Descriptions.Item>
+                  </Descriptions>
+                </Card>
+              </Col>
+
+              {/* Tiempos y Cuenta */}
+              <Col xs={24} md={12} lg={6}>
+                <Card size="small" title={<><ClockCircleOutlined /> Tiempos y Cuenta</>} style={{ height: '100%' }}>
+                  <Descriptions column={1} size="small">
+                    <Descriptions.Item label="Cuenta">
+                      {detallesCotizacion?.cuenta || 'N/A'}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Fecha de creación">
+                      {detallesCotizacion?.cotizacion?.created || 'N/A'}
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Fecha de pago">
+                      {detallesCotizacion?.cotizacion?.pagado ? 
+                        dayjs(detallesCotizacion.cotizacion.pagado).format('YYYY-MM-DD HH:mm:ss') : 
+                        'Sin fecha de pago'}
+                    </Descriptions.Item>
+                  </Descriptions>
+                </Card>
+              </Col>
+            </Row>
+
+            {/* Historial de Pagos */}
+            {detallesCotizacion?.pagos && detallesCotizacion.pagos.length > 0 && (
+              <>
+                <Divider orientation="left">HISTORIAL DE PAGOS</Divider>
+                <Table
+                  dataSource={detallesCotizacion.pagos}
+                  rowKey={(record: any) => record.token || Math.random()}
+                  pagination={false}
+                  size="small"
+                  scroll={{ x: 600 }}
+                  columns={[
+                    {
+                      title: 'Fecha',
+                      dataIndex: 'paid',
+                      key: 'paid',
+                      width: 120,
+                    },
+                    {
+                      title: 'Pagado',
+                      dataIndex: 'cantidad',
+                      key: 'cantidad',
+                      width: 120,
+                      render: (value: string | number) => `$${parseFloat(String(value || '0')).toFixed(2)}`,
+                    },
+                    {
+                      title: 'Total',
+                      key: 'total',
+                      width: 120,
+                      render: () => `$${parseFloat(detallesCotizacion?.cotizacion?.total || '0').toFixed(2)}`,
+                    },
+                    {
+                      title: 'Comprobante',
+                      key: 'comprobante',
+                      width: 150,
+                      render: (_, record: any) => {
+                        const comprobanteUrl = record.token && record.ext 
+                          ? `https://www.sistemaentregax.com/pagos/comprobante/${record.token}${record.ext}`
+                          : null;
+                        
+                        return (
+                          <Button
+                            type="primary"
+                            size="small"
+                            icon={<FileTextOutlined />}
+                            onClick={() => comprobanteUrl && handleOpenModal(comprobanteUrl)}
+                            disabled={!comprobanteUrl}
+                          >
+                            Ver Comprobante
+                          </Button>
+                        );
+                      },
+                    },
+                  ]}
+                />
+              </>
+            )}
+
+            {/* Desglose de Guía y Envío */}
+            {detallesCotizacion?.waybills && detallesCotizacion.waybills.length > 0 && (
+              <>
+                <Divider orientation="left">DESGLOSE DE GUÍA Y ENVÍO</Divider>
+                <Table
+                  dataSource={detallesCotizacion.waybills}
+                  rowKey={(record: any) => record.name || record.guiaingreso || Math.random()}
+                  pagination={false}
+                  size="small"
+                  scroll={{ x: 1200 }}
+                  columns={
+                    detallesCotizacion.servicio === 'MARITIMO'
+                      ? [
+                          // Columnas para servicio MARITIMO
+                          {
+                            title: 'Nombre',
+                            dataIndex: 'name',
+                            key: 'name',
+                            width: 180,
+                          },
+                          {
+                            title: 'Guía Salida',
+                            dataIndex: 'guiasalida',
+                            key: 'guiasalida',
+                            width: 150,
+                            render: (value: string) => value || '-',
+                          },
+                          {
+                            title: 'Logo',
+                            dataIndex: 'logo',
+                            key: 'logo',
+                            width: 100,
+                            render: (value: string | number) => {
+                              const logoValue = String(value);
+                              if (logoValue === '0') return 'Generico';
+                              if (logoValue === '1') return 'Logo';
+                              return '-';
+                            },
+                          },
+                          {
+                            title: 'CBM',
+                            dataIndex: 'cbm',
+                            key: 'cbm',
+                            width: 100,
+                            render: (value: string | number) => `${parseFloat(String(value || '0')).toFixed(2)}`,
+                          },
+                          {
+                            title: 'Bultos',
+                            dataIndex: 'bultos',
+                            key: 'bultos',
+                            width: 80,
+                            render: (value: string | number) => `${value || '0'}`,
+                          },
+                          {
+                            title: 'Peso',
+                            dataIndex: 'peso',
+                            key: 'peso',
+                            width: 100,
+                            render: (value: string | number) => `${value || '0'}`,
+                          },
+                        ]
+                      : [
+                          // Columnas para servicio TDI
+                          {
+                            title: 'Guía Ingreso',
+                            dataIndex: 'guiaingreso',
+                            key: 'guiaingreso',
+                            width: 180,
+                          },
+                          {
+                            title: 'Guía Salida',
+                            dataIndex: 'guiasalida',
+                            key: 'guiasalida',
+                            width: 150,
+                            render: (value: string) => value || '-',
+                          },
+                          {
+                            title: 'Contenido',
+                            dataIndex: 'contenido',
+                            key: 'contenido',
+                            width: 120,
+                          },
+                          {
+                            title: 'Costo',
+                            dataIndex: 'costo',
+                            key: 'costo',
+                            width: 100,
+                            render: (value: string | number) => `$${parseFloat(String(value || '0')).toFixed(2)}`,
+                          },
+                          {
+                            title: 'Costo x GL',
+                            dataIndex: 'cotgl',
+                            key: 'cotgl',
+                            width: 100,
+                            render: (value: string | number) => `$${parseFloat(String(value || '0')).toFixed(2)}`,
+                          },
+                          {
+                            title: 'Kilos',
+                            dataIndex: 'kilos',
+                            key: 'kilos',
+                            width: 80,
+                            render: (value: string | number) => `${value || '0'}`,
+                          },
+                          {
+                            title: 'Tipo de cambio',
+                            dataIndex: 'tipodecambio',
+                            key: 'tipodecambio',
+                            width: 120,
+                            render: (value: string | number) => `$${parseFloat(String(value || '0')).toFixed(2)}`,
+                          },
+                          {
+                            title: 'Costo Envío',
+                            dataIndex: 'costoenvio',
+                            key: 'costoenvio',
+                            width: 100,
+                            render: (value: string | number) => `$${parseFloat(String(value || '0')).toFixed(2)}`,
+                          },
+                        ]
+                  }
+                />
+              </>
+            )}
+          </>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '40px' }}>
+            <p>No hay información disponible</p>
           </div>
         )}
       </Modal>

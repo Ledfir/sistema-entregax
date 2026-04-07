@@ -7,6 +7,17 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* Estilo para botones principales */
+.listado-archivos-cuentas-card .ant-btn-primary {
+  background-color: #ff6600 !important;
+  border-color: #ff6600 !important;
+}
+
+.listado-archivos-cuentas-card .ant-btn-primary:hover {
+  background-color: #ff8533 !important;
+  border-color: #ff8533 !important;
+}
+
 .listado-archivos-cuentas-card .ant-table {
   background: #fff;
 }

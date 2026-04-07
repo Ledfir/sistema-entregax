@@ -41,6 +41,12 @@
   border-radius: 6px;
 }
 
+/* Estilo para botones principales */
+.reporte-estado-cuenta-card .ant-btn-primary {
+  background-color: #ff6600 !important;
+  border-color: #ff6600 !important;
+}
+
 .reporte-estado-cuenta-card .ant-btn-primary:hover {
   background-color: #ff8533 !important;
   border-color: #ff8533 !important;
