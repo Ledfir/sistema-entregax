@@ -50,4 +50,18 @@ export const cuentasService = {
     });
     return response.data;
   },
+
+  // Buscar pagos de un cliente
+  searchPaymentsCustomer: async (tokenCliente: string): Promise<any> => {
+    const url = '/cuentas/search-payments-customer';
+    const response = await apiClient.post(url, { tokenCliente });
+    return response.data;
+  },
+
+  // Transferir pago entre cuentas
+  transferPayment: async (idPago: string | number, idCuentaDestino: string | number): Promise<any> => {
+    const url = '/cuentas/transfer-payment';
+    const response = await apiClient.post(url, { idPago, idCuentaDestino });
+    return response.data;
+  },
 };

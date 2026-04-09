@@ -83,6 +83,20 @@ export const userService = {
     const response = await apiClient.get(url);
     return response.data?.data ?? response.data ?? [];
   },
+
+  // Crear nuevo usuario marítimo
+  createUserMaritimo: async (payload: { nombre: string; telefono: string; email: string }): Promise<any> => {
+    const url = '/users/new-user-maritimo';
+    const response = await apiClient.post(url, payload);
+    return response.data;
+  },
+
+  // Listar archivos BLs de usuarios marítimos
+  listFilesBls: async (): Promise<any> => {
+    const url = '/users/list-files-bls';
+    const response = await apiClient.get(url);
+    return response.data;
+  },
 };
 
 export default userService;

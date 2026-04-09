@@ -28,7 +28,9 @@ import { Instrucciones, GuiasArchivadas, PendientesCotizar, MisCotizaciones } fr
 import { EnvioConFactura, CatalogoServicios, MisEnvios, EnviosArchivados } from '@/pages/dolares';
 import { Cotizaciones, PanelPLInstrucciones, ClientesMaritima, ConsignatariosMaritima, CotizacionesMaritimasList, NavierasPuertos, PCTLList, PLsPendientes, SubirNuevoWeek, DHLValidar, ValidarManifiesto } from '@/pages/maritimos';
 import { Historial, Saldo, SubirPagos } from '@/pages/monedero';
-import { ListadoArchivosCuentas, ReporteEstadoCuenta, SubirEstadoCuenta } from '@/pages/admin/bancos';
+import { ListadoArchivosCuentas, ReporteEstadoCuenta, SubirEstadoCuenta, TransferirSaldo } from '@/pages/admin/bancos';
+import { ClientesAdmin } from '@/pages/admin/clientes';
+import { AgregarUsuarioMaritimo, BlsCargados } from '@/pages/bls';
 import { MisEnvios as MisEnviosRMB, EnviosArchivados as EnviosArchivadosRMB, EnvioConFactura as EnvioConFacturaRMB, EnvioSinFactura as EnvioSinFacturaRMB, CatalogoServicios as CatalogoServiciosRMB } from '@/pages/rmbs';
 import { MisEnvios as MisEnviosUSDT, EnviosArchivados as EnviosArchivadosUSDT, EnvioConFactura as EnvioConFacturaUSDT, EnvioSinFactura as EnvioSinFacturaUSDT, CatalogoServicios as CatalogoServiciosUSDT } from '@/pages/usdts';
 import { Juego, Snake } from '@/pages/juego';
@@ -517,6 +519,44 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['ADMIN']}>
                 <SubirEstadoCuenta />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/bancos/transferir-saldo"
+            element={
+              <ProtectedRoute roles={['ADMIN']}>
+                <TransferirSaldo />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Rutas de Bls */}
+          <Route
+            path="/admin/bls/agregar-usuario-maritimo"
+            element={
+              <ProtectedRoute roles={['SISTEMAS', 'ADMIN', 'OPERACION MARITIMA']}>
+                <AgregarUsuarioMaritimo />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin/bls/cargados"
+            element={
+              <ProtectedRoute roles={['SISTEMAS', 'ADMIN', 'OPERACION MARITIMA']}>
+                <BlsCargados />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Rutas de Admin - Clientes */}
+          <Route
+            path="/admin/clientes"
+            element={
+              <ProtectedRoute roles={['ADMIN']}>
+                <ClientesAdmin />
               </ProtectedRoute>
             }
           />

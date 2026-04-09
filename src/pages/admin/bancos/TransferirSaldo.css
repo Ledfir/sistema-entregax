@@ -1,0 +1,56 @@
+.transferir-saldo-wrapper {
+  padding: 24px;
+}
+
+/* Estilo para botones principales */
+.transferir-saldo-card .ant-btn-primary {
+  background-color: #ff6600 !important;
+  border-color: #ff6600 !important;
+}
+
+.transferir-saldo-card .ant-btn-primary:hover {
+  background-color: #ff8533 !important;
+  border-color: #ff8533 !important;
+}
+
+.transferir-saldo-form {
+  padding: 24px 0;
+}
+
+.form-row-two-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.button-section {
+  text-align: center;
+  margin-top: 32px;
+  margin-bottom: 0;
+}
+
+/* Estilos para la card de resultados */
+.resultados-card .ant-btn-primary {
+  background-color: #ff6600 !important;
+  border-color: #ff6600 !important;
+}
+
+.resultados-card .ant-btn-primary:hover {
+  background-color: #ff8533 !important;
+  border-color: #ff8533 !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .transferir-saldo-wrapper {
+    padding: 16px;
+  }
+
+  .transferir-saldo-form {
+    padding: 16px 0;
+  }
+
+  .form-row-two-columns {
+    grid-template-columns: 1fr;
+  }
+}

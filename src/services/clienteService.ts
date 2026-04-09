@@ -10,6 +10,15 @@ export const clienteService = {
     return Array.isArray(items) ? items : [];
   },
 
+  // Obtener clientes de un asesor específico
+  getMyCustomers: async (token: string | number): Promise<any[]> => {
+    const url = `/customers/my-customers/${token}`;
+    const response = await apiClient.get(url);
+    const raw = response.data ?? {};
+    const items = raw?.data ?? raw ?? [];
+    return Array.isArray(items) ? items : [];
+  },
+
   // Devuelve { items: any[], total?: number }
   list: async (query = '', page = 1, per_page = 10): Promise<{ items: any[]; total?: number }> => {
     const params: any = {};
@@ -214,6 +223,13 @@ export const clienteService = {
     const raw = response.data ?? {};
     const items = raw?.data ?? raw ?? [];
     return Array.isArray(items) ? items : [];
+  },
+
+  // Listar todos los clientes para panel de administrador
+  listCustomersAdmin: async (): Promise<any> => {
+    const url = '/customers/list-customers-admin';
+    const response = await apiClient.get(url);
+    return response.data;
   },
 };
 
