@@ -231,6 +231,30 @@ export const clienteService = {
     const response = await apiClient.get(url);
     return response.data;
   },
+
+  getBenefits: async (token: string): Promise<any> => {
+    const url = '/customers/get-benefits';
+    const response = await apiClient.post(url, { token });
+    return response.data;
+  },
+
+  updateBenefits: async (token: string, benefitId: number): Promise<any> => {
+    const url = '/customers/update-benefits';
+    const response = await apiClient.post(url, { token, id: benefitId });
+    return response.data;
+  },
+
+  getDeliveryAddresses: async (token: string): Promise<any> => {
+    const url = `/customers/delivery-addresses/${token}`;
+    const response = await apiClient.get(url);
+    return response.data;
+  },
+
+  listServices: async (): Promise<any> => {
+    const url = '/customers/list-services';
+    const response = await apiClient.get(url);
+    return response.data;
+  },
 };
 
 export default clienteService;

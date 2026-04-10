@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Dropdown, Button, Input, message, Modal, Row, Col } from 'antd';
+import { Card, Table, Dropdown, Button, Input, message, Modal, Row, Col, Carousel, Select } from 'antd';
 import type { MenuProps } from 'antd';
 import { SearchOutlined, DownOutlined, InfoCircleOutlined, EnvironmentOutlined, FileTextOutlined, HistoryOutlined, GiftOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -28,12 +28,24 @@ const ClientesAdmin: React.FC = () => {
   });
   const [modalBeneficiosVisible, setModalBeneficiosVisible] = useState(false);
   const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
-  const [beneficioCredito, setBeneficioCredito] = useState<number | null>(null);
-  const [beneficioPrecioUSA, setBeneficioPrecioUSA] = useState<number | null>(null);
-  const [beneficioPrecioMaritimo, setBeneficioPrecioMaritimo] = useState<number | null>(null);
+  const [loadingBeneficios, setLoadingBeneficios] = useState(false);
+  const [beneficioCredito, setBeneficioCredito] = useState<boolean>(false);
+  const [beneficioPrecioUSA, setBeneficioPrecioUSA] = useState<boolean>(false);
+  const [beneficioPrecioMaritimo, setBeneficioPrecioMaritimo] = useState<boolean>(false);
+  const [modalDireccionesVisible, setModalDireccionesVisible] = useState(false);
+  const [direcciones, setDirecciones] = useState<any[]>([]);
+  const [loadingDirecciones, setLoadingDirecciones] = useState(false);
+  const [modalFiscalesVisible, setModalFiscalesVisible] = useState(false);
+  const [datosFiscales, setDatosFiscales] = useState<any[]>([]);
+  const [loadingFiscales, setLoadingFiscales] = useState(false);
+  const [modalHistorialVisible, setModalHistorialVisible] = useState(false);
+  const [servicios, setServicios] = useState<any[]>([]);
+  const [loadingServicios, setLoadingServicios] = useState(false);
+  const [servicioSeleccionado, setServicioSeleccionado] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     cargarClientes();
+    cargarServicios();
   }, []);
 
   useEffect(() => {
@@ -50,6 +62,133 @@ const ClientesAdmin: React.FC = () => {
       setFilteredData(data);
     }
   }, [searchText, data]);
+
+  const cargarBeneficios = async (token: string) => {
+    try {
+      setLoadingBeneficios(true);
+      const response = await clienteService.getBenefits(token);
+      
+      if (response.status === 'success' && Array.isArray(response.data)) {
+        // La API devuelve un array con objetos { id: "1", state: 0/1 }
+        // id 1 = Crédito, id 2 = USA, id 3 = Marítimo
+        const creditoBenefit = response.data.find((b: any) => b.id === "1" || b.id === 1);
+        const usaBenefit = response.data.find((b: any) => b.id === "2" || b.id === 2);
+        const maritimoBenefit = response.data.find((b: any) => b.id === "3" || b.id === 3);
+        
+        setBeneficioCredito(creditoBenefit?.state === 1 || creditoBenefit?.state === "1");
+        setBeneficioPrecioUSA(usaBenefit?.state === 1 || usaBenefit?.state === "1");
+        setBeneficioPrecioMaritimo(maritimoBenefit?.state === 1 || maritimoBenefit?.state === "1");
+      } else {
+        // Valores por defecto si no hay respuesta
+        setBeneficioCredito(false);
+        setBeneficioPrecioUSA(false);
+        setBeneficioPrecioMaritimo(false);
+      }
+    } catch (error) {
+      console.error('Error al cargar beneficios:', error);
+      message.error('Error al cargar los beneficios del cliente');
+      // Valores por defecto en caso de error
+      setBeneficioCredito(false);
+      setBeneficioPrecioUSA(false);
+      setBeneficioPrecioMaritimo(false);
+    } finally {
+      setLoadingBeneficios(false);
+    }
+  };
+
+  const handleToggleBeneficio = async (benefitId: number, benefitName: string, currentState: boolean) => {
+    if (!clienteSeleccionado) return;
+
+    const accion = currentState ? 'desactivar' : 'activar';
+    
+    Modal.confirm({
+      title: `¿Confirmar ${accion} beneficio?`,
+      content: `¿Está seguro que desea ${accion} el beneficio de ${benefitName} para ${clienteSeleccionado.nombre}?`,
+      okText: 'Sí, confirmar',
+      cancelText: 'Cancelar',
+      onOk: async () => {
+        try {
+          setLoadingBeneficios(true);
+          const response = await clienteService.updateBenefits(clienteSeleccionado.token, benefitId);
+          
+          if (response.status === 'success') {
+            message.success(response.message || `Beneficio ${accion} correctamente`);
+            // Recargar beneficios para obtener el estado actualizado
+            await cargarBeneficios(clienteSeleccionado.token);
+          } else {
+            message.warning(response.message || 'No se pudo actualizar el beneficio');
+          }
+        } catch (error) {
+          console.error('Error al actualizar beneficio:', error);
+          const errorMessage = (error as any)?.response?.data?.message || 'Error al actualizar el beneficio';
+          message.error(errorMessage);
+        } finally {
+          setLoadingBeneficios(false);
+        }
+      },
+    });
+  };
+
+  const cargarDirecciones = async (token: string) => {
+    try {
+      setLoadingDirecciones(true);
+      const response = await clienteService.getDeliveryAddresses(token);
+      
+      if (response.status === 'success' && Array.isArray(response.data)) {
+        setDirecciones(response.data);
+      } else {
+        setDirecciones([]);
+        message.info('No se encontraron direcciones de entrega');
+      }
+    } catch (error) {
+      console.error('Error al cargar direcciones:', error);
+      const errorMessage = (error as any)?.response?.data?.message || 'Error al cargar las direcciones';
+      message.error(errorMessage);
+      setDirecciones([]);
+    } finally {
+      setLoadingDirecciones(false);
+    }
+  };
+
+  const cargarDatosFiscales = async (token: string) => {
+    try {
+      setLoadingFiscales(true);
+      const response = await clienteService.getBillingAddresses(token);
+      
+      if (Array.isArray(response)) {
+        setDatosFiscales(response);
+      } else {
+        setDatosFiscales([]);
+        message.info('No se encontraron datos fiscales');
+      }
+    } catch (error) {
+      console.error('Error al cargar datos fiscales:', error);
+      const errorMessage = (error as any)?.response?.data?.message || 'Error al cargar los datos fiscales';
+      message.error(errorMessage);
+      setDatosFiscales([]);
+    } finally {
+      setLoadingFiscales(false);
+    }
+  };
+
+  const cargarServicios = async () => {
+    try {
+      setLoadingServicios(true);
+      const response = await clienteService.listServices();
+      
+      if (response.status === 'success' && Array.isArray(response.data)) {
+        setServicios(response.data);
+      } else {
+        setServicios([]);
+      }
+    } catch (error) {
+      console.error('Error al cargar servicios:', error);
+      message.error('Error al cargar los servicios');
+      setServicios([]);
+    } finally {
+      setLoadingServicios(false);
+    }
+  };
 
   const cargarClientes = async () => {
     try {
@@ -94,20 +233,24 @@ const ClientesAdmin: React.FC = () => {
         // TODO: Navegar a información del cliente
         break;
       case 'direcciones':
-        message.info(`Ver direcciones de: ${cliente.nombre}`);
-        // TODO: Navegar a direcciones del cliente
+        setClienteSeleccionado(cliente);
+        setModalDireccionesVisible(true);
+        cargarDirecciones(cliente.token);
         break;
       case 'fiscales':
-        message.info(`Ver datos fiscales de: ${cliente.nombre}`);
-        // TODO: Navegar a datos fiscales del cliente
+        setClienteSeleccionado(cliente);
+        setModalFiscalesVisible(true);
+        cargarDatosFiscales(cliente.token);
         break;
       case 'historial':
-        message.info(`Ver historial de: ${cliente.nombre}`);
-        // TODO: Navegar a historial del cliente
+        setClienteSeleccionado(cliente);
+        setModalHistorialVisible(true);
+        setServicioSeleccionado(undefined);
         break;
       case 'beneficios':
         setClienteSeleccionado(cliente);
         setModalBeneficiosVisible(true);
+        cargarBeneficios(cliente.token);
         break;
       default:
         break;
@@ -249,12 +392,8 @@ const ClientesAdmin: React.FC = () => {
           {/* Tarjeta Crédito */}
           <Col xs={24} md={8} style={{ display: 'flex' }}>
             <Card 
-              style={{ textAlign: 'center', width: '100%', border: '2px solid #e0e0e0', borderRadius: '8px', cursor: 'pointer' }}
+              style={{ textAlign: 'center', width: '100%', border: '2px solid #e0e0e0', borderRadius: '8px' }}
               bodyStyle={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 350 }}
-              onClick={() => {
-                setBeneficioCredito(1);
-                console.log('Crédito seleccionado: 1');
-              }}
             >
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <img 
@@ -268,11 +407,16 @@ const ClientesAdmin: React.FC = () => {
                 </p>
               </div>
               <Button 
-                danger 
+                loading={loadingBeneficios}
                 size="large" 
-                style={{ backgroundColor: '#dc0000', borderColor: '#dc0000', color: '#ffffff' }}
+                onClick={() => handleToggleBeneficio(1, 'Crédito', beneficioCredito)}
+                style={{ 
+                  backgroundColor: beneficioCredito ? '#52c41a' : '#dc0000', 
+                  borderColor: beneficioCredito ? '#52c41a' : '#dc0000', 
+                  color: '#ffffff' 
+                }}
               >
-                Crédito : No
+                Crédito : {beneficioCredito ? 'Sí' : 'No'}
               </Button>
             </Card>
           </Col>
@@ -280,12 +424,8 @@ const ClientesAdmin: React.FC = () => {
           {/* Tarjeta Precio USA */}
           <Col xs={24} md={8} style={{ display: 'flex' }}>
             <Card 
-              style={{ textAlign: 'center', width: '100%', border: '2px solid #e0e0e0', borderRadius: '8px', cursor: 'pointer' }}
+              style={{ textAlign: 'center', width: '100%', border: '2px solid #e0e0e0', borderRadius: '8px' }}
               bodyStyle={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 350 }}
-              onClick={() => {
-                setBeneficioPrecioUSA(2);
-                console.log('Precio USA seleccionado: 2');
-              }}
             >
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <img 
@@ -299,11 +439,16 @@ const ClientesAdmin: React.FC = () => {
                 </p>
               </div>
               <Button 
-                danger 
+                loading={loadingBeneficios}
                 size="large" 
-                style={{ backgroundColor: '#dc0000', borderColor: '#dc0000', color: '#ffffff' }}
+                onClick={() => handleToggleBeneficio(2, 'Precio USA', beneficioPrecioUSA)}
+                style={{ 
+                  backgroundColor: beneficioPrecioUSA ? '#52c41a' : '#dc0000', 
+                  borderColor: beneficioPrecioUSA ? '#52c41a' : '#dc0000', 
+                  color: '#ffffff' 
+                }}
               >
-                USA : No
+                USA : {beneficioPrecioUSA ? 'Sí' : 'No'}
               </Button>
             </Card>
           </Col>
@@ -311,12 +456,8 @@ const ClientesAdmin: React.FC = () => {
           {/* Tarjeta Precio Marítimo */}
           <Col xs={24} md={8} style={{ display: 'flex' }}>
             <Card 
-              style={{ textAlign: 'center', width: '100%', border: '2px solid #e0e0e0', borderRadius: '8px', cursor: 'pointer' }}
+              style={{ textAlign: 'center', width: '100%', border: '2px solid #e0e0e0', borderRadius: '8px' }}
               bodyStyle={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 350 }}
-              onClick={() => {
-                setBeneficioPrecioMaritimo(3);
-                console.log('Precio Marítimo seleccionado: 3');
-              }}
             >
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                 <div style={{ fontSize: 80, marginBottom: 16 }}>🚢</div>
@@ -326,15 +467,305 @@ const ClientesAdmin: React.FC = () => {
                 </p>
               </div>
               <Button 
-                danger 
+                loading={loadingBeneficios}
                 size="large" 
-                style={{ backgroundColor: '#dc0000', borderColor: '#dc0000', color: '#ffffff' }}
+                onClick={() => handleToggleBeneficio(3, 'Precio Marítimo', beneficioPrecioMaritimo)}
+                style={{ 
+                  backgroundColor: beneficioPrecioMaritimo ? '#52c41a' : '#dc0000', 
+                  borderColor: beneficioPrecioMaritimo ? '#52c41a' : '#dc0000', 
+                  color: '#ffffff' 
+                }}
               >
-                Marítimo : No
+                Marítimo : {beneficioPrecioMaritimo ? 'Sí' : 'No'}
               </Button>
             </Card>
           </Col>
         </Row>
+      </Modal>
+
+      {/* Modal de Datos Fiscales */}
+      <Modal
+        title={`Datos Fiscales - ${clienteSeleccionado?.nombre || ''}`}
+        open={modalFiscalesVisible}
+        onCancel={() => setModalFiscalesVisible(false)}
+        footer={null}
+        width={800}
+      >
+        {loadingFiscales ? (
+          <div style={{ textAlign: 'center', padding: '50px 0' }}>
+            <p>Cargando datos fiscales...</p>
+          </div>
+        ) : datosFiscales.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '50px 0' }}>
+            <p>No hay datos fiscales registrados</p>
+          </div>
+        ) : (
+          <>
+            <div style={{ textAlign: 'center', marginBottom: 16, color: '#666' }}>
+              Total de datos fiscales: {datosFiscales.length}
+            </div>
+            <style>
+              {`
+                .ant-carousel .slick-prev,
+                .ant-carousel .slick-next {
+                  color: #ff6600;
+                  font-size: 24px;
+                  z-index: 2;
+                }
+                .ant-carousel .slick-prev:hover,
+                .ant-carousel .slick-next:hover {
+                  color: #ff8833;
+                }
+                .ant-carousel .slick-prev {
+                  left: -10px;
+                }
+                .ant-carousel .slick-next {
+                  right: -10px;
+                }
+                .ant-carousel .slick-dots li button {
+                  background: #d9d9d9;
+                }
+                .ant-carousel .slick-dots li.slick-active button {
+                  background: #ff6600;
+                }
+              `}
+            </style>
+            <Carousel 
+              arrows 
+              dots={true} 
+              dotPosition="bottom" 
+              style={{ padding: '0 30px' }}
+            >
+              {datosFiscales.map((fiscal, index) => (
+                <div key={fiscal.id || index}>
+                  <Card
+                    style={{
+                      margin: '20px 10px 40px 10px',
+                      border: '2px solid #e0e0e0',
+                      borderRadius: '8px',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                    }}
+                    title={
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <FileTextOutlined style={{ fontSize: 20, color: '#ff6600' }} />
+                        <span>Datos Fiscales {index + 1} de {datosFiscales.length}</span>
+                      </div>
+                    }
+                  >
+                    <Row gutter={[16, 16]}>
+                      <Col span={24}>
+                        <p><strong>Razón Social:</strong> {fiscal.razonsocial || 'N/A'}</p>
+                        <p><strong>RFC:</strong> {fiscal.rfc || 'N/A'}</p>
+                        <p><strong>Calle:</strong> {fiscal.calle || 'N/A'}</p>
+                        <p><strong>Núm. Exterior:</strong> {fiscal.numeroext || 'N/A'}</p>
+                        <p><strong>Núm. Interior:</strong> {fiscal.numeroint || 'N/A'}</p>
+                        <p><strong>Colonia:</strong> {fiscal.colonia || 'N/A'}</p>
+                        <p><strong>C.P.:</strong> {fiscal.cp || 'N/A'}</p>
+                        <p><strong>Municipio:</strong> {fiscal.municipio || 'N/A'}</p>
+                        <p><strong>Ciudad:</strong> {fiscal.ciudad || 'N/A'}</p>
+                        <p><strong>Estado:</strong> {fiscal.estado || 'N/A'}</p>
+                        <p><strong>País:</strong> {fiscal.pais || 'N/A'}</p>
+                        <p><strong>Email:</strong> {fiscal.email || 'N/A'}</p>
+                        <p><strong>Teléfono:</strong> {fiscal.tel || 'N/A'}</p>
+                        <p><strong>Régimen Fiscal:</strong> {fiscal.regimen || 'N/A'}</p>
+                        <p><strong>Uso CFDI:</strong> {fiscal.uso_cfdi || 'N/A'}</p>
+                      </Col>
+                    </Row>
+                  </Card>
+                </div>
+              ))}
+            </Carousel>
+          </>
+        )}
+      </Modal>
+
+      {/* Modal de Direcciones */}
+      <Modal
+        title={`Direcciones de Entrega - ${clienteSeleccionado?.nombre || ''}`}
+        open={modalDireccionesVisible}
+        onCancel={() => setModalDireccionesVisible(false)}
+        footer={null}
+        width={800}
+      >
+        {loadingDirecciones ? (
+          <div style={{ textAlign: 'center', padding: '50px 0' }}>
+            <p>Cargando direcciones...</p>
+          </div>
+        ) : direcciones.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '50px 0' }}>
+            <p>No hay direcciones de entrega registradas</p>
+          </div>
+        ) : (
+          <>
+            <div style={{ textAlign: 'center', marginBottom: 16, color: '#666' }}>
+              Total de direcciones: {direcciones.length}
+            </div>
+            <style>
+              {`
+                .ant-carousel .slick-prev,
+                .ant-carousel .slick-next {
+                  color: #ff6600;
+                  font-size: 24px;
+                  z-index: 2;
+                }
+                .ant-carousel .slick-prev:hover,
+                .ant-carousel .slick-next:hover {
+                  color: #ff8833;
+                }
+                .ant-carousel .slick-prev {
+                  left: -10px;
+                }
+                .ant-carousel .slick-next {
+                  right: -10px;
+                }
+                .ant-carousel .slick-dots li button {
+                  background: #d9d9d9;
+                }
+                .ant-carousel .slick-dots li.slick-active button {
+                  background: #ff6600;
+                }
+              `}
+            </style>
+            <Carousel 
+              arrows 
+              dots={true} 
+              dotPosition="bottom" 
+              style={{ padding: '0 30px' }}
+            >
+              {direcciones.map((direccion, index) => {
+                // Construir la dirección completa para Google Maps
+                const direccionCompleta = [
+                  direccion.calle,
+                  direccion.numeroext,
+                  direccion.colonia,
+                  direccion.cp,
+                  direccion.municipio,
+                  direccion.ciudad,
+                  direccion.estado,
+                  direccion.pais
+                ].filter(Boolean).join(', ');
+                
+                const mapsUrl = `https://www.google.com/maps?q=${encodeURIComponent(direccionCompleta)}&output=embed`;
+                
+                return (
+                  <div key={direccion.id || index}>
+                    <Card
+                      style={{
+                        margin: '20px 10px 40px 10px',
+                        border: '2px solid #e0e0e0',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                      }}
+                      title={
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <EnvironmentOutlined style={{ fontSize: 20, color: '#ff6600' }} />
+                          <span>Dirección {index + 1} de {direcciones.length}</span>
+                        </div>
+                      }
+                    >
+                      <Row gutter={[16, 16]}>
+                        {/* Columna izquierda - Datos */}
+                        <Col xs={24} sm={24} md={12}>
+                          <p><strong>Quien recibe:</strong> {direccion.quienrecibe || 'N/A'}</p>
+                          <p><strong>Calle:</strong> {direccion.calle || 'N/A'}</p>
+                          <p><strong>Núm. Exterior:</strong> {direccion.numeroext || 'N/A'}</p>
+                          <p><strong>Núm. Interior:</strong> {direccion.numeroint || 'N/A'}</p>
+                          <p><strong>Colonia:</strong> {direccion.colonia || 'N/A'}</p>
+                          <p><strong>C.P.:</strong> {direccion.cp || 'N/A'}</p>
+                          <p><strong>Municipio:</strong> {direccion.municipio || 'N/A'}</p>
+                          <p><strong>Ciudad:</strong> {direccion.ciudad || 'N/A'}</p>
+                          <p><strong>Estado:</strong> {direccion.estado || 'N/A'}</p>
+                          <p><strong>País:</strong> {direccion.pais || 'N/A'}</p>
+                          <p><strong>Teléfono:</strong> {direccion.telefono || 'N/A'}</p>
+                          <p><strong>Móvil:</strong> {direccion.movil || 'N/A'}</p>
+                        </Col>
+                        
+                        {/* Columna derecha - Mapa */}
+                        <Col xs={24} sm={24} md={12}>
+                          <div style={{ 
+                            border: '1px solid #d9d9d9', 
+                            borderRadius: '4px', 
+                            overflow: 'hidden',
+                            height: '350px'
+                          }}>
+                            <iframe
+                              title={`Mapa de dirección ${index + 1}`}
+                              src={mapsUrl}
+                              width="100%"
+                              height="100%"
+                              style={{ border: 0 }}
+                              allowFullScreen
+                              loading="lazy"
+                              referrerPolicy="no-referrer-when-downgrade"
+                            />
+                          </div>
+                        </Col>
+                        
+                        {/* Referencias y lugar de entrega - Full width */}
+                        {direccion.refe && (
+                          <Col span={24}>
+                            <p><strong>Referencias:</strong> {direccion.refe}</p>
+                          </Col>
+                        )}
+                        {direccion.lugarentrega && (
+                          <Col span={24}>
+                            <p><strong>Lugar de entrega:</strong> {direccion.lugarentrega}</p>
+                          </Col>
+                        )}
+                      </Row>
+                    </Card>
+                  </div>
+                );
+              })}
+            </Carousel>
+          </>
+        )}
+      </Modal>
+
+      {/* Modal de Historial */}
+      <Modal
+        title={`Historial - ${clienteSeleccionado?.nombre || ''}`}
+        open={modalHistorialVisible}
+        onCancel={() => {
+          setModalHistorialVisible(false);
+          setServicioSeleccionado(undefined);
+        }}
+        footer={null}
+        width={600}
+      >
+        <div style={{ padding: '20px 0' }}>
+          <div style={{ marginBottom: 16 }}>
+            <label style={{ display: 'block', marginBottom: 8, fontWeight: 'bold' }}>
+              Tipo de servicio:
+            </label>
+            <Select
+              style={{ width: '100%' }}
+              placeholder="Seleccione un tipo de servicio"
+              value={servicioSeleccionado}
+              onChange={(value) => setServicioSeleccionado(value)}
+              loading={loadingServicios}
+              allowClear
+            >
+              {servicios.map((servicio) => (
+                <Select.Option key={servicio.id} value={servicio.id}>
+                  {servicio.name}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+          
+          {servicioSeleccionado && (
+            <div style={{ 
+              marginTop: 24, 
+              padding: 16, 
+              background: '#f5f5f5', 
+              borderRadius: 8,
+              textAlign: 'center' 
+            }}>
+              <p>Servicio seleccionado: <strong>{servicios.find(s => s.id === servicioSeleccionado)?.name}</strong></p>
+            </div>
+          )}
+        </div>
       </Modal>
     </div>
   );
