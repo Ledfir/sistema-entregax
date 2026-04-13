@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Dropdown, Button, Input, message, Modal, Row, Col, Carousel, Select } from 'antd';
+import { Card, Table, Dropdown, Button, Input, message, Modal, Row, Col, Carousel, Select, Tag, Spin, Avatar } from 'antd';
 import type { MenuProps } from 'antd';
-import { SearchOutlined, DownOutlined, InfoCircleOutlined, EnvironmentOutlined, FileTextOutlined, HistoryOutlined, GiftOutlined } from '@ant-design/icons';
+import { SearchOutlined, DownOutlined, InfoCircleOutlined, EnvironmentOutlined, FileTextOutlined, HistoryOutlined, GiftOutlined, CalendarOutlined, MailOutlined, PhoneOutlined, MobileOutlined, GlobalOutlined, PictureOutlined, EyeOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import type { TablePaginationConfig } from 'antd/es/table';
 import { clienteService } from '@/services/clienteService';
@@ -42,6 +42,9 @@ const ClientesAdmin: React.FC = () => {
   const [servicios, setServicios] = useState<any[]>([]);
   const [loadingServicios, setLoadingServicios] = useState(false);
   const [servicioSeleccionado, setServicioSeleccionado] = useState<string | undefined>(undefined);
+  const [modalInformacionVisible, setModalInformacionVisible] = useState(false);
+  const [infoCliente, setInfoCliente] = useState<any>(null);
+  const [loadingInfo, setLoadingInfo] = useState(false);
 
   useEffect(() => {
     cargarClientes();
@@ -62,6 +65,20 @@ const ClientesAdmin: React.FC = () => {
       setFilteredData(data);
     }
   }, [searchText, data]);
+
+  const cargarInformacion = async (token: string) => {
+    try {
+      setLoadingInfo(true);
+      const response = await clienteService.get(token);
+      setInfoCliente(response);
+    } catch (error) {
+      console.error('Error al cargar información del cliente:', error);
+      message.error('Error al cargar la información del cliente');
+      setInfoCliente(null);
+    } finally {
+      setLoadingInfo(false);
+    }
+  };
 
   const cargarBeneficios = async (token: string) => {
     try {
@@ -229,8 +246,9 @@ const ClientesAdmin: React.FC = () => {
   const handleMenuClick = (cliente: Cliente, key: string) => {
     switch (key) {
       case 'informacion':
-        message.info(`Ver información de: ${cliente.nombre}`);
-        // TODO: Navegar a información del cliente
+        setClienteSeleccionado(cliente);
+        setModalInformacionVisible(true);
+        cargarInformacion(cliente.token);
         break;
       case 'direcciones':
         setClienteSeleccionado(cliente);
@@ -379,6 +397,155 @@ const ClientesAdmin: React.FC = () => {
           bordered
         />
       </Card>
+
+      {/* Modal de Información del Cliente */}
+      <Modal
+        title={`Información - ${clienteSeleccionado?.nombre || ''}`}
+        open={modalInformacionVisible}
+        onCancel={() => { setModalInformacionVisible(false); setInfoCliente(null); }}
+        footer={null}
+        width={800}
+      >
+        {loadingInfo ? (
+          <div style={{ textAlign: 'center', padding: '60px 0' }}>
+            <Spin size="large" />
+            <p style={{ marginTop: 16 }}>Cargando información...</p>
+          </div>
+        ) : infoCliente ? (
+          <div style={{ padding: '8px 0' }}>
+            {/* Cabecera */}
+            <Card style={{ marginBottom: 16, border: '1px solid #e0e0e0', borderRadius: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                <Avatar
+                  size={80}
+                  style={{ backgroundColor: '#ff6600', fontSize: 32, flexShrink: 0 }}
+                >
+                  {infoCliente.nombre?.charAt(0)}
+                </Avatar>
+                <div style={{ flex: 1 }}>
+                  <h2 style={{ margin: 0, marginBottom: 8, fontSize: 22, fontWeight: 700 }}>{infoCliente.nombre || 'N/A'}</h2>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                    <Tag style={{ margin: 0 }}><strong>ID:</strong> {infoCliente.id || 'N/A'}</Tag>
+                    <Tag style={{ margin: 0 }}><strong>Alias:</strong> {infoCliente.alias || 'N/A'}</Tag>
+                    <Tag style={{ margin: 0 }}><strong>Suite:</strong> {infoCliente.clavecliente || 'N/A'}</Tag>
+                    {infoCliente.created && (
+                      <span style={{ color: '#888', fontSize: 13, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        <CalendarOutlined /> Registrado: {infoCliente.created}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Contacto */}
+            <Card size="small" title="Contacto" style={{ marginBottom: 16 }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <tbody>
+                  <tr>
+                    <td style={{ padding: '8px 12px', borderBottom: '1px solid #f0f0f0', width: '33%' }}>
+                      <span style={{ color: '#888', marginRight: 6 }}><MailOutlined /></span>
+                      <strong>Correo</strong>
+                      <div style={{ marginTop: 2 }}>{infoCliente.correo || 'N/A'}</div>
+                    </td>
+                    <td style={{ padding: '8px 12px', borderBottom: '1px solid #f0f0f0', width: '33%' }}>
+                      <span style={{ color: '#888', marginRight: 6 }}><PhoneOutlined /></span>
+                      <strong>Teléfono</strong>
+                      <div style={{ marginTop: 2 }}>{infoCliente.telefono || 'N/A'}</div>
+                    </td>
+                    <td style={{ padding: '8px 12px', borderBottom: '1px solid #f0f0f0', width: '33%' }}>
+                      <span style={{ color: '#888', marginRight: 6 }}><MobileOutlined /></span>
+                      <strong>Móvil</strong>
+                      <div style={{ marginTop: 2 }}>{infoCliente.movil || 'N/A'}</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ padding: '8px 12px' }}>
+                      <span style={{ color: '#25D366', marginRight: 6 }}>💬</span>
+                      <strong>WhatsApp</strong>
+                      <div style={{ marginTop: 2 }}>{infoCliente.whatsapp || 'N/A'}</div>
+                    </td>
+                    <td style={{ padding: '8px 12px' }}>
+                      <span style={{ color: '#888', marginRight: 6 }}>微</span>
+                      <strong>WeChat</strong>
+                      <div style={{ marginTop: 2 }}>{infoCliente.wechat || 'N/A'}</div>
+                    </td>
+                    <td style={{ padding: '8px 12px' }}>
+                      <span style={{ color: '#1877F2', marginRight: 6 }}><GlobalOutlined /></span>
+                      <strong>Facebook</strong>
+                      <div style={{ marginTop: 2 }}>{infoCliente.facebook || 'N/A'}</div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </Card>
+
+            {/* INE */}
+            <Card size="small" title="Identificación (INE)">
+              <Row gutter={[16, 16]}>
+                <Col xs={24} sm={12}>
+                  <Card
+                    size="small"
+                    title="Frente"
+                    style={{ textAlign: 'center', border: '1px solid #e0e0e0' }}
+                    headStyle={{ textAlign: 'center' }}
+                    extra={infoCliente.ladoa ? (
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<EyeOutlined />}
+                        onClick={() => window.open(infoCliente.ladoa, '_blank')}
+                      >
+                        Ver
+                      </Button>
+                    ) : null}
+                  >
+                    {infoCliente.ladoa ? (
+                      <img src={infoCliente.ladoa} alt="INE Frente" style={{ maxWidth: '100%', borderRadius: 8 }} />
+                    ) : (
+                      <div style={{ padding: '40px 0', color: '#bbb', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, border: '2px dashed #e0e0e0', borderRadius: 8 }}>
+                        <PictureOutlined style={{ fontSize: 48 }} />
+                        <span style={{ fontSize: 13 }}>Imagen no disponible<br />or Sin subir</span>
+                      </div>
+                    )}
+                  </Card>
+                </Col>
+                <Col xs={24} sm={12}>
+                  <Card
+                    size="small"
+                    title="Reverso"
+                    style={{ textAlign: 'center', border: '1px solid #e0e0e0' }}
+                    headStyle={{ textAlign: 'center' }}
+                    extra={infoCliente.ladob ? (
+                      <Button
+                        type="link"
+                        size="small"
+                        icon={<EyeOutlined />}
+                        onClick={() => window.open(infoCliente.ladob, '_blank')}
+                      >
+                        Ver
+                      </Button>
+                    ) : null}
+                  >
+                    {infoCliente.ladob ? (
+                      <img src={infoCliente.ladob} alt="INE Reverso" style={{ maxWidth: '100%', borderRadius: 8 }} />
+                    ) : (
+                      <div style={{ padding: '40px 0', color: '#bbb', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, border: '2px dashed #e0e0e0', borderRadius: 8 }}>
+                        <PictureOutlined style={{ fontSize: 48 }} />
+                        <span style={{ fontSize: 13 }}>Imagen no disponible<br />or Sin subir</span>
+                      </div>
+                    )}
+                  </Card>
+                </Col>
+              </Row>
+            </Card>
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '50px 0' }}>
+            <p>No se pudo cargar la información del cliente</p>
+          </div>
+        )}
+      </Modal>
 
       {/* Modal de Beneficios */}
       <Modal
@@ -731,7 +898,7 @@ const ClientesAdmin: React.FC = () => {
           setServicioSeleccionado(undefined);
         }}
         footer={null}
-        width={600}
+        width={1000}
       >
         <div style={{ padding: '20px 0' }}>
           <div style={{ marginBottom: 16 }}>

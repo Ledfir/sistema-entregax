@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 import { HomeServicioCliente } from './HomeServicioCliente';
 import { HomeAsesor } from './HomeAsesor';
 import { HomeOperacionMaritima } from './HomeOperacionMaritima';
+import { HomeAdmin } from './HomeAdmin';
 import './Dashboard.css';
 
 export const Dashboard = () => {
@@ -15,6 +16,10 @@ export const Dashboard = () => {
   }, []);
 
   // Homes específicos por rol
+  if (user?.tipo_usuario === 'ADMIN' || user?.tipo_usuario === 'SISTEMAS') {
+    return <HomeAdmin />;
+  }
+
   if (user?.tipo_usuario === 'ASESOR') {
     return <HomeAsesor />;
   }
