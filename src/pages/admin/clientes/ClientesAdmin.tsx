@@ -42,6 +42,8 @@ const ClientesAdmin: React.FC = () => {
   const [servicios, setServicios] = useState<any[]>([]);
   const [loadingServicios, setLoadingServicios] = useState(false);
   const [servicioSeleccionado, setServicioSeleccionado] = useState<string | undefined>(undefined);
+  const [historialData, setHistorialData] = useState<any[]>([]);
+  const [loadingHistorial, setLoadingHistorial] = useState(false);
   const [modalInformacionVisible, setModalInformacionVisible] = useState(false);
   const [infoCliente, setInfoCliente] = useState<any>(null);
   const [loadingInfo, setLoadingInfo] = useState(false);
@@ -151,8 +153,19 @@ const ClientesAdmin: React.FC = () => {
       setLoadingDirecciones(true);
       const response = await clienteService.getDeliveryAddresses(token);
       
-      if (response.status === 'success' && Array.isArray(response.data)) {
-        setDirecciones(response.data);
+      // Manejar diferentes formatos de respuesta
+      let direccionesData = [];
+      
+      if (Array.isArray(response)) {
+        // Si la respuesta es directamente un array
+        direccionesData = response;
+      } else if (response?.data && Array.isArray(response.data)) {
+        // Si la respuesta tiene estructura { status, data }
+        direccionesData = response.data;
+      }
+      
+      if (direccionesData.length > 0) {
+        setDirecciones(direccionesData);
       } else {
         setDirecciones([]);
         message.info('No se encontraron direcciones de entrega');
@@ -205,6 +218,183 @@ const ClientesAdmin: React.FC = () => {
     } finally {
       setLoadingServicios(false);
     }
+  };
+
+  const cargarHistorial = async (serviceId: string) => {
+    if (!clienteSeleccionado) return;
+    
+    try {
+      setLoadingHistorial(true);
+      setHistorialData([]);
+      
+      const response = await clienteService.getHistory(clienteSeleccionado.token, serviceId);
+      
+      if (response.status === 'success' && Array.isArray(response.data)) {
+        setHistorialData(response.data);
+      } else if (Array.isArray(response)) {
+        setHistorialData(response);
+      } else {
+        setHistorialData([]);
+        message.info('No se encontró historial para este servicio');
+      }
+    } catch (error) {
+      console.error('Error al cargar historial:', error);
+      message.error('Error al cargar el historial del servicio');
+      setHistorialData([]);
+    } finally {
+      setLoadingHistorial(false);
+    }
+  };
+
+  // Definir columnas dinámicas según el tipo de servicio
+  const getHistorialColumns = (): ColumnsType<any> => {
+    const serviceId = String(servicioSeleccionado);
+    
+    if (serviceId === '4') {
+      // Columnas para servicio marítimo (service_id = 4)
+      return [
+        {
+          title: 'LOG',
+          dataIndex: 'log',
+          key: 'log',
+          width: 150,
+        },
+        {
+          title: 'CTZ',
+          dataIndex: 'ctz',
+          key: 'ctz',
+          width: 100,
+        },
+        {
+          title: 'Week',
+          dataIndex: 'week',
+          key: 'week',
+          width: 100,
+          align: 'center' as const,
+        },
+        {
+          title: 'CBM',
+          dataIndex: 'cbm',
+          key: 'cbm',
+          width: 100,
+          align: 'center' as const,
+        },
+        {
+          title: 'Bultos',
+          dataIndex: 'bultos',
+          key: 'bultos',
+          width: 100,
+          align: 'center' as const,
+        },
+        {
+          title: 'Peso',
+          dataIndex: 'peso',
+          key: 'peso',
+          width: 100,
+          align: 'center' as const,
+          render: (value: string) => value ? `${value} Kg` : '-',
+        },
+        {
+          title: 'Logo',
+          dataIndex: 'logo',
+          key: 'logo',
+          width: 80,
+          align: 'center' as const,
+          render: (value: string) => value === '1' ? <Tag color="green">Sí</Tag> : <Tag>No</Tag>,
+        },
+        {
+          title: 'Sensible',
+          dataIndex: 'sensible',
+          key: 'sensible',
+          width: 100,
+          align: 'center' as const,
+          render: (value: string) => value === '0' ? <Tag>No</Tag> : <Tag color="orange">Sí</Tag>,
+        },
+        {
+          title: 'Estado',
+          dataIndex: 'estado',
+          key: 'estado',
+          width: 200,
+          render: (value: string) => <Tag color="blue">{value || 'N/A'}</Tag>,
+        },
+      ];
+    }
+    
+    if (serviceId === '1' || serviceId === '2' || serviceId === '3') {
+      // Columnas para servicio de envíos/paquetería (service_id = 1)
+      return [
+        {
+          title: 'Guía de Ingreso',
+          dataIndex: 'Guia de ingreso',
+          key: 'guia_ingreso',
+          width: 180,
+        },
+        {
+          title: 'Guía Única',
+          dataIndex: 'Guia unica',
+          key: 'guia_unica',
+          width: 180,
+        },
+        {
+          title: 'CTZ',
+          dataIndex: 'CTZ',
+          key: 'ctz',
+          width: 100,
+        },
+        {
+          title: 'Estado',
+          dataIndex: 'Estado',
+          key: 'estado',
+          width: 250,
+          render: (value: string) => <Tag color="blue">{value || 'N/A'}</Tag>,
+        },
+        {
+          title: 'Guía de Salida',
+          dataIndex: 'Guia de salida',
+          key: 'guia_salida',
+          width: 150,
+          render: (value: any) => value ? value : <Tag>Sin guía</Tag>,
+        },
+        {
+          title: 'Costo',
+          dataIndex: 'Costo',
+          key: 'costo',
+          width: 100,
+          align: 'center' as const,
+          render: (value: string) => value ? `$${value}` : '-',
+        },
+        {
+          title: 'Tipo de Cambio',
+          dataIndex: 'Tipo de cambio',
+          key: 'tipo_cambio',
+          width: 120,
+          align: 'center' as const,
+        },
+        {
+          title: 'Kilos',
+          dataIndex: 'kilos',
+          key: 'kilos',
+          width: 80,
+          align: 'center' as const,
+          render: (value: string) => value ? `${value} Kg` : '-',
+        },
+        {
+          title: 'Dimensiones (L×A×An)',
+          key: 'dimensiones',
+          width: 150,
+          align: 'center' as const,
+          render: (_: any, record: any) => {
+            const largo = record.largo || '0';
+            const alto = record.alto || '0';
+            const ancho = record.ancho || '0';
+            return `${largo}×${alto}×${ancho} cm`;
+          },
+        },
+      ];
+    }
+    
+    // Columnas genéricas para otros servicios
+    return [];
   };
 
   const cargarClientes = async () => {
@@ -896,6 +1086,7 @@ const ClientesAdmin: React.FC = () => {
         onCancel={() => {
           setModalHistorialVisible(false);
           setServicioSeleccionado(undefined);
+          setHistorialData([]);
         }}
         footer={null}
         width={1000}
@@ -909,7 +1100,14 @@ const ClientesAdmin: React.FC = () => {
               style={{ width: '100%' }}
               placeholder="Seleccione un tipo de servicio"
               value={servicioSeleccionado}
-              onChange={(value) => setServicioSeleccionado(value)}
+              onChange={(value) => {
+                setServicioSeleccionado(value);
+                if (value) {
+                  cargarHistorial(value);
+                } else {
+                  setHistorialData([]);
+                }
+              }}
               loading={loadingServicios}
               allowClear
             >
@@ -921,15 +1119,48 @@ const ClientesAdmin: React.FC = () => {
             </Select>
           </div>
           
-          {servicioSeleccionado && (
+          {loadingHistorial && (
+            <div style={{ textAlign: 'center', padding: '50px 0' }}>
+              <p>Cargando historial...</p>
+            </div>
+          )}
+
+          {!loadingHistorial && servicioSeleccionado && historialData.length > 0 && getHistorialColumns().length > 0 && (
+            <div style={{ marginTop: 24 }}>
+              <Table
+                dataSource={historialData}
+                columns={getHistorialColumns()}
+                rowKey={(record) => record.log || record.id || record.token}
+                pagination={{ pageSize: 10 }}
+                size="small"
+                bordered
+                scroll={{ x: 'max-content' }}
+              />
+            </div>
+          )}
+
+          {!loadingHistorial && servicioSeleccionado && historialData.length > 0 && getHistorialColumns().length === 0 && (
             <div style={{ 
               marginTop: 24, 
-              padding: 16, 
+              padding: 50, 
+              background: '#fff3cd', 
+              borderRadius: 8,
+              textAlign: 'center',
+              border: '1px solid #ffc107'
+            }}>
+              <p>La vista de historial para este tipo de servicio aún no está disponible.</p>
+            </div>
+          )}
+
+          {!loadingHistorial && servicioSeleccionado && historialData.length === 0 && (
+            <div style={{ 
+              marginTop: 24, 
+              padding: 50, 
               background: '#f5f5f5', 
               borderRadius: 8,
               textAlign: 'center' 
             }}>
-              <p>Servicio seleccionado: <strong>{servicios.find(s => s.id === servicioSeleccionado)?.name}</strong></p>
+              <p>No se encontró historial para este servicio</p>
             </div>
           )}
         </div>

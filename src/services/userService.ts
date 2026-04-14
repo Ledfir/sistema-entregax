@@ -97,6 +97,13 @@ export const userService = {
     const response = await apiClient.get(url);
     return response.data;
   },
+
+  // Obtener datos del panel de administrador
+  getAdminPanelData: async (userId: number | string): Promise<any> => {
+    const url = '/get-data-admin-panel';
+    const response = await apiClient.post(url, { id: userId });
+    return response.data;
+  },
 };
 
 export default userService;

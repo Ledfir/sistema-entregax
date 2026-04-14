@@ -441,7 +441,7 @@ export const MainLayout = () => {
         },
         { key: '/admin/configuracion/activar-desactivar-pagos', label: "Activar/Desactivar pagos de CTZ'S" },
         { key: '/admin/configuracion/bancos', label: 'Bancos' },
-        { key: '/admin/configuracion/cuentas', label: 'Cuentas' },
+        { key: '/configuracion/cuentas', label: 'Cuentas' },
         { key: '/admin/configuracion/servicios', label: 'Servicios' },
       ],
     },

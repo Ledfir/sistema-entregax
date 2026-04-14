@@ -244,15 +244,19 @@ export const clienteService = {
     return response.data;
   },
 
-  getDeliveryAddresses: async (token: string): Promise<any> => {
-    const url = `/customers/delivery-addresses/${token}`;
+  listServices: async (): Promise<any> => {
+    const url = '/customers/list-services';
     const response = await apiClient.get(url);
     return response.data;
   },
 
-  listServices: async (): Promise<any> => {
-    const url = '/customers/list-services';
-    const response = await apiClient.get(url);
+  // Obtener historial de servicios del cliente
+  getHistory: async (token: string, serviceId: string | number): Promise<any> => {
+    const url = '/customers/get-history';
+    const response = await apiClient.post(url, { 
+      token,
+      service_id: serviceId 
+    });
     return response.data;
   },
 };

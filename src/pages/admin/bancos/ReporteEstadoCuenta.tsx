@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Form, Select, Button, DatePicker, Typography, message, Table, Modal, Row, Col, Spin, Descriptions, Divider } from 'antd';
-import { SearchOutlined, EyeOutlined, FileTextOutlined, ExportOutlined, DollarOutlined, UserOutlined, BankOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import { SearchOutlined, EyeOutlined, FileTextOutlined, ExportOutlined, DollarOutlined, UserOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs, { Dayjs } from 'dayjs';
 import { cuentasService } from '@/services/cuentasService';

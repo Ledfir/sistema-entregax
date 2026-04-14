@@ -34,6 +34,7 @@ import { AgregarUsuarioMaritimo, BlsCargados } from '@/pages/bls';
 import { MisEnvios as MisEnviosRMB, EnviosArchivados as EnviosArchivadosRMB, EnvioConFactura as EnvioConFacturaRMB, EnvioSinFactura as EnvioSinFacturaRMB, CatalogoServicios as CatalogoServiciosRMB } from '@/pages/rmbs';
 import { MisEnvios as MisEnviosUSDT, EnviosArchivados as EnviosArchivadosUSDT, EnvioConFactura as EnvioConFacturaUSDT, EnvioSinFactura as EnvioSinFacturaUSDT, CatalogoServicios as CatalogoServiciosUSDT } from '@/pages/usdts';
 import { Juego, Snake } from '@/pages/juego';
+import { CuentasList } from '@/pages/config/cuentas';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 
@@ -181,6 +182,16 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['SISTEMAS']} permission="settings.view">
                 <div style={{ padding: 24 }}>Configuración</div>
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* Rutas de Configuración */}
+          <Route 
+            path="/configuracion/cuentas" 
+            element={
+              <ProtectedRoute roles={['SISTEMAS', 'ADMIN']}>
+                <CuentasList />
               </ProtectedRoute>
             } 
           />
