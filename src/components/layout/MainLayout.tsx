@@ -34,6 +34,8 @@ import {
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { AppHeader } from './AppHeader';
 import { useAuthStore } from '@/store/authStore';
+import { ActivarDesactivarPagosModal } from '@/components/common';
+import { pagosService } from '@/services/pagosService';
 import './MainLayout.css';
 
 const { Sider, Content } = Layout;
@@ -43,6 +45,9 @@ export const MainLayout = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [modalPagosOpen, setModalPagosOpen] = useState(false);
+  const [estadoPagos, setEstadoPagos] = useState<boolean>(false);
+  const [loadingPagos, setLoadingPagos] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -440,9 +445,9 @@ export const MainLayout = () => {
           ],
         },
         { key: '/admin/configuracion/activar-desactivar-pagos', label: "Activar/Desactivar pagos de CTZ'S" },
-        { key: '/admin/configuracion/bancos', label: 'Bancos' },
+        { key: '/configuracion/bancos', label: 'Bancos' },
         { key: '/configuracion/cuentas', label: 'Cuentas' },
-        { key: '/admin/configuracion/servicios', label: 'Servicios' },
+        { key: '/configuracion/servicios', label: 'Servicios' },
       ],
     },
     {
@@ -522,6 +527,15 @@ export const MainLayout = () => {
   }, [hasRole, user?.tipo_usuario]);
 
   const handleMenuClick = ({ key }: { key: string }) => {
+    // Interceptar clic en activar/desactivar pagos para abrir modal
+    if (key === '/admin/configuracion/activar-desactivar-pagos') {
+      handleAbrirModalPagos();
+      if (isMobile) {
+        setMobileMenuOpen(false);
+      }
+      return;
+    }
+
     if (!navigator.onLine) {
       notification.error({
         key: 'network-status',
@@ -536,6 +550,36 @@ export const MainLayout = () => {
     // Cerrar el menú móvil después de navegar
     if (isMobile) {
       setMobileMenuOpen(false);
+    }
+  };
+
+  const handleAbrirModalPagos = async () => {
+    try {
+      setLoadingPagos(true);
+      const response = await pagosService.getEstadoPagos(user?.id || 0);
+      
+      if (response.status === 'success') {
+        // Guardar el estado (0 o 1) como booleano
+        setEstadoPagos(response.data?.state || false);
+        setModalPagosOpen(true);
+      } else {
+        notification.error({
+          message: 'Error',
+          description: response.message || 'No se pudo obtener la configuración de pagos',
+          duration: 4,
+          placement: 'topRight',
+        });
+      }
+    } catch (error: any) {
+      console.error('Error al cargar configuración de pagos:', error);
+      notification.error({
+        message: 'Error',
+        description: error?.response?.data?.message || 'Error al cargar la configuración de pagos',
+        duration: 4,
+        placement: 'topRight',
+      });
+    } finally {
+      setLoadingPagos(false);
     }
   };
   // Decidir qué item marcar como seleccionado en el sidebar
@@ -607,6 +651,13 @@ export const MainLayout = () => {
           <span>2026 © Entregax Paquetería.</span>
         </div>
       </Layout>
+
+      <ActivarDesactivarPagosModal
+        open={modalPagosOpen}
+        onCancel={() => setModalPagosOpen(false)}
+        estadoInicial={estadoPagos}
+        userId={user?.id || 0}
+      />
     </Layout>
   );
 };

@@ -4,39 +4,40 @@ import type { MenuProps } from 'antd';
 import { SearchOutlined, DownOutlined, EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import type { TablePaginationConfig } from 'antd/es/table';
-import { cuentasService } from '@/services/cuentasService';
-import CuentaModal from './CuentaModal';
+import { serviciosService } from '@/services/serviciosService';
+import { humanizarFecha } from '@/utils/dateUtils';
+import { ServicioModal } from './ServicioModal';
 
-interface Cuenta {
+interface Servicio {
   id: string | number;
   token?: string;
   name: string;
-  banco: string;
-  cuenta: string;
-  clabe: string;
-  tarjeta?: string;
-  rfc?: string;
-  corto: string;
+  ctz_ini?: string;
+  idcta: string;
+  idtp?: string;
+  salida: string;
   desc?: string | null;
+  resp?: string;
   state?: string;
   created?: string;
+  com: string;
 }
 
-const CuentasList: React.FC = () => {
+const ServiciosList: React.FC = () => {
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<Cuenta[]>([]);
+  const [data, setData] = useState<Servicio[]>([]);
   const [searchText, setSearchText] = useState('');
-  const [filteredData, setFilteredData] = useState<Cuenta[]>([]);
+  const [filteredData, setFilteredData] = useState<Servicio[]>([]);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [servicioSeleccionado, setServicioSeleccionado] = useState<Servicio | null>(null);
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
     pageSize: 10,
     total: 0,
   });
-  const [modalOpen, setModalOpen] = useState(false);
-  const [cuentaSeleccionada, setCuentaSeleccionada] = useState<Cuenta | null>(null);
 
   useEffect(() => {
-    cargarCuentas();
+    cargarServicios();
   }, []);
 
   useEffect(() => {
@@ -53,123 +54,79 @@ const CuentasList: React.FC = () => {
     }
   }, [searchText, data]);
 
-  const cargarCuentas = async () => {
+  const cargarServicios = async () => {
     try {
       setLoading(true);
-      const response = await cuentasService.list();
+      const response = await serviciosService.list();
       setData(response);
       setPagination({ ...pagination, total: response.length });
     } catch (error) {
-      console.error('Error al cargar cuentas:', error);
-      message.error('Error al cargar las cuentas');
+      console.error('Error al cargar servicios:', error);
+      message.error('Error al cargar los servicios');
       setData([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEditar = async (cuenta: Cuenta) => {
-    try {
-      setLoading(true);
-      const response = await cuentasService.get(cuenta.token!);
-      
-      if (response.status === 'success' && response.data?.cuenta) {
-        const cuentaData = response.data.cuenta;
-        // Mapear los datos de la API al formato del modal
-        const datosCompletos = {
-          id: cuentaData.id,
-          token: cuentaData.token,
-          name: cuentaData.name,
-          banco: response.data.banco, // El nombre del banco viene por separado
-          cuenta: cuentaData.cuenta,
-          clabe: cuentaData.clabe,
-          tarjeta: cuentaData.tarjeta || '',
-          rfc: cuentaData.rfc || '',
-          corto: cuentaData.corto,
-        };
-        
-        setCuentaSeleccionada(datosCompletos);
-        // Usar setTimeout para asegurar que el state se actualice antes de abrir el modal
-        setTimeout(() => {
-          setModalOpen(true);
-        }, 50);
-      } else {
-        message.error('No se pudo obtener la información de la cuenta');
-      }
-    } catch (error: any) {
-      console.error('Error al cargar datos de la cuenta:', error);
-      const errorMessage = error?.response?.data?.message || 'Error al cargar los datos de la cuenta';
-      message.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+  const handleEditar = (servicio: Servicio) => {
+    setServicioSeleccionado(servicio);
+    setModalOpen(true);
   };
 
-  const handleEliminar = (cuenta: Cuenta) => {
+  const handleEliminar = (servicio: Servicio) => {
     Modal.confirm({
       title: '¿Confirmar eliminación?',
-      content: `¿Está seguro que desea eliminar la cuenta "${cuenta.corto}"?`,
+      content: `¿Está seguro que desea eliminar el servicio "${servicio.name}"?`,
       okText: 'Sí, eliminar',
       okType: 'danger',
       cancelText: 'Cancelar',
       onOk: async () => {
         try {
-          const response = await cuentasService.delete(cuenta.token!);
-          
-          // Mostrar mensaje de la API
+          const response = await serviciosService.delete(servicio.id);
           if (response.status === 'success') {
-            message.success(response.message || 'Cuenta eliminada correctamente');
-            cargarCuentas(); // Recargar la tabla
+            message.success(response.message || 'Servicio eliminado correctamente');
+            cargarServicios();
           } else {
-            message.error(response.message || 'Error al eliminar la cuenta');
+            message.error(response.message || 'Error al eliminar el servicio');
           }
-        } catch (error: any) {
-          console.error('Error al eliminar cuenta:', error);
-          const errorMessage = error?.response?.data?.message || 'Error al eliminar la cuenta';
-          message.error(errorMessage);
+        } catch (error) {
+          console.error('Error al eliminar servicio:', error);
+          message.error('Error al eliminar el servicio');
         }
       },
     });
   };
 
-  const handleAñadirCuenta = () => {
-    setCuentaSeleccionada(null);
+  const handleAñadirServicio = () => {
+    setServicioSeleccionado(null);
     setModalOpen(true);
   };
 
-  const handleModalClose = () => {
-    setModalOpen(false);
-    setCuentaSeleccionada(null);
-  };
-
-  const handleModalSuccess = () => {
-    cargarCuentas();
-  };
-
-  const getMenuItems = (cuenta: Cuenta): MenuProps['items'] => [
+  const getMenuItems = (servicio: Servicio): MenuProps['items'] => [
     {
       key: 'editar',
       label: 'Editar',
       icon: <EditOutlined />,
-      onClick: () => handleEditar(cuenta),
+      onClick: () => handleEditar(servicio),
     },
     {
       key: 'eliminar',
       label: 'Eliminar',
       icon: <DeleteOutlined />,
       danger: true,
-      onClick: () => handleEliminar(cuenta),
+      onClick: () => handleEliminar(servicio),
     },
   ];
 
-  const columns: ColumnsType<Cuenta> = [
+  const columns: ColumnsType<Servicio> = [
     {
       title: 'Acciones',
       key: 'acciones',
       width: 120,
       align: 'center',
       fixed: 'left',
-      render: (_: any, record: Cuenta) => (
+      render: (_: any, record: Servicio) => (
         <Dropdown menu={{ items: getMenuItems(record) }} trigger={['click']}>
           <Button type="primary" style={{ backgroundColor: '#ff6600', borderColor: '#ff6600' }}>
             Acciones <DownOutlined />
@@ -178,36 +135,39 @@ const CuentasList: React.FC = () => {
       ),
     },
     {
-      title: 'Beneficiario',
+      title: 'Nombre',
       dataIndex: 'name',
       key: 'name',
-      width: 300,
-    },
-    {
-      title: 'Banco',
-      dataIndex: 'banco',
-      key: 'banco',
-      width: 150,
+      width: 250,
     },
     {
       title: 'Cuenta',
       dataIndex: 'cuenta',
       key: 'cuenta',
+      width: 200,
+    },
+    {
+      title: 'Genera salida',
+      dataIndex: 'salida',
+      key: 'salida',
       width: 150,
       align: 'center',
+      render: (salida: string) => (salida === '1' ? 'Sí' : 'No'),
     },
     {
-      title: 'Clabe',
-      dataIndex: 'clabe',
-      key: 'clabe',
-      width: 200,
+      title: 'Comisión',
+      dataIndex: 'com',
+      key: 'com',
+      width: 120,
       align: 'center',
     },
     {
-      title: 'Nombre Corto',
-      dataIndex: 'corto',
-      key: 'corto',
+      title: 'Fecha de creación',
+      dataIndex: 'created',
+      key: 'created',
       width: 200,
+      align: 'center',
+      render: (created: string) => created ? humanizarFecha(created) : '-',
     },
   ];
 
@@ -221,10 +181,10 @@ const CuentasList: React.FC = () => {
 
   return (
     <div style={{ padding: '24px' }}>
-      <Card title="Listado de cuentas">
+      <Card title="Listado de servicios">
         <div style={{ marginBottom: 16, display: 'flex', gap: 16, justifyContent: 'space-between' }}>
           <Input
-            placeholder="Buscar cuenta..."
+            placeholder="Buscar servicio..."
             prefix={<SearchOutlined />}
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
@@ -235,10 +195,10 @@ const CuentasList: React.FC = () => {
             type="primary"
             icon={<PlusOutlined />}
             size="large"
-            onClick={handleAñadirCuenta}
+            onClick={handleAñadirServicio}
             style={{ backgroundColor: '#ff6600', borderColor: '#ff6600' }}
           >
-            Añadir cuenta
+            Añadir servicio
           </Button>
         </div>
 
@@ -261,14 +221,19 @@ const CuentasList: React.FC = () => {
         />
       </Card>
 
-      <CuentaModal
+      <ServicioModal
         open={modalOpen}
-        onCancel={handleModalClose}
-        onSuccess={handleModalSuccess}
-        cuenta={cuentaSeleccionada}
+        servicio={servicioSeleccionado}
+        onCancel={() => {
+          setModalOpen(false);
+          setServicioSeleccionado(null);
+        }}
+        onSuccess={() => {
+          cargarServicios();
+        }}
       />
     </div>
   );
 };
 
-export default CuentasList;
+export default ServiciosList;

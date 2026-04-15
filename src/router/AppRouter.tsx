@@ -24,7 +24,7 @@ import { OperacionMaritima } from '@/pages/operaciones/OperacionMaritima';
 import { UsaRemp } from '@/pages/operaciones/UsaRemp';
 import { NBox } from '@/pages/operaciones/NBox';
 import { NBoxMaritimo } from '@/pages/operaciones/NBoxMaritimo';
-import { Instrucciones, GuiasArchivadas, PendientesCotizar, MisCotizaciones } from '@/pages/cotizaciones';
+import { Instrucciones, GuiasArchivadas, PendientesCotizar, MisCotizaciones, CotizacionesMaritimas } from '@/pages/cotizaciones';
 import { EnvioConFactura, CatalogoServicios, MisEnvios, EnviosArchivados } from '@/pages/dolares';
 import { Cotizaciones, PanelPLInstrucciones, ClientesMaritima, ConsignatariosMaritima, CotizacionesMaritimasList, NavierasPuertos, PCTLList, PLsPendientes, SubirNuevoWeek, DHLValidar, ValidarManifiesto } from '@/pages/maritimos';
 import { Historial, Saldo, SubirPagos } from '@/pages/monedero';
@@ -35,6 +35,8 @@ import { MisEnvios as MisEnviosRMB, EnviosArchivados as EnviosArchivadosRMB, Env
 import { MisEnvios as MisEnviosUSDT, EnviosArchivados as EnviosArchivadosUSDT, EnvioConFactura as EnvioConFacturaUSDT, EnvioSinFactura as EnvioSinFacturaUSDT, CatalogoServicios as CatalogoServiciosUSDT } from '@/pages/usdts';
 import { Juego, Snake } from '@/pages/juego';
 import { CuentasList } from '@/pages/config/cuentas';
+import { BancosList } from '@/pages/config/bancos';
+import { ServiciosList } from '@/pages/config/servicios';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 
@@ -192,6 +194,22 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['SISTEMAS', 'ADMIN']}>
                 <CuentasList />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/configuracion/bancos" 
+            element={
+              <ProtectedRoute roles={['SISTEMAS', 'ADMIN']}>
+                <BancosList />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/configuracion/servicios" 
+            element={
+              <ProtectedRoute roles={['SISTEMAS', 'ADMIN']}>
+                <ServiciosList />
               </ProtectedRoute>
             } 
           />
@@ -568,6 +586,16 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['ADMIN']}>
                 <ClientesAdmin />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Rutas de Admin - Cotizaciones */}
+          <Route
+            path="/admin/cotizaciones/maritimas"
+            element={
+              <ProtectedRoute roles={['ADMIN', 'SISTEMAS']}>
+                <CotizacionesMaritimas />
               </ProtectedRoute>
             }
           />

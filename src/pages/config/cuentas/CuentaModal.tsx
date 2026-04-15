@@ -8,6 +8,7 @@ interface CuentaModalProps {
   onSuccess: () => void;
   cuenta?: {
     id: string | number;
+    token?: string;
     name: string;
     banco: string;
     cuenta: string;
@@ -27,13 +28,30 @@ export const CuentaModal: React.FC<CuentaModalProps> = ({ open, onCancel, onSucc
   useEffect(() => {
     if (open) {
       cargarBancos();
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (open && bancos.length > 0) {
       if (cuenta) {
-        form.setFieldsValue(cuenta);
+        // Esperar un momento para asegurar que el formulario esté listo
+        setTimeout(() => {
+          const valores = {
+            name: cuenta.name,
+            banco: cuenta.banco,
+            cuenta: cuenta.cuenta,
+            clabe: cuenta.clabe,
+            tarjeta: cuenta.tarjeta || '',
+            rfc: cuenta.rfc || '',
+            corto: cuenta.corto,
+          };
+          form.setFieldsValue(valores);
+        }, 100);
       } else {
         form.resetFields();
       }
     }
-  }, [open, cuenta, form]);
+  }, [open, cuenta, bancos, form]);
 
   const cargarBancos = async () => {
     try {
@@ -54,24 +72,37 @@ export const CuentaModal: React.FC<CuentaModalProps> = ({ open, onCancel, onSucc
       
       if (isEditing && cuenta) {
         // Actualizar cuenta existente
-        await cuentasService.update(cuenta.id, values);
-        message.success('Cuenta actualizada correctamente');
+        const response = await cuentasService.update(cuenta.token!, values);
+        
+        if (response.status === 'success') {
+          message.success(response.message || 'Cuenta actualizada correctamente');
+          form.resetFields();
+          onSuccess();
+          onCancel();
+        } else {
+          message.error(response.message || 'Error al actualizar la cuenta');
+        }
       } else {
         // Crear nueva cuenta
-        await cuentasService.create(values);
-        message.success('Cuenta creada correctamente');
+        const response = await cuentasService.create(values);
+        
+        if (response.status === 'success') {
+          message.success(response.message || 'Cuenta creada correctamente');
+          form.resetFields();
+          onSuccess();
+          onCancel();
+        } else {
+          message.error(response.message || 'Error al crear la cuenta');
+        }
       }
-      
-      form.resetFields();
-      onSuccess();
-      onCancel();
     } catch (error: any) {
       if (error.errorFields) {
         // Error de validación de formulario
         return;
       }
       console.error('Error al guardar cuenta:', error);
-      message.error(isEditing ? 'Error al actualizar la cuenta' : 'Error al crear la cuenta');
+      const errorMessage = error?.response?.data?.message || (isEditing ? 'Error al actualizar la cuenta' : 'Error al crear la cuenta');
+      message.error(errorMessage);
     }
   };
 

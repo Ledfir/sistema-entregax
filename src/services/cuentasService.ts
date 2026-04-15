@@ -20,6 +20,16 @@ export const cuentasService = {
     return Array.isArray(data) ? data : [];
   },
 
+  // Listar todas las cuentas (para selects)
+  listCuentas: async (): Promise<any[]> => {
+    const url = '/cuentas';
+    const response = await apiClient.get(url);
+    
+    const raw = response.data ?? {};
+    const data = raw?.data ?? [];
+    return Array.isArray(data) ? data : [];
+  },
+
   // Listar bancos disponibles
   listBanks: async (): Promise<any[]> => {
     const url = '/cuentas/list-banks';
@@ -86,13 +96,13 @@ export const cuentasService = {
     rfc?: string;
     corto: string;
   }): Promise<any> => {
-    const url = '/cuentas/create';
+    const url = '/cuentas/add-account-payment';
     const response = await apiClient.post(url, data);
     return response.data;
   },
 
   // Actualizar cuenta bancaria existente
-  update: async (id: number | string, data: {
+  update: async (token: string, data: {
     name?: string;
     banco?: string;
     cuenta?: string;
@@ -101,21 +111,21 @@ export const cuentasService = {
     rfc?: string;
     corto?: string;
   }): Promise<any> => {
-    const url = `/cuentas/update/${id}`;
-    const response = await apiClient.put(url, data);
+    const url = '/cuentas/update-account-payment';
+    const response = await apiClient.post(url, { ...data, token });
     return response.data;
   },
 
   // Eliminar cuenta bancaria
-  delete: async (id: number | string): Promise<any> => {
-    const url = `/cuentas/delete/${id}`;
-    const response = await apiClient.delete(url);
+  delete: async (token: string): Promise<any> => {
+    const url = '/cuentas/delete-account-payment';
+    const response = await apiClient.post(url, { token });
     return response.data;
   },
 
   // Obtener información de una cuenta específica
-  get: async (id: number | string): Promise<any> => {
-    const url = `/cuentas/${id}`;
+  get: async (token: string): Promise<any> => {
+    const url = `/cuentas/get-data-account/${token}`;
     const response = await apiClient.get(url);
     return response.data;
   },
