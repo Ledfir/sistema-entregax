@@ -47,7 +47,6 @@ export const MainLayout = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [modalPagosOpen, setModalPagosOpen] = useState(false);
   const [estadoPagos, setEstadoPagos] = useState<boolean>(false);
-  const [loadingPagos, setLoadingPagos] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -555,7 +554,6 @@ export const MainLayout = () => {
 
   const handleAbrirModalPagos = async () => {
     try {
-      setLoadingPagos(true);
       const response = await pagosService.getEstadoPagos(user?.id || 0);
       
       if (response.status === 'success') {
@@ -578,8 +576,6 @@ export const MainLayout = () => {
         duration: 4,
         placement: 'topRight',
       });
-    } finally {
-      setLoadingPagos(false);
     }
   };
   // Decidir qué item marcar como seleccionado en el sidebar
