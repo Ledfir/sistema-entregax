@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Dropdown, Button, Input, message, Tag } from 'antd';
+import { Card, Table, Dropdown, Button, Input, message, Tag, Modal } from 'antd';
 import type { MenuProps } from 'antd';
-import { SearchOutlined, DownOutlined, EyeOutlined, DownloadOutlined, DollarOutlined } from '@ant-design/icons';
+import { SearchOutlined, DownOutlined, EyeOutlined, DownloadOutlined, DollarOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import type { TablePaginationConfig } from 'antd/es/table';
 import { humanizarFecha } from '@/utils/dateUtils';
@@ -22,6 +22,27 @@ interface CotizacionMaritima {
   fecha_subida: string;
 }
 
+interface LogMaritimo {
+  id: string | number;
+  bl: string;
+  week: string;
+  fecha: string;
+  tipo: string;
+  cliente: string;
+  log: string;
+  estado: boolean | number | string;
+  logo: boolean | number | string;
+  paqueteria: string;
+}
+
+interface PagoMaritimo {
+  id: string | number;
+  ctz: string;
+  comprobante: string;
+  cantidad: string | number;
+  fecha_pago: string;
+}
+
 const CotizacionesMaritimas: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<CotizacionMaritima[]>([]);
@@ -32,6 +53,22 @@ const CotizacionesMaritimas: React.FC = () => {
     pageSize: 10,
     total: 0,
   });
+  
+  // Estados para el modal de logs
+  const [modalLogsVisible, setModalLogsVisible] = useState(false);
+  const [loadingLogs, setLoadingLogs] = useState(false);
+  const [logsData, setLogsData] = useState<LogMaritimo[]>([]);
+  const [ctzSeleccionada, setCtzSeleccionada] = useState<string>('');
+
+  // Estados para el modal de pagos
+  const [modalPagosVisible, setModalPagosVisible] = useState(false);
+  const [loadingPagos, setLoadingPagos] = useState(false);
+  const [pagosData, setPagosData] = useState<PagoMaritimo[]>([]);
+
+  // Estados para el modal de PDF
+  const [modalPdfVisible, setModalPdfVisible] = useState(false);
+  const [loadingPdf, setLoadingPdf] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState<string>('');
 
   useEffect(() => {
     cargarCotizaciones();
@@ -88,31 +125,108 @@ const CotizacionesMaritimas: React.FC = () => {
     const stateNum = typeof state === 'string' ? parseInt(state) : state;
     switch (stateNum) {
       case 1:
-        return 'Aprobado';
-      case 0:
-        return 'Pendiente';
+        return 'Nuevo';
       case 2:
-        return 'En revisión';
+        return 'En validación';
       case 3:
-        return 'Rechazado';
+        return 'Aprobado';
       default:
-        return 'Pendiente';
+        return 'Nuevo';
     }
   };
 
-  const handleDetalles = (cotizacion: CotizacionMaritima) => {
-    message.info(`Ver detalles de cotización: ${cotizacion.ctz}`);
-    // TODO: Implementar vista de detalles
+  const handleDetalles = async (cotizacion: CotizacionMaritima) => {
+    try {
+      setCtzSeleccionada(cotizacion.ctz);
+      setModalLogsVisible(true);
+      setLoadingLogs(true);
+      
+      const response = await cotizacionesService.getDataQuoteMaritima(cotizacion.ctz);
+      
+      if (response.status === 'success') {
+        const logsArray = response.data || [];
+        const logsMapeados: LogMaritimo[] = logsArray.map((item: any) => ({
+          id: item.id || Math.random(),
+          bl: item.bl || '-',
+          week: item.week || '-',
+          fecha: item.dated || '-',
+          tipo: item.type || '-',
+          cliente: item.cliente || '-',
+          log: item.log || '-',
+          estado: item.estado ?? false,
+          logo: item.logo ?? false,
+          paqueteria: item.paqueteria || '-',
+        }));
+        setLogsData(logsMapeados);
+      } else {
+        message.error(response.message || 'Error al cargar los logs');
+        setLogsData([]);
+      }
+    } catch (error: any) {
+      console.error('Error al cargar logs:', error);
+      message.error(error.response?.data?.message || 'Error al cargar los logs de la cotización');
+      setLogsData([]);
+    } finally {
+      setLoadingLogs(false);
+    }
   };
 
-  const handleDescargarPDF = (cotizacion: CotizacionMaritima) => {
-    message.info(`Descargar PDF de cotización: ${cotizacion.ctz}`);
-    // TODO: Implementar descarga de PDF
+  const handleDescargarPDF = async (cotizacion: CotizacionMaritima) => {
+    try {
+      setCtzSeleccionada(cotizacion.ctz);
+      setLoadingPdf(true);
+      
+      const response = await cotizacionesService.downloadQuoteMaritimePdf(cotizacion.ctz);
+      
+      if (response.status === 'success') {
+        setPdfUrl(response.url);
+        setModalPdfVisible(true);
+        message.success(response.message || 'PDF generado correctamente');
+      } else {
+        message.error(response.message || 'Error al generar el PDF');
+      }
+    } catch (error: any) {
+      console.error('Error al descargar PDF:', error);
+      message.error(error.response?.data?.message || 'Error al generar el PDF de la cotización');
+    } finally {
+      setLoadingPdf(false);
+    }
   };
 
-  const handlePagos = (cotizacion: CotizacionMaritima) => {
-    message.info(`Ver pagos de cotización: ${cotizacion.ctz}`);
-    // TODO: Implementar gestión de pagos
+  const handlePagos = async (cotizacion: CotizacionMaritima) => {
+    try {
+      setCtzSeleccionada(cotizacion.ctz);
+      setModalPagosVisible(true);
+      setLoadingPagos(true);
+      
+      const response = await cotizacionesService.getPaymentsQuoteMaritime(cotizacion.ctz);
+      
+      if (response.status === 'success') {
+        const pagosArray = response.data || [];
+        const pagosMapeados: PagoMaritimo[] = pagosArray.map((item: any) => ({
+          id: item.id || Math.random(),
+          ctz: item.ctz || cotizacion.ctz,
+          comprobante: item.token && item.ext 
+            ? `https://sistemaentregax.com/pagos/comprobante/${item.token}${item.ext}`
+            : '-',
+          cantidad: item.cantidad || 0,
+          fecha_pago: item.paid || '-',
+        }));
+        setPagosData(pagosMapeados);
+        if (pagosMapeados.length === 0) {
+          message.info('No hay pagos registrados para esta cotización');
+        }
+      } else {
+        message.error(response.message || 'Error al cargar los pagos');
+        setPagosData([]);
+      }
+    } catch (error: any) {
+      console.error('Error al cargar pagos:', error);
+      message.error(error.response?.data?.message || 'Error al cargar los pagos de la cotización');
+      setPagosData([]);
+    } finally {
+      setLoadingPagos(false);
+    }
   };
 
   const getMenuItems = (cotizacion: CotizacionMaritima): MenuProps['items'] => [
@@ -138,14 +252,12 @@ const CotizacionesMaritimas: React.FC = () => {
 
   const getEstadoColor = (estado: string): string => {
     switch (estado.toLowerCase()) {
+      case 'nuevo':
+        return 'blue';
+      case 'en validación':
+        return 'orange';
       case 'aprobado':
         return 'green';
-      case 'pendiente':
-        return 'orange';
-      case 'en revisión':
-        return 'blue';
-      case 'rechazado':
-        return 'red';
       default:
         return 'default';
     }
@@ -264,6 +376,141 @@ const CotizacionesMaritimas: React.FC = () => {
     });
   };
 
+  const handleCloseModalLogs = () => {
+    setModalLogsVisible(false);
+    setLogsData([]);
+    setCtzSeleccionada('');
+  };
+
+  // Columnas para la tabla de logs en el modal
+  const logsColumns: ColumnsType<LogMaritimo> = [
+    {
+      title: 'BL',
+      dataIndex: 'bl',
+      key: 'bl',
+      width: 150,
+    },
+    {
+      title: 'WEEK',
+      dataIndex: 'week',
+      key: 'week',
+      width: 100,
+      align: 'center',
+    },
+    {
+      title: 'Fecha',
+      dataIndex: 'fecha',
+      key: 'fecha',
+      width: 150,
+      render: (fecha: string) => fecha && fecha !== '-' ? humanizarFecha(fecha) : '-',
+    },
+    {
+      title: 'Tipo',
+      dataIndex: 'tipo',
+      key: 'tipo',
+      width: 120,
+    },
+    {
+      title: 'Cliente',
+      dataIndex: 'cliente',
+      key: 'cliente',
+      width: 200,
+    },
+    {
+      title: 'LOG',
+      dataIndex: 'log',
+      key: 'log',
+      width: 250,
+    },
+    {
+      title: 'Estado',
+      dataIndex: 'estado',
+      key: 'estado',
+      width: 100,
+      align: 'center',
+      render: (estado: boolean | number | string) => {
+        const isActivo = estado === true || estado === 1 || estado === '1';
+        return isActivo ? (
+          <CheckCircleOutlined style={{ color: 'green', fontSize: 20 }} />
+        ) : (
+          <CloseCircleOutlined style={{ color: 'red', fontSize: 20 }} />
+        );
+      },
+    },
+    {
+      title: 'Logo',
+      dataIndex: 'logo',
+      key: 'logo',
+      width: 100,
+      align: 'center',
+      render: (logo: boolean | number | string) => {
+        const isActivo = logo === true || logo === 1 || logo === '1';
+        return isActivo ? (
+          <CheckCircleOutlined style={{ color: 'green', fontSize: 20 }} />
+        ) : (
+          <CloseCircleOutlined style={{ color: 'red', fontSize: 20 }} />
+        );
+      },
+    },
+    {
+      title: 'Paqueteria',
+      dataIndex: 'paqueteria',
+      key: 'paqueteria',
+      width: 150,
+    },
+  ];
+
+  const handleCloseModalPagos = () => {
+    setModalPagosVisible(false);
+    setPagosData([]);
+  };
+
+  const handleCloseModalPdf = () => {
+    setModalPdfVisible(false);
+    setPdfUrl('');
+    setCtzSeleccionada('');
+  };
+
+  // Columnas para la tabla de pagos en el modal
+  const pagosColumns: ColumnsType<PagoMaritimo> = [
+    {
+      title: 'CTZ',
+      dataIndex: 'ctz',
+      key: 'ctz',
+      width: 150,
+    },
+    {
+      title: 'Comprobante',
+      dataIndex: 'comprobante',
+      key: 'comprobante',
+      width: 200,
+      render: (comprobante: string) => {
+        if (comprobante === '-') return '-';
+        return (
+          <a href={comprobante} target="_blank" rel="noopener noreferrer" style={{ color: '#ff6600' }}>
+            <DownloadOutlined /> Ver comprobante
+          </a>
+        );
+      },
+    },
+    {
+      title: 'Cantidad',
+      dataIndex: 'cantidad',
+      key: 'cantidad',
+      width: 150,
+      align: 'right',
+      render: (cantidad: string | number) => formatMoney(cantidad),
+    },
+    {
+      title: 'Fecha de pago',
+      dataIndex: 'fecha_pago',
+      key: 'fecha_pago',
+      width: 180,
+      align: 'center',
+      render: (fecha: string) => fecha && fecha !== '-' ? humanizarFecha(fecha) : '-',
+    },
+  ];
+
   return (
     <div style={{ padding: '24px' }}>
       <Card title="Cotizaciones Maritimas">
@@ -296,6 +543,90 @@ const CotizacionesMaritimas: React.FC = () => {
           bordered
         />
       </Card>
+
+      {/* Modal de LOGS */}
+      <Modal
+        title={`LOGS - ${ctzSeleccionada}`}
+        open={modalLogsVisible}
+        onCancel={handleCloseModalLogs}
+        footer={null}
+        width={1200}
+        destroyOnClose
+      >
+        <Table
+          columns={logsColumns}
+          dataSource={logsData}
+          rowKey="id"
+          loading={loadingLogs}
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            pageSizeOptions: ['10', '20', '50'],
+            showTotal: (total, range) => `Mostrando ${range[0]} a ${range[1]} de ${total} logs`,
+          }}
+          scroll={{ x: 'max-content' }}
+          bordered
+        />
+      </Modal>
+
+      {/* Modal de Pagos */}
+      <Modal
+        title={`Pagos vinculados - ${ctzSeleccionada}`}
+        open={modalPagosVisible}
+        onCancel={handleCloseModalPagos}
+        footer={null}
+        width={900}
+        destroyOnClose
+      >
+        <Table
+          columns={pagosColumns}
+          dataSource={pagosData}
+          rowKey="id"
+          loading={loadingPagos}
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            pageSizeOptions: ['10', '20', '50'],
+            showTotal: (total, range) => `Mostrando ${range[0]} a ${range[1]} de ${total} pagos`,
+          }}
+          scroll={{ x: 'max-content' }}
+          bordered
+        />
+      </Modal>
+
+      {/* Modal de visualizador de PDF */}
+      <Modal
+        title={`Cotización - ${ctzSeleccionada}`}
+        open={modalPdfVisible}
+        onCancel={handleCloseModalPdf}
+        footer={[
+          <Button key="download" type="primary" style={{ backgroundColor: '#ff6600', borderColor: '#ff6600' }}>
+            <a href={pdfUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'white', textDecoration: 'none' }}>
+              <DownloadOutlined /> Descargar PDF
+            </a>
+          </Button>,
+          <Button key="close" onClick={handleCloseModalPdf}>
+            Cerrar
+          </Button>,
+        ]}
+        width="90%"
+        style={{ top: 20 }}
+        destroyOnClose
+      >
+        {loadingPdf ? (
+          <div style={{ textAlign: 'center', padding: '50px' }}>
+            <p>Generando PDF...</p>
+          </div>
+        ) : (
+          pdfUrl && (
+            <iframe
+              src={pdfUrl}
+              style={{ width: '100%', height: '80vh', border: 'none' }}
+              title={`PDF - ${ctzSeleccionada}`}
+            />
+          )
+        )}
+      </Modal>
     </div>
   );
 };

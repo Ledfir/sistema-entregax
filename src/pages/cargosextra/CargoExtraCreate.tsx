@@ -5,11 +5,7 @@ import cargoExtraService from '../../services/cargoExtraService';
 import { clienteService } from '../../services/clienteService';
 import Swal from 'sweetalert2';
 import { FaSave, FaTrash, FaPlus } from 'react-icons/fa';
-import { Document, Page, pdfjs } from 'react-pdf';
 import './CargoExtra.css';
-
-// Configurar worker de PDF.js
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 const { Option } = Select;
 
@@ -43,7 +39,6 @@ export const CargoExtraCreate = () => {
   const [loadingCuentas, setLoadingCuentas] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fileType, setFileType] = useState<'image' | 'pdf' | null>(null);
-  const [numPages, setNumPages] = useState<number>(0);
   const navigate = useNavigate();
 
   // Cargar clientes y cuentas al montar el componente
@@ -144,10 +139,6 @@ export const CargoExtraCreate = () => {
       setPreviewUrl(null);
       setFileType(null);
     }
-  };
-
-  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    setNumPages(numPages);
   };
 
   const onFinish = async (values: any) => {
@@ -422,26 +413,11 @@ export const CargoExtraCreate = () => {
                     />
                   )}
                   {fileType === 'pdf' && (
-                    <div style={{ maxHeight: 500, overflow: 'auto' }}>
-                      <Document 
-                        file={previewUrl} 
-                        onLoadSuccess={onDocumentLoadSuccess}
-                        loading={<Spin />}
-                      >
-                        {Array.from(new Array(numPages), (_, index) => (
-                          <Page 
-                            key={`page_${index + 1}`} 
-                            pageNumber={index + 1}
-                            width={Math.min(window.innerWidth * 0.6, 600)}
-                            renderTextLayer={true}
-                            renderAnnotationLayer={true}
-                          />
-                        ))}
-                      </Document>
-                      <p style={{ textAlign: 'center', marginTop: 8 }}>
-                        Página(s): {numPages}
-                      </p>
-                    </div>
+                    <iframe
+                      src={previewUrl || ''}
+                      style={{ width: '100%', height: 500, border: 'none' }}
+                      title="Vista previa PDF"
+                    />
                   )}
                 </div>
               )}
