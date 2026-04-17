@@ -29,6 +29,14 @@ interface CotizacionTdiUsa {
   fecha_creacion: string;
 }
 
+interface PagoTdiUsa {
+  id: string | number;
+  ctz: string;
+  comprobante: string;
+  cantidad: string | number;
+  fecha_pago: string;
+}
+
 const CotizacionesTdiUsa: React.FC = () => {
   const [loadingClientes, setLoadingClientes] = useState(false);
   const [loadingAsesores, setLoadingAsesores] = useState(false);
@@ -48,6 +56,11 @@ const CotizacionesTdiUsa: React.FC = () => {
   const [loadingPdf, setLoadingPdf] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string>('');
   const [ctzSeleccionada, setCtzSeleccionada] = useState<string>('');
+  
+  // Estados para el modal de pagos
+  const [modalPagosVisible, setModalPagosVisible] = useState(false);
+  const [loadingPagos, setLoadingPagos] = useState(false);
+  const [pagosData, setPagosData] = useState<PagoTdiUsa[]>([]);
 
   useEffect(() => {
     cargarClientes();
@@ -209,9 +222,8 @@ const CotizacionesTdiUsa: React.FC = () => {
   const handleAccion = async (accion: string, cotizacion: CotizacionTdiUsa) => {
     if (accion === 'pdf') {
       await handleDescargarPDF(cotizacion);
-    } else if (accion === 'detalles') {
-      // TODO: Implementar detalles
-      message.info(`Acción "${accion}" para CTZ ${cotizacion.ctz}`);
+    } else if (accion === 'pagos') {
+      await handleVerPagos(cotizacion);
     }
   };
 
@@ -241,6 +253,47 @@ const CotizacionesTdiUsa: React.FC = () => {
     }
   };
 
+  const handleVerPagos = async (cotizacion: CotizacionTdiUsa) => {
+    try {
+      setCtzSeleccionada(cotizacion.ctz);
+      setModalPagosVisible(true);
+      setLoadingPagos(true);
+      
+      const response = await cotizacionesService.getQuotePayments(cotizacion.ctz);
+      
+      if (response.status === 'success') {
+        const pagosArray = response.data || [];
+        const pagosMapeados: PagoTdiUsa[] = pagosArray.map((item: any) => ({
+          id: item.id || Math.random(),
+          ctz: item.ctz || cotizacion.ctz,
+          comprobante: item.token && item.ext 
+            ? `https://sistemaentregax.com/pagos/comprobante/${item.token}${item.ext}`
+            : '-',
+          cantidad: item.cantidad || 0,
+          fecha_pago: item.paid || '-',
+        }));
+        setPagosData(pagosMapeados);
+        if (pagosMapeados.length === 0) {
+          message.info('No hay pagos registrados para esta cotización');
+        }
+      } else {
+        message.error(response.message || 'Error al cargar los pagos');
+        setPagosData([]);
+      }
+    } catch (error: any) {
+      console.error('Error al cargar pagos:', error);
+      message.error(error.response?.data?.message || 'Error al cargar los pagos de la cotización');
+      setPagosData([]);
+    } finally {
+      setLoadingPagos(false);
+    }
+  };
+
+  const handleCloseModalPagos = () => {
+    setModalPagosVisible(false);
+    setPagosData([]);
+  };
+
   const formatMoney = (value: string | number): string => {
     const num = typeof value === 'string' ? parseFloat(value) : value;
     return `$${num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -257,7 +310,7 @@ const CotizacionesTdiUsa: React.FC = () => {
           {
             key: '1',
             label: 'Ver pagos',
-            onClick: () => handleAccion('detalles', record)
+            onClick: () => handleAccion('pagos', record)
           },
           {
             key: '2',
@@ -477,6 +530,68 @@ const CotizacionesTdiUsa: React.FC = () => {
           </div>
         )}
       </Card>
+
+      {/* Modal de Pagos */}
+      <Modal
+        title={`Pagos vinculados - ${ctzSeleccionada}`}
+        open={modalPagosVisible}
+        onCancel={handleCloseModalPagos}
+        footer={null}
+        width={900}
+        destroyOnClose
+      >
+        <Table
+          columns={[
+            {
+              title: 'CTZ',
+              dataIndex: 'ctz',
+              key: 'ctz',
+              width: 150,
+            },
+            {
+              title: 'Comprobante',
+              dataIndex: 'comprobante',
+              key: 'comprobante',
+              width: 200,
+              render: (comprobante: string) => {
+                if (comprobante === '-') return '-';
+                return (
+                  <a href={comprobante} target="_blank" rel="noopener noreferrer" style={{ color: '#ff6600' }}>
+                    <DownloadOutlined /> Ver comprobante
+                  </a>
+                );
+              },
+            },
+            {
+              title: 'Cantidad',
+              dataIndex: 'cantidad',
+              key: 'cantidad',
+              width: 150,
+              align: 'right' as const,
+              render: (cantidad: string | number) => formatMoney(cantidad),
+            },
+            {
+              title: 'Fecha de pago',
+              dataIndex: 'fecha_pago',
+              key: 'fecha_pago',
+              width: 180,
+              align: 'center' as const,
+              render: (fecha: string) => fecha && fecha !== '-' ? humanizarFecha(fecha) : '-',
+            },
+          ]}
+          dataSource={pagosData}
+          rowKey="id"
+          loading={loadingPagos}
+          pagination={{
+            pageSize: 10,
+            showSizeChanger: true,
+            pageSizeOptions: ['10', '20', '50'],
+            showTotal: (total, range) => `Mostrando ${range[0]} a ${range[1]} de ${total} pagos`,
+          }}
+          scroll={{ x: 'max-content' }}
+          bordered
+        />
+      </Modal>
 
       {/* Modal para visualizar PDF */}
       <Modal

@@ -45,4 +45,11 @@ export const cotizacionesService = {
     const response = await apiClient.get(url);
     return response.data;
   },
+
+  // Obtener pagos de cotización TDI-USA
+  getQuotePayments: async (ctz: string): Promise<any> => {
+    const url = '/quotes/get-quote-payments';
+    const response = await apiClient.post(url, { ctz });
+    return response.data;
+  },
 };

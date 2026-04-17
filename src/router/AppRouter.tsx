@@ -26,6 +26,7 @@ import { NBox } from '@/pages/operaciones/NBox';
 import { NBoxMaritimo } from '@/pages/operaciones/NBoxMaritimo';
 import { Instrucciones, GuiasArchivadas, PendientesCotizar, MisCotizaciones, CotizacionesMaritimas, CotizacionesTdiUsa } from '@/pages/cotizaciones';
 import { EnvioConFactura, CatalogoServicios, MisEnvios, EnviosArchivados } from '@/pages/dolares';
+import { GenerarPin } from '@/pages/examen';
 import { Cotizaciones, PanelPLInstrucciones, ClientesMaritima, ConsignatariosMaritima, CotizacionesMaritimasList, NavierasPuertos, PCTLList, PLsPendientes, SubirNuevoWeek, DHLValidar, ValidarManifiesto } from '@/pages/maritimos';
 import { Historial, Saldo, SubirPagos } from '@/pages/monedero';
 import { ListadoArchivosCuentas, ReporteEstadoCuenta, SubirEstadoCuenta, TransferirSaldo } from '@/pages/admin/bancos';
@@ -605,6 +606,16 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['ADMIN', 'SISTEMAS']}>
                 <CotizacionesTdiUsa />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Rutas de examen */}
+          <Route
+            path="/admin/examen/generar-pin"
+            element={
+              <ProtectedRoute roles={['ADMIN']}>
+                <GenerarPin />
               </ProtectedRoute>
             }
           />
