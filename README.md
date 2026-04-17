@@ -52,6 +52,13 @@ EntregaX es una plataforma completa que permite gestionar todos los aspectos de 
 - **Pendientes de Cotizar**: flujo de 2 vistas
   - Lista de pendientes por asesor
   - Detalle por suite con selección múltiple y generación de cotización (`POST quotes/generate-quote`)
+- **Cotizaciones Marítimas**: gestión de cotizaciones marítimas con logs y pagos
+- **TDI-USA**: módulo administrativo para cotizaciones TDI-USA
+  - Búsqueda por cliente o asesor
+  - Tabla de resultados con estado, montos y fechas
+  - Visualización de pagos vinculados
+  - Descarga de PDF de cotización
+  - Búsqueda en tiempo real en tabla
 
 ### 👤 Gestión de Usuarios
 - Sistema de roles y permisos
@@ -81,6 +88,13 @@ EntregaX es una plataforma completa que permite gestionar todos los aspectos de 
 ### 🏢 Proveedores y Paqueterías
 - CRUD de proveedores
 - Gestión de paqueterías
+
+### 📝 Exámenes
+- **Generar PIN**: módulo administrativo para crear PINs de acceso a exámenes
+  - Registro de nombre y teléfono del candidato
+  - Generación automática de PIN
+  - Envío de notificación con PIN y liga de acceso
+  - Respaldo manual del PIN generado
 
 ## 🛠️ Stack Tecnológico
 
@@ -120,9 +134,10 @@ src/
 │   ├── auth/         # Login, Unauthorized
 │   ├── cargosextra/  # Lista, historial y pendientes de cargos extra
 │   ├── clientes/     # CRUD clientes + direcciones de facturación + Mis Clientes
-│   ├── cotizaciones/ # Mis Cotizaciones, Instrucciones, Guías Archivadas, Pendientes de cotizar
+│   ├── cotizaciones/ # Cotizaciones (Mis Cotizaciones, Instrucciones, Guías Archivadas, Pendientes, Marítimas, TDI-USA)
 │   ├── dashboard/    # Dashboard general y Home Servicio al Cliente
 │   ├── encuestas/    # Encuestas pendientes y realizadas
+│   ├── examen/       # Generar PIN para exámenes
 │   ├── juego/        # Juego Snake
 │   ├── operaciones/  # Módulos de operaciones logísticas
 │   ├── polizas/      # Pólizas nuevas y pagadas
@@ -134,8 +149,10 @@ src/
 │   ├── authService.ts
 │   ├── cargoExtraService.ts
 │   ├── clienteService.ts
+│   ├── cotizacionesService.ts  # Cotizaciones (marítimas, TDI-USA)
 │   ├── encuestaService.ts
-│   ├── operacionesService.ts   # Operaciones + Cotizaciones (quotes/*)
+│   ├── examService.ts          # Exámenes (generación de PIN)
+│   ├── operacionesService.ts   # Operaciones logísticas
 │   └── userService.ts
 ├── store/            # Zustand stores (authStore)
 ├── types/            # Tipos TypeScript
@@ -190,6 +207,9 @@ src/
 | `/cotizaciones/instrucciones` | Instrucciones pendientes | ASESOR, SC, SISTEMAS, ADMIN |
 | `/cotizaciones/guias-archivadas` | Guías archivadas | ASESOR, SC, SISTEMAS, ADMIN |
 | `/cotizaciones/pendientes` | Pendientes de cotizar | ASESOR, SC, SISTEMAS, ADMIN |
+| `/admin/cotizaciones/maritimas` | Cotizaciones marítimas | ADMIN, SISTEMAS |
+| `/admin/cotizaciones/tdi-usa` | Cotizaciones TDI-USA | ADMIN, SISTEMAS |
+| `/admin/examen/generar-pin` | Generar PIN examen | ADMIN |
 | `/polizas/nuevas` | Pólizas nuevas | SC |
 | `/polizas/pagadas` | Pólizas pagadas | SC |
 | `/tickets/activos` | Tickets activos | ADMIN, SISTEMAS |
@@ -262,6 +282,8 @@ npm run lint         # Ejecuta ESLint
 - **Confirmaciones**: SweetAlert2 para acciones críticas (desarchivar, generar cotización, etc.)
 - **Feedback Visual**: Spinners de carga por sección, mensajes de éxito/error desde el API
 - **Vistas Inline**: Componentes multi-vista sin cambio de ruta (lista → detalle → acción)
+- **Visualización de PDFs**: Modal con iframe nativo del navegador para visualización y descarga
+- **Modales de Información**: Ant Design Modal.success/error con contenido personalizado HTML
 
 ## 🔧 Configuración de Desarrollo
 
@@ -315,6 +337,60 @@ Payload de generación: `{ ids[], idtp, iduser, idc }` → `POST /quotes/generat
 
 Endpoints: `GET /quotes/pending-quotes/{iduser}`, `GET /quotes/list-pending-quotes/{suite}/{idtp}`
 
+### Cotizaciones Marítimas (`/admin/cotizaciones/maritimas`)
+Módulo administrativo para gestión de cotizaciones marítimas. Tabla con columnas: CTZ, Week, Suite, Asesor, CBM, TC, Costo, Costo Paquetería, Estado, Fecha Aprobación, Fecha Subida, Acciones.
+
+**Acciones disponibles**:
+- Ver Logs: Modal con tabla de logs asociados a la cotización
+- Ver Pagos: Modal con tabla de pagos vinculados (comprobante, cantidad, fecha)
+- Descargar PDF: Generación y visualización de PDF en modal con iframe
+
+Endpoints: `GET /quotes/list-quote-maritime`, `POST /quotes/get-data-quote-maritime`, `POST /quotes/get-payments-quote-maritime`, `POST /quotes/download-quote-maritime-pdf`
+
+### TDI-USA (`/admin/cotizaciones/tdi-usa`)
+Módulo administrativo para consulta de cotizaciones TDI-USA. Interfaz de doble búsqueda:
+- **Por Cliente**: Select de clientes con formato `(clavecliente) nombre`
+- **Por Asesor**: Select de asesores
+
+**Tabla de resultados**: CTZ, Estado (Nuevo/Pagado con tags de color), Cliente, Asesor, Cantidad (formato monetario), Fecha de creación (humanizada).
+
+**Acciones disponibles**:
+- Ver Pagos: Modal con tabla de pagos vinculados (comprobante descargable, cantidad, fecha)
+- Descargar PDF: Visualización de PDF en modal con iframe y opción de descarga
+
+**Características**:
+- Búsqueda en tiempo real en tabla
+- Paginación controlada (10/20/50/100 registros)
+- Estados mapeados: 1=Nuevo (azul), 2=Pagado (verde)
+
+Endpoints: `POST /quotes/get-list-quotes-tdi-usa`, `GET /quotes/quote-pdf/{ctz}`, `POST /quotes/get-quote-payments`
+
+## 📝 Módulos de Examen (detalle)
+
+### Generar PIN (`/admin/examen/generar-pin`)
+Módulo administrativo para generar PINs de acceso a exámenes. Formulario con validación completa.
+
+**Campos**:
+- Nombre de la persona (requerido, mínimo 3 caracteres)
+- Número de teléfono (requerido, 10 dígitos numéricos)
+
+**Proceso**:
+1. Validación de formulario
+2. Envío a `GET /exam/save-pin` con parámetros `{nombre, telefono}`
+3. Modal de éxito con información completa:
+   - Confirmación de envío al teléfono
+   - PIN generado para respaldo manual
+   - Liga de acceso: https://sistemaentregax.com/quiz
+   - Instrucciones para envío manual en caso de falla
+
+**Características**:
+- Botón naranja corporativo (#ff6600)
+- Loading state durante procesamiento
+- Limpieza automática del formulario tras éxito
+- Manejo de errores con mensajes del servidor
+
+Endpoint: `GET /exam/save-pin`
+
 ## 🤝 Contribución
 
 Para contribuir al proyecto:
@@ -334,5 +410,5 @@ Para soporte técnico, contactar al equipo de desarrollo.
 
 ---
 
-**Última actualización**: Marzo 2026  
-**Versión**: 2.1.0 
+**Última actualización**: Abril 2026  
+**Versión**: 2.2.0 
