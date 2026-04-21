@@ -426,9 +426,12 @@ export const MainLayout = () => {
       label: 'Clientes',
     },
     {
-      key: '/admin/comisiones',
+      key: 'comisiones',
       icon: <PercentageOutlined />,
       label: 'Comisiones',
+      children: [
+        { key: '/admin/comisiones/reporte', label: 'Reporte de comisiones' },
+      ],
     },
     {
       key: 'configuracion',

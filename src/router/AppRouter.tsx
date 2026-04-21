@@ -26,7 +26,8 @@ import { NBox } from '@/pages/operaciones/NBox';
 import { NBoxMaritimo } from '@/pages/operaciones/NBoxMaritimo';
 import { Instrucciones, GuiasArchivadas, PendientesCotizar, MisCotizaciones, CotizacionesMaritimas, CotizacionesTdiUsa } from '@/pages/cotizaciones';
 import { EnvioConFactura, CatalogoServicios, MisEnvios, EnviosArchivados } from '@/pages/dolares';
-import { GenerarPin } from '@/pages/examen';
+import { GenerarPin, ObservarResultados } from '@/pages/examen';
+import { ReporteComisiones } from '@/pages/comisiones';
 import { Cotizaciones, PanelPLInstrucciones, ClientesMaritima, ConsignatariosMaritima, CotizacionesMaritimasList, NavierasPuertos, PCTLList, PLsPendientes, SubirNuevoWeek, DHLValidar, ValidarManifiesto } from '@/pages/maritimos';
 import { Historial, Saldo, SubirPagos } from '@/pages/monedero';
 import { ListadoArchivosCuentas, ReporteEstadoCuenta, SubirEstadoCuenta, TransferirSaldo } from '@/pages/admin/bancos';
@@ -616,6 +617,24 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['ADMIN']}>
                 <GenerarPin />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/examen/observar-resultados"
+            element={
+              <ProtectedRoute roles={['ADMIN']}>
+                <ObservarResultados />
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Rutas de comisiones */}
+          <Route
+            path="/admin/comisiones/reporte"
+            element={
+              <ProtectedRoute roles={['ADMIN']}>
+                <ReporteComisiones />
               </ProtectedRoute>
             }
           />
