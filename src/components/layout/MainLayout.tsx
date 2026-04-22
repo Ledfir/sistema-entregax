@@ -485,7 +485,7 @@ export const MainLayout = () => {
       label: 'PCTL',
     },
     {
-      key: '/admin/polizas',
+      key: '/polizas/pagadas',
       icon: <FileProtectOutlined />,
       label: 'Polizas',
     },
@@ -501,7 +501,7 @@ export const MainLayout = () => {
       ],
     },
     {
-      key: '/admin/reporte-gastos-week',
+      key: '/admin/gastos-week/reporte',
       icon: <BarChartOutlined />,
       label: 'Reporte de gastos Week',
     },

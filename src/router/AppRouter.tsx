@@ -1,3 +1,5 @@
+import ReporteGastosWeek from '@/pages/admin/gastosweek/ReporteGastosWeek';
+import ReporteUS from '@/pages/admin/reporteus/ReporteUS';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Login } from '@/pages/auth/Login';
 import { Unauthorized } from '@/pages/auth/Unauthorized';
@@ -214,6 +216,16 @@ export const AppRouter = () => {
                 <ServiciosList />
               </ProtectedRoute>
             } 
+          />
+
+          {/* Reporte US - ADMIN */}
+          <Route
+            path="/admin/reporte-us"
+            element={
+              <ProtectedRoute roles={[ 'ADMIN' ]}>
+                <ReporteUS />
+              </ProtectedRoute>
+            }
           />
           
           {/* Rutas de encuestas */}
@@ -601,7 +613,6 @@ export const AppRouter = () => {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/admin/cotizaciones/tdi-usa"
             element={
@@ -667,7 +678,7 @@ export const AppRouter = () => {
           <Route 
             path="/polizas/pagadas" 
             element={
-              <ProtectedRoute roles={['SERVICIO AL CLIENTE']}>
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'ADMIN']}>
                 <PolizasPagadas />
               </ProtectedRoute>
             } 
@@ -895,6 +906,16 @@ export const AppRouter = () => {
                 <div style={{ padding: 24 }}>Nuevo Proveedor</div>
               </ProtectedRoute>
             } 
+          />
+          
+          {/* Reporte de gastos WEEK - ADMIN */}
+          <Route
+            path="/admin/gastos-week/reporte"
+            element={
+              <ProtectedRoute roles={['ADMIN', 'SISTEMAS']}>
+                <ReporteGastosWeek />
+              </ProtectedRoute>
+            }
           />
         </Route>
         

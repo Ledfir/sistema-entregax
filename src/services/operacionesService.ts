@@ -176,6 +176,20 @@ export const operacionesService = {
     return response.data;
   },
 
+  // Obtener reporte WEEK
+  getReportWeek: async (payload: { week: string | number; year: string | number }): Promise<any> => {
+    const url = '/operations/get-report-week';
+    const response = await apiClient.post(url, payload);
+    return response.data;
+  },
+
+  // Descargar reporte WEEK (retorna archivo .xlsx/.csv en blob)
+  downloadReportWeek: async (payload: { week: string | number; year: string | number }) => {
+    const url = '/operations/download-report-week';
+    const response = await apiClient.post(url, payload, { responseType: 'blob' });
+    return response;
+  },
+
   // Listado de productos (para DHL)
   getListProducts: async (): Promise<any> => {
     const response = await apiClient.get('/quotes/list-products');
