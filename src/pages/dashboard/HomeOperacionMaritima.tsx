@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Card, Table, Button, Tag, Dropdown } from 'antd';
+import { Card, Table, Button, Tag, Dropdown, message, Row, Col, Select, DatePicker, Input, Form } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { MenuProps } from 'antd';
 import { MoreOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import { humanizarFecha } from '@/utils';
+import axios from '@/api/axios';
+import dayjs from 'dayjs';
 import './HomeOperacionMaritima.css';
 
 interface BLDisponible {
@@ -20,73 +22,63 @@ interface BLDisponible {
 export const HomeOperacionMaritima = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<BLDisponible[]>([]);
+  const [estados, setEstados] = useState<Array<{id: string | number; name: string}>>([]);
+  const [selectedRecord, setSelectedRecord] = useState<BLDisponible | null>(null);
+  const [estadoSeleccionado, setEstadoSeleccionado] = useState<string | undefined>(undefined);
+  const [eta, setEta] = useState<any | null>(null);
+  const [comentario, setComentario] = useState<string>('');
+  const [submittingEstado, setSubmittingEstado] = useState(false);
+  const [submittingEta, setSubmittingEta] = useState(false);
 
   useEffect(() => {
     document.title = 'Sistema Entregax | Operación Marítima';
     loadBLsDisponibles();
+    loadEstados();
   }, []);
+
+  const loadEstados = () => {
+    axios
+      .get('/operation-maritime/list-estados')
+      .then((res) => {
+        const list = res?.data?.data || [];
+        setEstados(list);
+      })
+      .catch((err) => {
+        console.error('Error cargando estados:', err);
+      });
+  };
 
   const loadBLsDisponibles = () => {
     setLoading(true);
-    
-    // Mock data - Reemplazar con llamada real a la API
-    setTimeout(() => {
-      const mockData: BLDisponible[] = [
-        {
-          key: '1',
-          bl: 'MAEU123456789',
-          week: 'W12-2026',
-          plsPendientes: 5,
-          eta: '2026-03-30',
-          tipo: 'FCL',
-          fecha: '2026-03-15',
-          estado: 'En tránsito',
-        },
-        {
-          key: '2',
-          bl: 'CMDU987654321',
-          week: 'W11-2026',
-          plsPendientes: 0,
-          eta: '2026-03-28',
-          tipo: 'LCL',
-          fecha: '2026-03-10',
-          estado: 'En puerto',
-        },
-        {
-          key: '3',
-          bl: 'MSKU555444333',
-          week: 'W13-2026',
-          plsPendientes: 12,
-          eta: '2026-04-05',
-          tipo: 'FCL',
-          fecha: '2026-03-20',
-          estado: 'En tránsito',
-        },
-        {
-          key: '4',
-          bl: 'HLCU111222333',
-          week: 'W12-2026',
-          plsPendientes: 3,
-          eta: '2026-03-29',
-          tipo: 'LCL',
-          fecha: '2026-03-14',
-          estado: 'Pendiente documentos',
-        },
-        {
-          key: '5',
-          bl: 'OOLU789456123',
-          week: 'W10-2026',
-          plsPendientes: 0,
-          eta: '2026-03-26',
-          tipo: 'FCL',
-          fecha: '2026-03-05',
-          estado: 'Listo para despacho',
-        },
-      ];
-      
-      setData(mockData);
-      setLoading(false);
-    }, 500);
+
+    const determineEstado = (item: any) => {
+      const pendientes = Number(item.pendientes ?? 0);
+      if (pendientes > 0) return 'Pendiente documentos';
+      if (item.state === '1') return 'En puerto';
+      return 'En tránsito';
+    };
+
+    axios
+      .get('/operation-maritime/list-bls')
+      .then((res) => {
+        const list = res?.data?.data || [];
+        const mapped: BLDisponible[] = list.map((item: any) => ({
+          key: String(item.id ?? item.token ?? Math.random()),
+          bl: item.name ?? item.token ?? '',
+          week: item.week ?? '',
+          plsPendientes: Number(item.pendientes ?? 0),
+          eta: item.eta ?? '',
+          tipo: item.tipo ?? '',
+          fecha: item.created ?? item.eta ?? '',
+          estado: determineEstado(item),
+        }));
+
+        setData(mapped);
+      })
+      .catch((err) => {
+        console.error('Error cargando BLs:', err);
+      })
+      .finally(() => setLoading(false));
   };
 
   const getEstadoColor = (estado: string): string => {
@@ -213,34 +205,172 @@ export const HomeOperacionMaritima = () => {
   ];
 
   const handleDetalles = (record: BLDisponible) => {
-    console.log('Ver detalles:', record);
-    // TODO: Implementar navegación o modal con detalles
+    setSelectedRecord(record);
+    // intentar preseleccionar el estado por nombre si existe en la lista de estados
+    const match = estados.find((s) => s.name === record.estado || String(s.id) === record.estado);
+    setEstadoSeleccionado(match ? String(match.id) : undefined);
+    setEta(null);
+    setComentario('');
   };
 
   const handleOcultar = (record: BLDisponible) => {
-    console.log('Ocultar BL:', record);
-    // TODO: Implementar lógica para ocultar el BL
+    const id = record.key;
+    const key = `hide-${id}`;
+    message.loading({ content: 'Ocultando...', key, duration: 0 });
+    setLoading(true);
+
+    axios
+      .post('/operation-maritime/hide-bl', { id })
+      .then((res) => {
+        const data = res?.data ?? {};
+        const msg = data.message || data.msg || (typeof data === 'string' ? data : 'Operación completada');
+        const success = data.status === 'success' || data.success === true;
+
+        if (success) {
+          message.success({ content: msg, key, duration: 2 });
+          loadBLsDisponibles();
+        } else {
+          message.error({ content: msg, key, duration: 3 });
+        }
+      })
+      .catch((err) => {
+        console.error('Error ocultando BL:', err);
+        message.error({ content: 'Error al ocultar BL', key, duration: 3 });
+      })
+      .finally(() => setLoading(false));
+  };
+
+  const handleChangeEstado = () => {
+    if (!selectedRecord || !estadoSeleccionado) return;
+    const id = selectedRecord.key;
+    const key = `change-state-${id}`;
+    message.loading({ content: 'Cambiando estado...', key, duration: 0 });
+    setSubmittingEstado(true);
+
+    axios
+      .post('/operation-maritime/change-state', { id, state: estadoSeleccionado })
+      .then((res) => {
+        const data = res?.data ?? {};
+        const msg = data.message || data.msg || 'Estado cambiado';
+        const success = data.status === 'success' || data.success === true;
+
+        if (success) {
+          message.success({ content: msg, key, duration: 2 });
+          loadBLsDisponibles();
+        } else {
+          message.error({ content: msg, key, duration: 3 });
+        }
+      })
+      .catch((err) => {
+        console.error('Error cambiando estado:', err);
+        message.error({ content: 'Error cambiando estado', key, duration: 3 });
+      })
+      .finally(() => setSubmittingEstado(false));
+  };
+
+  const handleChangeEta = () => {
+    if (!selectedRecord || !eta) return;
+    const id = selectedRecord.key;
+    const key = `change-eta-${id}`;
+    message.loading({ content: 'Cambiando ETA...', key, duration: 0 });
+    setSubmittingEta(true);
+
+    const etaFormatted = typeof eta?.format === 'function' ? eta.format('YYYY-MM-DD') : eta;
+
+    axios
+      .post('/operation-maritime/change-eta', { id, eta: etaFormatted, comentario })
+      .then((res) => {
+        const data = res?.data ?? {};
+        const msg = data.message || data.msg || 'ETA actualizada';
+        const success = data.status === 'success' || data.success === true;
+
+        if (success) {
+          message.success({ content: msg, key, duration: 2 });
+          loadBLsDisponibles();
+        } else {
+          message.error({ content: msg, key, duration: 3 });
+        }
+      })
+      .catch((err) => {
+        console.error('Error cambiando ETA:', err);
+        message.error({ content: 'Error cambiando ETA', key, duration: 3 });
+      })
+      .finally(() => setSubmittingEta(false));
   };
 
   return (
     <div className="home-operacion-maritima">
-      <Card 
-        title="BL's disponibles"
-        className="bls-card"
-      >
-        <Table
-          columns={columns}
-          dataSource={data}
-          loading={loading}
-          pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-            showTotal: (total) => `Total: ${total} BLs`,
-          }}
-          scroll={{ x: 1200 }}
-          size="middle"
-        />
-      </Card>
+      {!selectedRecord ? (
+        <Card 
+          title="BL's disponibles"
+          className="bls-card"
+        >
+          <Table
+            columns={columns}
+            dataSource={data}
+            loading={loading}
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              showTotal: (total) => `Total: ${total} BLs`,
+            }}
+            scroll={{ x: 1200 }}
+            size="middle"
+          />
+        </Card>
+      ) : (
+        <Card
+          title={`Detalles BL ${selectedRecord.bl}`}
+          extra={<Button onClick={() => { setSelectedRecord(null); setEstadoSeleccionado(undefined); setEta(null); setComentario(''); }}>Volver</Button>}
+        >
+          <Row gutter={16}>
+            <Col xs={24} md={12}>
+              <div style={{ border: '1px solid #f0f0f0', padding: 16, borderRadius: 4 }}>
+                <h3>Estado BL</h3>
+                <Form layout="vertical">
+                  <Form.Item label="Estado a cambiar en BL">
+                    <Select
+                      placeholder="Selecciona un estado"
+                      value={estadoSeleccionado}
+                      onChange={(val) => setEstadoSeleccionado(val)}
+                      loading={estados.length === 0}
+                    >
+                      {estados.map((s) => (
+                        <Select.Option key={s.id} value={String(s.id)}>
+                          {s.name}
+                        </Select.Option>
+                      ))}
+                    </Select>
+                  </Form.Item>
+                  <Form.Item>
+                    <Button type="primary" onClick={handleChangeEstado} loading={submittingEstado}>
+                      Cambiar estado
+                    </Button>
+                  </Form.Item>
+                </Form>
+              </div>
+            </Col>
+            <Col xs={24} md={12}>
+              <div style={{ border: '1px solid #f0f0f0', padding: 16, borderRadius: 4 }}>
+                <h3>Cambio de ETA</h3>
+                <Form layout="vertical">
+                  <Form.Item label="Selecciona la nueva ETA">
+                    <DatePicker style={{ width: '100%' }} value={eta} onChange={(d) => setEta(d)} />
+                  </Form.Item>
+                  <Form.Item label="Comentario">
+                    <Input.TextArea rows={4} placeholder="Por favor indícanos cuál es el motivo del cambio" value={comentario} onChange={(e) => setComentario(e.target.value)} />
+                  </Form.Item>
+                  <Form.Item>
+                    <Button type="primary" onClick={handleChangeEta} loading={submittingEta}>
+                      Cambiar ETA
+                    </Button>
+                  </Form.Item>
+                </Form>
+              </div>
+            </Col>
+          </Row>
+        </Card>
+      )}
     </div>
   );
 };

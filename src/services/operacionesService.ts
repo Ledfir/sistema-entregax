@@ -190,6 +190,13 @@ export const operacionesService = {
     return response;
   },
 
+  // Obtener reporte US
+  getReportUS: async (payload: { fecha_inicio: string; fecha_fin: string }): Promise<any> => {
+    const url = '/operations/get-report-us';
+    const response = await apiClient.post(url, payload);
+    return response.data;
+  },
+
   // Listado de productos (para DHL)
   getListProducts: async (): Promise<any> => {
     const response = await apiClient.get('/quotes/list-products');
