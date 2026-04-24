@@ -5,7 +5,6 @@ import type { MenuProps } from 'antd';
 import { MoreOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import { humanizarFecha } from '@/utils';
 import axios from '@/api/axios';
-import dayjs from 'dayjs';
 import './HomeOperacionMaritima.css';
 
 interface BLDisponible {
