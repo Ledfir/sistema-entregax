@@ -1,0 +1,25 @@
+.ia-chat-container { display: flex; flex-direction: column; gap: 12px; }
+.ia-chat-messages { max-height: 420px; overflow: auto; padding: 8px; border: 1px solid #f0f0f0; border-radius: 6px; background: #fff; }
+.ia-chat-input { margin-top: 12px; display: flex; flex-direction: column; }
+.ia-message { padding: 8px 0; }
+.ia-message-user { text-align: right; }
+.ia-message-bot { text-align: left; }
+.ia-message .ant-list-item-meta-description { white-space: pre-wrap; }
+
+/* New styles for markdown messages */
+.ia-message { display: flex; gap: 12px; align-items: flex-start; }
+.ia-message-avatar { width: 40px; }
+.ia-message-body { max-width: 820px; }
+.ia-message-title { font-size: 12px; color: #666; margin-bottom: 4px; }
+.ia-message-content { background: #fafafa; padding: 10px 12px; border-radius: 8px; border: 1px solid #eee; white-space: pre-wrap; }
+.ia-message-user .ia-message-content { background: #e6f7ff; border-color: #91d5ff; }
+.ia-message-bot .ia-message-content { background: #fff; }
+
+/* Markdown element tweaks */
+.ia-message-content a { color: #1890ff; }
+.ia-message-content pre { background: #f5f5f5; padding: 8px; border-radius: 6px; overflow: auto; }
+.ia-message-content code { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; }
+
+/* Cursor de tipeo */
+/* Ajustes para el contenedor markdown */
+.ia-message-markdown { display: inline-block; max-width: 100%; }

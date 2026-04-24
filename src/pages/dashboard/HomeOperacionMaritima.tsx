@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Card, Table, Button, Tag, Dropdown, message, Row, Col, Select, DatePicker, Input, Form } from 'antd';
+import { Card, Table, Button, Tag, Dropdown, message, Row, Col, Select, DatePicker, Input, Form, Modal } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import type { MenuProps } from 'antd';
 import { MoreOutlined, EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
@@ -29,6 +29,9 @@ export const HomeOperacionMaritima = () => {
   const [comentario, setComentario] = useState<string>('');
   const [submittingEstado, setSubmittingEstado] = useState(false);
   const [submittingEta, setSubmittingEta] = useState(false);
+  const [blDetails, setBlDetails] = useState<any | null>(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const { confirm } = Modal;
 
   useEffect(() => {
     document.title = 'Sistema Entregax | Operación Marítima';
@@ -211,6 +214,72 @@ export const HomeOperacionMaritima = () => {
     setEstadoSeleccionado(match ? String(match.id) : undefined);
     setEta(null);
     setComentario('');
+    loadBlDetails(record.key);
+  };
+
+  const loadBlDetails = (id: string) => {
+    setDetailsLoading(true);
+    setBlDetails(null);
+    axios
+      .get(`/operation-maritime/details-bl/${id}`)
+      .then((res) => {
+        const data = res?.data?.data ?? {};
+        const bl = data.bl ?? null;
+        const logs = data.logs || [];
+        // calcular totales
+        const totalCbm = logs.reduce((acc: number, l: any) => acc + (parseFloat(l.cbm ?? 0) || 0), 0);
+        const totalBultos = logs.reduce((acc: number, l: any) => acc + (parseInt(l.bultos ?? 0) || 0), 0);
+        setBlDetails({ bl, logs, totalCbm, totalBultos });
+      })
+      .catch((err) => {
+        console.error('Error cargando detalles BL:', err);
+      })
+      .finally(() => setDetailsLoading(false));
+  };
+
+  const handleEditDeliveryAddress = (log: any) => {
+    message.info('Editar Dir. Entrega - implementar UI');
+    console.log('Editar dir entrega', log);
+  };
+
+  const handleChangePlToS = (log: any) => {
+    confirm({
+      title: 'Cambiar PL a S',
+      content: `¿Deseas cambiar PL a S para ${log.name || log.id}?`,
+      onOk() {
+        return axios.post('/operation-maritime/change-pl-to-s', { id: log.id })
+          .then((res) => {
+            const data = res?.data ?? {};
+            const msg = data.message || 'Operacion exitosa';
+            message.success(msg);
+            if (selectedRecord) loadBlDetails(selectedRecord.key);
+          })
+          .catch((err) => {
+            console.error(err);
+            message.error('Error cambiando PL');
+          });
+      }
+    });
+  };
+
+  const handleRejectPl = (log: any) => {
+    confirm({
+      title: 'Rechazar PL',
+      content: `¿Deseas rechazar el PL ${log.name || log.id}?`,
+      onOk() {
+        return axios.post('/operation-maritime/reject-pl', { id: log.id })
+          .then((res) => {
+            const data = res?.data ?? {};
+            const msg = data.message || 'PL rechazado';
+            message.success(msg);
+            if (selectedRecord) loadBlDetails(selectedRecord.key);
+          })
+          .catch((err) => {
+            console.error(err);
+            message.error('Error rechazando PL');
+          });
+      }
+    });
   };
 
   const handleOcultar = (record: BLDisponible) => {
@@ -369,6 +438,80 @@ export const HomeOperacionMaritima = () => {
               </div>
             </Col>
           </Row>
+          {blDetails && (
+            <>
+              <div style={{ marginTop: 20, padding: 16, border: '1px solid #f0f0f0', borderRadius: 4 }}>
+                <h2 style={{ margin: 0 }}>Estado Actual: {blDetails.bl?.estado || '—'}</h2>
+                <p style={{ marginTop: 8 }}>
+                  <strong>BL:</strong> {blDetails.bl?.name || selectedRecord?.bl} - 
+                  <strong>WEEK:</strong> {blDetails.bl?.week || selectedRecord?.week || '—'} - 
+                  <strong>Fecha:</strong> {blDetails.bl?.created ? humanizarFecha(blDetails.bl.created) : (selectedRecord?.fecha ? humanizarFecha(selectedRecord.fecha) : '—')} - 
+                  <strong>CBMS:</strong> {Number(blDetails.totalCbm).toFixed(2)} - 
+                  <strong>Bultos:</strong> {blDetails.totalBultos}
+                </p>
+              </div>
+
+              <div style={{ marginTop: 16 }}>
+                <Table
+                  columns={[
+                    {
+                      title: 'Acciones',
+                      key: 'acciones',
+                      width: 120,
+                      fixed: 'left',
+                      align: 'center',
+                      render: (_: any, record: any) => {
+                        const items: any[] = [
+                          { key: 'editar', label: 'Editar Dir. Entrega', onClick: () => handleEditDeliveryAddress(record) },
+                          { key: 'cambiar', label: 'Cambiar PL a S', onClick: () => handleChangePlToS(record) },
+                          { key: 'rechazar', label: 'Rechazar PL', onClick: () => handleRejectPl(record) },
+                        ];
+                        return (
+                          <Dropdown menu={{ items }} trigger={[ 'click' ]}>
+                            <Button type="text" icon={<MoreOutlined style={{ fontSize: 18 }} />} onClick={(e) => e.stopPropagation()} />
+                          </Dropdown>
+                        );
+                      }
+                    },
+                    { title: 'LOG', dataIndex: 'name', key: 'name' },
+                    { title: 'Cliente', dataIndex: 'cliente', key: 'cliente' },
+                    { title: 'CBMs', dataIndex: 'cbm', key: 'cbm', render: (v: any) => Number(v || 0).toFixed(2) },
+                    { title: 'Bultos', dataIndex: 'bultos', key: 'bultos' },
+                    { title: 'Asesor', dataIndex: 'asesor', key: 'asesor' },
+                    { title: 'Fecha de creacion', dataIndex: 'created', key: 'created', render: (v: any) => v ? humanizarFecha(v) : '-' },
+                    { title: 'Dias de PL', dataIndex: 'dias_pl', key: 'dias_pl' },
+                    { title: 'PL', dataIndex: 'pl', key: 'pl', render: (v: any) => (
+                        v === 1 || v === true || String(v) === '1' ? <Tag color="green">Sí</Tag> : <Tag>No</Tag>
+                      ) },
+                    { title: 'Tipo', dataIndex: 'pl_tipo', key: 'pl_tipo', render: (v: any) => (
+                        Number(v) === 1 ? <Tag>LOGO</Tag> : <Tag>GENERICO</Tag>
+                      ) },
+                    { title: 'Sensible', dataIndex: 'sensible', key: 'sensible', render: (v: any) => (
+                        v === 1 || v === true || String(v) === '1' ? <Tag color="red">Sí</Tag> : <Tag>No</Tag>
+                      ) },
+                    { title: 'Descargar PL', key: 'descargar', render: (_: any, record: any) => {
+                        const file = record.file_pl || record.pl_file || null;
+                        if (file && file.success && file.value) {
+                          return <a href={file.value} target="_blank" rel="noreferrer">Descargar</a>;
+                        }
+                        return '-';
+                      }
+                    },
+                    { title: 'Dias en aceptar PL', dataIndex: 'dias_pl_acept', key: 'dias_pl_acept' },
+                  ] as any}
+                  dataSource={blDetails.logs}
+                  rowKey={(r: any) => r.id}
+                  loading={detailsLoading}
+                  pagination={{
+                    defaultPageSize: 5,
+                    showSizeChanger: true,
+                    pageSizeOptions: ['5', '10', '20', '50'],
+                    showTotal: (total) => `Total: ${total}`,
+                  }}
+                />
+              </div>
+            </>
+          )}
         </Card>
       )}
     </div>

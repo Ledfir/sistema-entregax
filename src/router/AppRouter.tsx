@@ -43,6 +43,7 @@ import { BancosList } from '@/pages/config/bancos';
 import { ServiciosList } from '@/pages/config/servicios';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
+import { IAEntregaX } from '@/pages/ia/IAEntregaX';
 
 export const AppRouter = () => {
   return (
@@ -180,6 +181,14 @@ export const AppRouter = () => {
           
           {/* Otras rutas */}
           <Route path="/comunicados" element={<div style={{ padding: 24 }}>Comunicados</div>} />
+          <Route 
+            path="/ia/entregax"
+            element={
+              <ProtectedRoute roles={['SISTEMAS']}>
+                <IAEntregaX />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/perfil" element={<Profile />} />
           <Route path="/juego" element={<Juego />} />
           <Route path="/snake" element={<Snake />} />

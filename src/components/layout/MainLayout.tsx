@@ -135,6 +135,11 @@ export const MainLayout = () => {
       icon: <NotificationOutlined />,
       label: 'Comunicados',
     },
+    {
+      key: '/ia/entregax',
+      icon: <RocketOutlined />,
+      label: 'IA EntregaX',
+    },
   ];
 
   // Menú para SERVICIO AL CLIENTE / ATENCION A CLIENTES
