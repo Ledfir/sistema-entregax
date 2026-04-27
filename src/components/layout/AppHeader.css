@@ -218,6 +218,30 @@ body.dark-mode .mobile-menu-btn {
   background: transparent;
 }
 
+/* Roles drawer items */
+.role-item-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, transform 0.08s ease;
+}
+.role-item-btn:hover {
+  box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+  transform: translateY(-2px);
+}
+.role-item-name {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #333;
+  text-align: center;
+  line-height: 14px;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
   .banner-content {

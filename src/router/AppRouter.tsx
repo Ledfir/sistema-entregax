@@ -41,6 +41,7 @@ import { Juego, Snake } from '@/pages/juego';
 import { CuentasList } from '@/pages/config/cuentas';
 import { BancosList } from '@/pages/config/bancos';
 import { ServiciosList } from '@/pages/config/servicios';
+import { Generales } from '@/pages/config/Generales';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { IAEntregaX } from '@/pages/ia/IAEntregaX';
@@ -225,6 +226,14 @@ export const AppRouter = () => {
                 <ServiciosList />
               </ProtectedRoute>
             } 
+          />
+          <Route
+            path="/configuracion/generales"
+            element={
+              <ProtectedRoute roles={["SISTEMAS"]} permission="settings.view">
+                <Generales />
+              </ProtectedRoute>
+            }
           />
 
           {/* Reporte US - ADMIN */}

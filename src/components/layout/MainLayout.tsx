@@ -140,6 +140,11 @@ export const MainLayout = () => {
       icon: <RocketOutlined />,
       label: 'IA EntregaX',
     },
+    {
+      key: '/configuracion/generales',
+      icon: <SettingOutlined />,
+      label: 'Config. Generales',
+    },
   ];
 
   // Menú para SERVICIO AL CLIENTE / ATENCION A CLIENTES
@@ -531,7 +536,19 @@ export const MainLayout = () => {
       return operacionMaritimaMenuItems;
     }
     return generalMenuItems;
-  }, [hasRole, user?.tipo_usuario]);
+  }, [hasRole, user]);
+
+  // Escuchar cambios en localStorage (por si otro tab actualiza la sesión)
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'auth-storage') {
+        // Forzar re-render si el usuario cambió
+        // (no hacemos nada específico, React volverá a ejecutar el componente porque useAuthStore cambiará)
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, []);
 
   const handleMenuClick = ({ key }: { key: string }) => {
     // Interceptar clic en activar/desactivar pagos para abrir modal
