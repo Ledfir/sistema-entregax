@@ -135,6 +135,7 @@ export const HomeOperacionMaritima = () => {
       dataIndex: 'bl',
       key: 'bl',
       width: 150,
+      align: 'center',
       sorter: (a, b) => a.bl.localeCompare(b.bl),
     },
     {
@@ -142,6 +143,7 @@ export const HomeOperacionMaritima = () => {
       dataIndex: 'week',
       key: 'week',
       width: 120,
+      align: 'center',
       sorter: (a, b) => a.week.localeCompare(b.week),
     },
     {
@@ -162,6 +164,7 @@ export const HomeOperacionMaritima = () => {
       dataIndex: 'eta',
       key: 'eta',
       width: 180,
+      align: 'center',
       sorter: (a, b) => new Date(a.eta).getTime() - new Date(b.eta).getTime(),
       render: (value: string) => humanizarFecha(value),
     },
@@ -185,6 +188,7 @@ export const HomeOperacionMaritima = () => {
       dataIndex: 'fecha',
       key: 'fecha',
       width: 180,
+      align: 'center',
       sorter: (a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime(),
       render: (value: string) => humanizarFecha(value),
     },
@@ -193,6 +197,7 @@ export const HomeOperacionMaritima = () => {
       dataIndex: 'estado',
       key: 'estado',
       width: 180,
+      align: 'center',
       filters: [
         { text: 'En tránsito', value: 'En tránsito' },
         { text: 'En puerto', value: 'En puerto' },

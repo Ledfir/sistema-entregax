@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Card, Table, Input } from 'antd';
+import { Card, Table, Input, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { SearchOutlined } from '@ant-design/icons';
+import axios from '@/api/axios';
 import './ClientesMaritima.css';
 
 const { Search } = Input;
@@ -13,85 +14,47 @@ interface ClienteMaritimo {
   correo: string;
   telefono: string;
   asesor: string;
-  capitan: string;
 }
 
 export const ClientesMaritima = () => {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<ClienteMaritimo[]>([]);
   const [filteredData, setFilteredData] = useState<ClienteMaritimo[]>([]);
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
 
   useEffect(() => {
     document.title = 'Sistema Entregax | Clientes Marítima';
     loadClientes();
   }, []);
 
-  const loadClientes = () => {
+  const loadClientes = async () => {
     setLoading(true);
-    
-    // Mock data - Reemplazar con llamada real a la API
-    setTimeout(() => {
-      const mockData: ClienteMaritimo[] = [
-        {
-          key: '1',
-          suite: 'STE-001',
-          nombre: 'Importadora Global SA de CV',
-          correo: 'contacto@importadoraglobal.com',
-          telefono: '+52 55 1234 5678',
-          asesor: 'Juan Pérez',
-          capitan: 'Carlos Rodríguez',
-        },
-        {
-          key: '2',
-          suite: 'STE-002',
-          nombre: 'Comercializadora del Norte',
-          correo: 'ventas@comnorte.com',
-          telefono: '+52 81 9876 5432',
-          asesor: 'María González',
-          capitan: 'Luis Martínez',
-        },
-        {
-          key: '3',
-          suite: 'STE-003',
-          nombre: 'Distribuidora Marítima SA',
-          correo: 'info@distmaritima.com',
-          telefono: '+52 33 5555 1234',
-          asesor: 'Ana López',
-          capitan: 'Roberto Sánchez',
-        },
-        {
-          key: '4',
-          suite: 'STE-004',
-          nombre: 'Logística Internacional Corp',
-          correo: 'logistica@logintcorp.com',
-          telefono: '+52 55 8888 9999',
-          asesor: 'Pedro Ramírez',
-          capitan: 'Jorge Hernández',
-        },
-        {
-          key: '5',
-          suite: 'STE-005',
-          nombre: 'Exportadora del Pacífico',
-          correo: 'export@pacifico.com.mx',
-          telefono: '+52 66 7777 3333',
-          asesor: 'Laura Torres',
-          capitan: 'Miguel Castro',
-        },
-        {
-          key: '6',
-          suite: 'STE-006',
-          nombre: 'Comercio Exterior Solutions',
-          correo: 'info@cesolutions.mx',
-          telefono: '+52 55 4444 2222',
-          asesor: 'Juan Pérez',
-          capitan: 'Carlos Rodríguez',
-        },
-      ];
-      
-      setData(mockData);
-      setFilteredData(mockData);
+    try {
+      const res = await axios.get('/customers/list-customers-maritimo');
+      if (res.data?.status === 'success' && Array.isArray(res.data.data)) {
+        const mapped: ClienteMaritimo[] = res.data.data.map((it: any) => ({
+          key: it.token || it.id || String(Math.random()),
+          suite: it.suite || it.suite_number || '',
+          nombre: (it.nombre || it.name || '').trim(),
+          correo: it.correo || it.email || '',
+          telefono: it.telefono || it.phone || '',
+          asesor: it.asesor || it.advisor || '',
+        }));
+        setData(mapped);
+        setFilteredData(mapped);
+      } else {
+        setData([]);
+        setFilteredData([]);
+        message.error('No se recibieron clientes desde el servidor');
+      }
+    } catch (err) {
+      console.error('Error cargando clientes maritimos', err);
+      message.error('Error al cargar clientes');
+      setData([]);
+      setFilteredData([]);
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   const handleSearch = (value: string) => {
@@ -101,14 +64,15 @@ export const ClientesMaritima = () => {
     }
 
     const searchLower = value.toLowerCase();
-    const filtered = data.filter((item) =>
-      item.suite.toLowerCase().includes(searchLower) ||
-      item.nombre.toLowerCase().includes(searchLower) ||
-      item.correo.toLowerCase().includes(searchLower) ||
-      item.telefono.toLowerCase().includes(searchLower) ||
-      item.asesor.toLowerCase().includes(searchLower) ||
-      item.capitan.toLowerCase().includes(searchLower)
-    );
+    const filtered = data.filter((item) => {
+      return (
+        (item.suite || '').toLowerCase().includes(searchLower) ||
+        (item.nombre || '').toLowerCase().includes(searchLower) ||
+        (item.correo || '').toLowerCase().includes(searchLower) ||
+        (item.telefono || '').toLowerCase().includes(searchLower) ||
+        (item.asesor || '').toLowerCase().includes(searchLower)
+      );
+    });
 
     setFilteredData(filtered);
   };
@@ -118,6 +82,7 @@ export const ClientesMaritima = () => {
       title: 'SUITE',
       dataIndex: 'suite',
       key: 'suite',
+      align: 'center',
       width: 120,
       sorter: (a, b) => a.suite.localeCompare(b.suite),
     },
@@ -125,6 +90,7 @@ export const ClientesMaritima = () => {
       title: 'Nombre',
       dataIndex: 'nombre',
       key: 'nombre',
+      align: 'center',
       width: 250,
       sorter: (a, b) => a.nombre.localeCompare(b.nombre),
     },
@@ -133,6 +99,7 @@ export const ClientesMaritima = () => {
       dataIndex: 'correo',
       key: 'correo',
       width: 220,
+      align: 'center',
       sorter: (a, b) => a.correo.localeCompare(b.correo),
     },
     {
@@ -140,20 +107,15 @@ export const ClientesMaritima = () => {
       dataIndex: 'telefono',
       key: 'telefono',
       width: 150,
+      align: 'center',
     },
     {
       title: 'Asesor',
       dataIndex: 'asesor',
       key: 'asesor',
       width: 150,
+      align: 'center',
       sorter: (a, b) => a.asesor.localeCompare(b.asesor),
-    },
-    {
-      title: 'Capitan',
-      dataIndex: 'capitan',
-      key: 'capitan',
-      width: 150,
-      sorter: (a, b) => a.capitan.localeCompare(b.capitan),
     },
   ];
 
@@ -179,9 +141,14 @@ export const ClientesMaritima = () => {
           dataSource={filteredData}
           loading={loading}
           pagination={{
-            pageSize: 10,
+            current: pagination.current,
+            pageSize: pagination.pageSize,
             showSizeChanger: true,
+            pageSizeOptions: ['10', '20', '50', '100'],
             showTotal: (total) => `Total: ${total} clientes`,
+          }}
+          onChange={(pag) => {
+            setPagination({ current: pag.current || 1, pageSize: pag.pageSize || 10 });
           }}
           scroll={{ x: 1200 }}
           size="middle"

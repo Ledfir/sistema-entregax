@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, Carousel, Button, Modal, Form, Input, Dropdown, message } from 'antd';
 import { PlusOutlined, MoreOutlined } from '@ant-design/icons';
 import './NavierasPuertos.css';
+import axios from '@/api/axios';
 
 interface Naviera {
   key: string;
@@ -17,65 +18,142 @@ const NavierasPuertos = () => {
   const [form] = Form.useForm();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalType, setModalType] = useState<'naviera' | 'puerto'>('naviera');
+  const [submitting, setSubmitting] = useState(false);
+  const [editingNavieraId, setEditingNavieraId] = useState<string | null>(null);
+  const [editingPuertoId, setEditingPuertoId] = useState<string | null>(null);
 
-  // Mock data para navieras
-  const [navieras, setNavieras] = useState<Naviera[]>([
-    { key: '1', nombre: 'Maersk Line' },
-    { key: '2', nombre: 'MSC Mediterranean Shipping Company' },
-    { key: '3', nombre: 'CMA CGM Group' },
-    { key: '4', nombre: 'COSCO Shipping Lines' },
-    { key: '5', nombre: 'Hapag-Lloyd' },
-  ]);
-
-  // Mock data para puertos
-  const [puertos, setPuertos] = useState<Puerto[]>([
-    { key: '1', nombre: 'Puerto de Miami' },
-    { key: '2', nombre: 'Puerto de Los Ángeles' },
-    { key: '3', nombre: 'Puerto de Houston' },
-    { key: '4', nombre: 'Puerto de Newark' },
-    { key: '5', nombre: 'Puerto de Long Beach' },
-  ]);
+  const [navieras, setNavieras] = useState<Naviera[]>([]);
+  const [puertos, setPuertos] = useState<Puerto[]>([]);
+  const [loadingNavieras, setLoadingNavieras] = useState(false);
+  const [loadingPuertos, setLoadingPuertos] = useState(false);
 
   const handleAgregarNaviera = () => {
     setModalType('naviera');
     setIsModalVisible(true);
+    setEditingNavieraId(null);
+    // ensure lists are fresh
+    loadNavieras();
   };
 
   const handleAgregarPuerto = () => {
     setModalType('puerto');
     setIsModalVisible(true);
+    setEditingPuertoId(null);
+    loadPuertos();
   };
+
+  // cargar datos iniciales
+  useEffect(() => {
+    loadNavieras();
+    loadPuertos();
+  }, []);
 
   const handleModalOk = async () => {
     try {
       const values = await form.validateFields();
-      
-      if (modalType === 'naviera') {
-        const newNaviera: Naviera = {
-          key: String(navieras.length + 1),
-          nombre: values.nombre,
-        };
-        setNavieras([...navieras, newNaviera]);
-        message.success('Naviera agregada exitosamente');
-      } else {
-        const newPuerto: Puerto = {
-          key: String(puertos.length + 1),
-          nombre: values.nombre,
-        };
-        setPuertos([...puertos, newPuerto]);
-        message.success('Puerto agregado exitosamente');
+      setSubmitting(true);
+      const payload = { name: values.nombre };
+      try {
+        if (modalType === 'naviera') {
+          let res;
+          // if editingNavieraId is set, call update endpoint
+          if (editingNavieraId) {
+            const updatePayload = { id: editingNavieraId, name: values.nombre };
+            res = await axios.post('/operation-maritime/update-naviera', updatePayload);
+          } else {
+            res = await axios.post('/operation-maritime/save-naviera', { name: values.nombre });
+          }
+          const serverMsg = res?.data?.message;
+          if (res.data?.status === 'success') {
+            message.success(serverMsg || (editingNavieraId ? 'Naviera actualizada correctamente' : 'Naviera guardada correctamente'));
+            setIsModalVisible(false);
+            form.resetFields();
+            setEditingNavieraId(null);
+            await loadNavieras();
+          } else {
+            if (serverMsg) message.error(serverMsg);
+            else message.error(editingNavieraId ? 'Error al actualizar naviera' : 'Error al guardar naviera');
+          }
+        } else {
+          let res;
+          if (editingPuertoId) {
+            const updatePayload = { id: editingPuertoId, name: values.nombre };
+            res = await axios.post('/operation-maritime/update-puerto', updatePayload);
+          } else {
+            res = await axios.post('/operation-maritime/save-puerto', payload);
+          }
+          const serverMsg = res?.data?.message;
+          if (res.data?.status === 'success') {
+            message.success(serverMsg || (editingPuertoId ? 'Puerto actualizado correctamente' : 'Puerto guardado correctamente'));
+            setIsModalVisible(false);
+            form.resetFields();
+            setEditingPuertoId(null);
+            // reload puertos so the UI updates
+            await loadPuertos();
+          } else {
+            if (serverMsg) message.error(serverMsg);
+            else message.error('Error al guardar puerto');
+          }
+        }
+      } catch (apiErr: any) {
+        console.error('API error saving item', apiErr);
+        const serverMsg = apiErr?.response?.data?.message || apiErr?.response?.data?.error;
+        if (serverMsg) message.error(serverMsg);
+        else message.error('Error de red al guardar');
       }
-      
-      form.resetFields();
-      setIsModalVisible(false);
     } catch (error) {
       console.error('Error al validar:', error);
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleModalCancel = () => {
     form.resetFields();
     setIsModalVisible(false);
+    setEditingNavieraId(null);
+    setEditingPuertoId(null);
+  };
+
+  const handleEditarNaviera = async (key: string) => {
+    setModalType('naviera');
+    setIsModalVisible(true);
+    setEditingNavieraId(key);
+    // fetch naviera data
+    try {
+      const res = await axios.get(`/operation-maritime/get-naviera/${key}`);
+      if (res.data?.status === 'success' && res.data.data) {
+        const data = res.data.data;
+        form.setFieldsValue({ nombre: data.name || data.nombre || '' });
+      } else {
+        const serverMsg = res?.data?.message;
+        if (serverMsg) message.error(serverMsg);
+        else message.error('No se pudo cargar la naviera');
+      }
+    } catch (err) {
+      console.error('Error cargando naviera', err);
+      message.error('Error al cargar naviera');
+    }
+  };
+
+  const handleEditarPuerto = async (key: string) => {
+    setModalType('puerto');
+    setIsModalVisible(true);
+    setEditingPuertoId(key);
+    try {
+      const res = await axios.get(`/operation-maritime/get-puerto/${key}`);
+      if (res.data?.status === 'success' && res.data.data) {
+        const data = res.data.data;
+        form.setFieldsValue({ nombre: data.name || data.nombre || '' });
+      } else {
+        const serverMsg = res?.data?.message;
+        if (serverMsg) message.error(serverMsg);
+        else message.error('No se pudo cargar el puerto');
+      }
+    } catch (err) {
+      console.error('Error cargando puerto', err);
+      message.error('Error al cargar puerto');
+    }
   };
 
   const handleEliminarNaviera = (key: string) => {
@@ -85,9 +163,23 @@ const NavierasPuertos = () => {
       okText: 'Eliminar',
       okType: 'danger',
       cancelText: 'Cancelar',
-      onOk: () => {
-        setNavieras(navieras.filter(n => n.key !== key));
-        message.success('Naviera eliminada exitosamente');
+      onOk: async () => {
+        try {
+          const res = await axios.post('/operation-maritime/delete-naviera', { id: key });
+          const serverMsg = res?.data?.message;
+          if (res.data?.status === 'success') {
+            message.success(serverMsg || 'Naviera eliminada correctamente');
+            await loadNavieras();
+          } else {
+            if (serverMsg) message.error(serverMsg);
+            else message.error('Error al eliminar naviera');
+          }
+        } catch (apiErr: any) {
+          console.error('Error eliminando naviera', apiErr);
+          const serverMsg = apiErr?.response?.data?.message || apiErr?.response?.data?.error;
+          if (serverMsg) message.error(serverMsg);
+          else message.error('Error de red al eliminar naviera');
+        }
       },
     });
   };
@@ -106,6 +198,52 @@ const NavierasPuertos = () => {
     });
   };
 
+  const loadNavieras = async () => {
+    setLoadingNavieras(true);
+    try {
+      const res = await axios.get('/operation-maritime/navieras');
+      if (res.data?.status === 'success' && Array.isArray(res.data.data)) {
+        const mapped: Naviera[] = res.data.data.map((it: any) => ({
+          key: it.token || it.id || String(Math.random()),
+          nombre: it.name || it.nombre || '',
+        }));
+        setNavieras(mapped);
+      } else {
+        setNavieras([]);
+        message.error('No se recibieron navieras desde el servidor');
+      }
+    } catch (err) {
+      console.error('Error cargando navieras', err);
+      message.error('Error al cargar navieras');
+      setNavieras([]);
+    } finally {
+      setLoadingNavieras(false);
+    }
+  };
+
+  const loadPuertos = async () => {
+    setLoadingPuertos(true);
+    try {
+      const res = await axios.get('/operation-maritime/puertos');
+      if (res.data?.status === 'success' && Array.isArray(res.data.data)) {
+        const mapped: Puerto[] = res.data.data.map((it: any) => ({
+          key: it.token || it.id || String(Math.random()),
+          nombre: it.name || it.nombre || '',
+        }));
+        setPuertos(mapped);
+      } else {
+        setPuertos([]);
+        message.error('No se recibieron puertos desde el servidor');
+      }
+    } catch (err) {
+      console.error('Error cargando puertos', err);
+      message.error('Error al cargar puertos');
+      setPuertos([]);
+    } finally {
+      setLoadingPuertos(false);
+    }
+  };
+
   const renderNavieraCard = (naviera: Naviera) => (
     <div className="carousel-card-wrapper" key={naviera.key}>
       <Card className="carousel-item-card">
@@ -115,6 +253,7 @@ const NavierasPuertos = () => {
               {
                 key: 'editar',
                 label: 'Editar',
+                onClick: () => handleEditarNaviera(naviera.key),
               },
               {
                 key: 'eliminar',
@@ -149,6 +288,7 @@ const NavierasPuertos = () => {
               {
                 key: 'editar',
                 label: 'Editar',
+                onClick: () => handleEditarPuerto(puerto.key),
               },
               {
                 key: 'eliminar',
@@ -213,8 +353,9 @@ const NavierasPuertos = () => {
                 },
               ]}
             >
-              {navieras.map((naviera) => renderNavieraCard(naviera))}
+              {(loadingNavieras ? [] : navieras).map((naviera) => renderNavieraCard(naviera))}
             </Carousel>
+            {loadingNavieras && <div style={{ textAlign: 'center', marginTop: 12 }}>Cargando navieras...</div>}
           </div>
         </div>
 
@@ -251,20 +392,26 @@ const NavierasPuertos = () => {
                 },
               ]}
             >
-              {puertos.map((puerto) => renderPuertoCard(puerto))}
+              {(loadingPuertos ? [] : puertos).map((puerto) => renderPuertoCard(puerto))}
             </Carousel>
+            {loadingPuertos && <div style={{ textAlign: 'center', marginTop: 12 }}>Cargando puertos...</div>}
           </div>
         </div>
       </Card>
 
       <Modal
-        title={modalType === 'naviera' ? 'Agregar Nueva Naviera' : 'Agregar Nuevo Puerto'}
+        title={
+          modalType === 'naviera'
+            ? (editingNavieraId ? 'Editar naviera' : 'Agregar Nueva Naviera')
+            : (editingPuertoId ? 'Editar puerto' : 'Agregar Nuevo Puerto')
+        }
         open={isModalVisible}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
-        okText="Agregar"
+        okText={(editingNavieraId || editingPuertoId) ? 'Guardar' : 'Agregar'}
         cancelText="Cancelar"
         width={500}
+        confirmLoading={submitting}
       >
         <Form
           form={form}

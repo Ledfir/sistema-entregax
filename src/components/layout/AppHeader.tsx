@@ -331,7 +331,6 @@ export const AppHeader = ({ onMenuClick }: AppHeaderProps) => {
                 <BellOutlined className="header-icon" style={{ cursor: 'pointer' }} />
               </Badge>
             </Dropdown>
-            <SettingOutlined className="header-icon" />
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight" arrow>
               <div className="user-dropdown">
                 <Avatar

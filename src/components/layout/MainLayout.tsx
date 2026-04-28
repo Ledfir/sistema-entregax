@@ -308,7 +308,7 @@ export const MainLayout = () => {
       label: 'Consignatarios',
     },
     {
-      key: '/maritima/cotizaciones',
+      key: '/admin/cotizaciones/maritimas',
       icon: <FileTextOutlined />,
       label: 'Cotizaciones Maritimas',
     },
@@ -522,8 +522,71 @@ export const MainLayout = () => {
     },
   ];
 
+  // Menú para CEDIS MONTERREY
+  const cedisMonterreyMenuItems = [
+    {
+      key: '/dashboard',
+      icon: <HomeOutlined />,
+      label: 'Home',
+    },
+    {
+      key: 'cedis-dhl',
+      icon: <RocketOutlined />,
+      label: 'DHL',
+      children: [
+        { key: '/cedis/dhl/ingresos-diarios', label: 'Ingresos diarios' },
+        { key: '/cedis/dhl/imp-instrucciones', label: 'Imp. Instrucciones' },
+        { key: '/cedis/dhl/recepcion', label: 'Recepcion' },
+        { key: '/cedis/dhl/recepcion-fedex', label: 'Recepcion FEDEX' },
+        { key: '/cedis/dhl/salida', label: 'Salida' },
+        { key: '/cedis/dhl/busqueda-impuestos', label: 'Busq. Impuestos' },
+      ],
+    },
+    {
+      key: '/cedis/salidas',
+      icon: <ContainerOutlined />,
+      label: 'SALIDAS',
+    },
+    {
+      key: '/cedis/solicitud-documentos',
+      icon: <FileTextOutlined />,
+      label: 'Solicitud de documentos',
+    },
+    {
+      key: 'cedis-tdi',
+      icon: <SwapOutlined />,
+      label: 'TDI',
+      children: [
+        { key: '/cedis/tdi/imp-instrucciones', label: 'Imp. Instrucciones' },
+        { key: '/cedis/tdi/recepcion', label: 'Recepcion' },
+        { key: '/cedis/tdi/reimprimir-qr', label: 'Reimprimir QR' },
+        { key: '/cedis/tdi/salida', label: 'Salida' },
+      ],
+    },
+    {
+      key: 'cedis-usa',
+      icon: <DollarCircleOutlined />,
+      label: 'USA',
+      children: [
+        { key: '/cedis/usa/ingresos-diarios', label: 'Ingresos diarios' },
+        { key: '/cedis/usa/imp-instrucciones', label: 'Imp. instrucciones' },
+        { key: '/cedis/usa/recepcion', label: 'Recepcion' },
+        { key: '/cedis/usa/salida', label: 'Salida' },
+      ],
+    },
+    {
+      key: '/cedis/tdi-dhl',
+      icon: <CloudUploadOutlined />,
+      label: 'TDI-DHL',
+    },
+  ];
+
   // Seleccionar menú según el rol
   const menuItems = useMemo(() => {
+    // CEDIS MONTERREY debe ser evaluado antes de los genéricos
+    if (hasRole(['CEDIS MONTERREY'])) {
+      return cedisMonterreyMenuItems;
+    }
     if (hasRole(['ADMIN'])) {
       return adminMenuItems;
     } else if (hasRole(['SISTEMAS'])) {

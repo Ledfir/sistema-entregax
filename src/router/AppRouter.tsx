@@ -626,7 +626,7 @@ export const AppRouter = () => {
           <Route
             path="/admin/cotizaciones/maritimas"
             element={
-              <ProtectedRoute roles={['ADMIN', 'SISTEMAS']}>
+              <ProtectedRoute roles={['ADMIN', 'SISTEMAS', 'OPERACION MARITIMA']}>
                 <CotizacionesMaritimas />
               </ProtectedRoute>
             }
