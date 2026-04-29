@@ -45,6 +45,8 @@ import { Generales } from '@/pages/config/Generales';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { IAEntregaX } from '@/pages/ia/IAEntregaX';
+import { CedisIngresosDiarios } from '@/pages/dhl/CedisIngresosDiarios';
+import { ImpresionInstrucciones } from '@/pages/dhl/ImpresionInstrucciones';
 
 export const AppRouter = () => {
   return (
@@ -870,6 +872,24 @@ export const AppRouter = () => {
                 <div style={{ padding: 24 }}>Nueva Paquetería</div>
               </ProtectedRoute>
             } 
+          />
+
+          {/* DHL - CEDIS MONTERREY */}
+          <Route
+            path="/cedis/dhl/ingresos-diarios"
+            element={
+              <ProtectedRoute roles={['CEDIS MONTERREY']}>
+                <CedisIngresosDiarios />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cedis/dhl/imp-instrucciones"
+            element={
+              <ProtectedRoute roles={['CEDIS MONTERREY']}>
+                <ImpresionInstrucciones />
+              </ProtectedRoute>
+            }
           />
           
           {/* Rutas de tickets */}
