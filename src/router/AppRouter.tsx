@@ -47,6 +47,7 @@ import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { IAEntregaX } from '@/pages/ia/IAEntregaX';
 import { CedisIngresosDiarios } from '@/pages/dhl/CedisIngresosDiarios';
 import { ImpresionInstrucciones } from '@/pages/dhl/ImpresionInstrucciones';
+import Recepcion from '@/pages/dhl/Recepcion';
 
 export const AppRouter = () => {
   return (
@@ -888,6 +889,14 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['CEDIS MONTERREY']}>
                 <ImpresionInstrucciones />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cedis/dhl/recepcion"
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY']}>
+                <Recepcion />
               </ProtectedRoute>
             }
           />

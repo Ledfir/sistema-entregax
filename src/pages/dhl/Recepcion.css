@@ -1,0 +1,57 @@
+.dhl-recepcion-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+.dhl-recepcion-card {
+  width: 100%;
+  max-width: 900px;
+  min-height: 380px; /* más largo */
+}
+.dhl-recepcion-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  height: 100%;
+  padding: 24px 0;
+}
+.dhl-recepcion-label {
+  font-size: 1rem;
+  text-align: center;
+  display: block;
+}
+.dhl-recepcion-input {
+  width: 100%;
+  max-width: 420px;
+  text-align: center;
+}
+
+.capture-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.capture-icon {
+  font-size: 36px;
+}
+.capture-title {
+  color: #ff8a00;
+  margin: 0;
+  letter-spacing: 1px;
+}
+.measure-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 24px;
+  max-width: 900px;
+}
+.measure-label {
+  display: block;
+  margin-bottom: 8px;
+  color: #333;
+}
