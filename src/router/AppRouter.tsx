@@ -48,6 +48,9 @@ import { IAEntregaX } from '@/pages/ia/IAEntregaX';
 import { CedisIngresosDiarios } from '@/pages/dhl/CedisIngresosDiarios';
 import { ImpresionInstrucciones } from '@/pages/dhl/ImpresionInstrucciones';
 import Recepcion from '@/pages/dhl/Recepcion';
+import Salida from '@/pages/dhl/Salida';
+import BusquedaImpuesto from '@/pages/dhl/BusquedaImpuesto';
+import Salidas from '@/pages/cedis/Salidas';
 
 export const AppRouter = () => {
   return (
@@ -897,6 +900,38 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY']}>
                 <Recepcion />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cedis/dhl/busqueda-impuesto"
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY']}>
+                <BusquedaImpuesto />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cedis/dhl/busqueda-impuestos"
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY']}>
+                <BusquedaImpuesto />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cedis/dhl/salida"
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY']}>
+                <Salida />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cedis/salidas"
+            element={
+              <ProtectedRoute roles={['CEDIS MONTERREY']}>
+                <Salidas />
               </ProtectedRoute>
             }
           />
