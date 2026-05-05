@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Card, Select, Input, Button, message, Spin } from 'antd';
 import clienteService from '@/services/clienteService';
 import apiClient from '@/api/axios';
+import { useAuthStore } from '@/store/authStore';
 
 const { TextArea } = Input;
 
@@ -40,27 +41,75 @@ const SolicitudDocumentos: React.FC = () => {
 
     setSending(true);
     try {
+      const user = useAuthStore.getState().user;
+      const iduser = user?.id ?? null;
+
       const payload = {
-        customer_id: selectedClient,
-        message: messageText.trim(),
+        cliente: selectedClient,
+        solicitud: messageText.trim(),
+        iduser,
       };
 
-      // Endpoint: /cedis/solicitud-documentos (puede ajustarse según API)
-      const res = await apiClient.post('/cedis/solicitud-documentos', payload);
+      const res = await apiClient.post('/cedis/enviar-solicitud-documentos', payload);
       const payloadRes = res?.data ?? {};
+
+      const showApiMessages = (p: any) => {
+        if (!p) return false;
+        let shown = false;
+        const push = (txt: any) => {
+          if (!txt) return;
+          shown = true;
+          message.info(String(txt));
+        };
+        if (typeof p === 'string') { push(p); return shown; }
+        if (p.message) push(p.message);
+        if (p.messages && Array.isArray(p.messages)) p.messages.forEach((m: any) => push(m));
+        if (p.error) push(p.error);
+        if (p.errors) {
+          if (typeof p.errors === 'string') push(p.errors);
+          else if (Array.isArray(p.errors)) p.errors.forEach((e: any) => push(e));
+          else if (typeof p.errors === 'object') Object.values(p.errors).forEach((v: any) => {
+            if (Array.isArray(v)) v.forEach((x) => push(x)); else push(v);
+          });
+        }
+        return shown;
+      };
+
+      const wasShown = showApiMessages(payloadRes);
       if (payloadRes?.status === 'success' || res.status === 200 || res.status === 201) {
-        message.success('Solicitud enviada');
+        if (!wasShown) message.success('Solicitud enviada');
         setSelectedClient(null);
         setMessageText('');
       } else {
-        message.info(payloadRes?.message || 'Solicitud enviada (respuesta inesperada)');
+        if (!wasShown) message.info(payloadRes?.message || 'Respuesta inesperada del servidor');
       }
     } catch (err: any) {
       console.error('Error enviando solicitud', err);
       const resp = err?.response?.data;
-      if (resp?.message) message.error(resp.message);
-      else if (err?.message) message.error(err.message);
-      else message.error('Error al enviar solicitud');
+      const showApiMessages = (p: any) => {
+        if (!p) return false;
+        let shown = false;
+        const push = (txt: any) => {
+          if (!txt) return;
+          shown = true;
+          message.error(String(txt));
+        };
+        if (typeof p === 'string') { push(p); return shown; }
+        if (p.message) push(p.message);
+        if (p.messages && Array.isArray(p.messages)) p.messages.forEach((m: any) => push(m));
+        if (p.error) push(p.error);
+        if (p.errors) {
+          if (typeof p.errors === 'string') push(p.errors);
+          else if (Array.isArray(p.errors)) p.errors.forEach((e: any) => push(e));
+          else if (typeof p.errors === 'object') Object.values(p.errors).forEach((v: any) => {
+            if (Array.isArray(v)) v.forEach((x) => push(x)); else push(v);
+          });
+        }
+        return shown;
+      };
+
+      const shown = resp ? showApiMessages(resp) : false;
+      if (!shown) message.error(err?.message || 'Error al enviar solicitud');
     } finally {
       setSending(false);
     }
