@@ -3,7 +3,7 @@ import { Card, Space, Button, Table, message, Modal, Row, Col, Divider, Typograp
 import { ContainerOutlined, FlagOutlined, TruckOutlined, ApiOutlined, CloudOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import apiClient from '../../api/axios';
-import { humanizarFecha, formatearFechaCompleta } from '../../utils/dateUtils';
+import { humanizarFecha } from '../../utils/dateUtils';
 
 const botones = [
   { key: 'maritimo', label: 'Maritimo', color: '#2f54eb', icon: <ContainerOutlined /> },
