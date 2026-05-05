@@ -51,6 +51,7 @@ import Recepcion from '@/pages/dhl/Recepcion';
 import Salida from '@/pages/dhl/Salida';
 import BusquedaImpuesto from '@/pages/dhl/BusquedaImpuesto';
 import Salidas from '@/pages/cedis/Salidas';
+import SolicitudDocumentos from '@/pages/cedis/SolicitudDocumentos';
 
 export const AppRouter = () => {
   return (
@@ -932,6 +933,14 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['CEDIS MONTERREY']}>
                 <Salidas />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cedis/solicitud-documentos"
+            element={
+              <ProtectedRoute roles={['CEDIS MONTERREY']}>
+                <SolicitudDocumentos />
               </ProtectedRoute>
             }
           />

@@ -95,6 +95,88 @@ EntregaX es una plataforma completa que permite gestionar todos los aspectos de 
   - Generación automática de PIN
   - Envío de notificación con PIN y liga de acceso
   - Respaldo manual del PIN generado
+- **Observar Resultados**: visualización de resultados de exámenes por PIN
+
+### 💵 Dólares
+- Solicitud de envío con factura
+- Catálogo de servicios disponibles
+- Mis envíos (activos y archivados)
+
+### 💳 Monedero
+- **Historial**: registro de movimientos del monedero del usuario
+- **Saldo**: consulta de saldo disponible
+- **Subir pagos**: carga de comprobantes de pago
+
+### 🏦 RMBs
+- Solicitud con factura y sin factura
+- Mis envíos y envíos archivados
+- Catálogo de servicios
+
+### 💰 USDTs
+- Solicitud con factura y sin factura
+- Mis envíos y envíos archivados
+- Catálogo de servicios
+
+### 📊 Comisiones
+- Reporte de comisiones por asesor (acceso ADMIN)
+
+### 🤖 IA EntregaX
+- Módulo de inteligencia artificial integrado (acceso SISTEMAS)
+
+### 🎮 Juego
+- Juego Snake integrado en la plataforma
+
+### ⚙️ Configuración del Sistema
+- **Cuentas**: gestión de cuentas bancarias
+- **Bancos**: catálogo de bancos
+- **Servicios**: configuración de servicios
+- **Generales**: configuración general del sistema
+
+### 🚢 Marítimos (Módulo ASESOR/SC)
+- Cotizaciones marítimas
+- Panel de instrucciones PL
+
+### ⚓ Operación Marítima
+- Clientes marítimos y consignatarios
+- Cotizaciones de operación marítima
+- Navieras y puertos
+- PCTL (Pre-Carga de Tráfico Logístico)
+- PLs pendientes
+- Subir nuevo week
+- Validar manifiesto
+- Validar DHL y TDI-DHL
+
+### 📦 BLS (Marítimo)
+- Agregar usuario marítimo
+- BLs cargados
+
+### 🏛️ Administración – Bancos
+- Listado de archivos de cuentas
+- Reporte de estado de cuenta
+- Subir estado de cuenta
+- Transferir saldo entre cuentas
+
+### 👥 Administración – Clientes
+- Panel administrativo de clientes (vista global)
+
+### 📈 Administración – Reportes
+- Reporte US
+- Reporte de gastos semanales (GastosWeek)
+
+### 🏭 CEDIS Monterrey
+- **Salidas Diarias**: gestión de salidas por tipo (Marítimo, USA, DHL, TDI GDL/CDMX/MTY/DHL)
+  - Tabla de registros pendientes con clave cliente, cajas, fecha humanizada y responsable
+  - Botón `Dar Salida` con confirmación modal
+  - Modal de detalles con guías, estado, mapa de Google Maps y soporte multi-registro
+- **Solicitud de Documentos**: formulario para solicitar información o documentos a un cliente
+  - Select de clientes con búsqueda (muestra `nombre (clavecliente)`)
+  - Textarea para especificar la solicitud
+  - Envío al endpoint `/cedis/solicitud-documentos`
+- **DHL Ingresos Diarios**: registro de ingresos DHL del día
+- **Impresión de Instrucciones**: impresión de instrucciones para paquetes
+- **Recepción**: módulo de recepción de paquetes
+- **Búsqueda de Impuesto**: búsqueda de impuesto por guía
+- **Salida DHL**: registro de salida DHL
 
 ## 🛠️ Stack Tecnológico
 
@@ -125,38 +207,63 @@ src/
 ├── api/              # Configuración de Axios (base URL + interceptor Bearer)
 ├── assets/           # Recursos estáticos
 ├── components/       # Componentes reutilizables
-│   ├── common/       # ProtectedRoute, RoleGuard
+│   ├── common/       # ProtectedRoute, RoleGuard, ActivarDesactivarPagosModal
 │   └── layout/       # AppHeader, MainLayout (menú lateral)
 ├── config/           # Configuraciones globales
 ├── hooks/            # Custom hooks
 ├── pages/            # Páginas de la aplicación
+│   ├── admin/        # Módulos administrativos
+│   │   ├── bancos/   # Estado de cuenta, listado, subir, transferir
+│   │   ├── clientes/ # ClientesAdmin (vista global)
+│   │   ├── gastosweek/ # ReporteGastosWeek
+│   │   └── reporteus/  # ReporteUS
 │   ├── asesores/     # Lista de asesores
 │   ├── auth/         # Login, Unauthorized
+│   ├── bls/          # AgregarUsuarioMaritimo, BlsCargados
 │   ├── cargosextra/  # Lista, historial y pendientes de cargos extra
+│   ├── cedis/        # Módulos CEDIS Monterrey
+│   │   ├── Salidas.tsx              # Salidas diarias por tipo
+│   │   └── SolicitudDocumentos.tsx  # Solicitud de documentos a clientes
 │   ├── clientes/     # CRUD clientes + direcciones de facturación + Mis Clientes
-│   ├── cotizaciones/ # Cotizaciones (Mis Cotizaciones, Instrucciones, Guías Archivadas, Pendientes, Marítimas, TDI-USA)
-│   ├── dashboard/    # Dashboard general y Home Servicio al Cliente
+│   ├── comisiones/   # ReporteComisiones
+│   ├── config/       # Generales, cuentas, bancos, servicios
+│   ├── cotizaciones/ # Mis Cotizaciones, Instrucciones, Guías Archivadas, Pendientes, Marítimas, TDI-USA
+│   ├── dashboard/    # Dashboard general
+│   ├── dhl/          # CedisIngresosDiarios, ImpresionInstrucciones, Recepcion, Salida, BusquedaImpuesto
+│   ├── dolares/      # EnvioConFactura, CatalogoServicios, MisEnvios, EnviosArchivados
 │   ├── encuestas/    # Encuestas pendientes y realizadas
-│   ├── examen/       # Generar PIN para exámenes
+│   ├── examen/       # GenerarPin, ObservarResultados
+│   ├── ia/           # IAEntregaX
 │   ├── juego/        # Juego Snake
+│   ├── maritimos/    # Cotizaciones marítimas (ASESOR/SC), PanelPLInstrucciones
+│   ├── monedero/     # Historial, Saldo, SubirPagos
 │   ├── operaciones/  # Módulos de operaciones logísticas
-│   ├── polizas/      # Pólizas nuevas y pagadas
+│   ├── polizas/      # PolizasNuevas, PolizasPagadas, GenerarPoliza, MisPolizas
 │   ├── profile/      # Perfil de usuario
-│   ├── tickets/      # Tickets activos, archivados y reporte estadístico
+│   ├── rmbs/         # MisEnvios, EnviosArchivados, Con/SinFactura, CatalogoServicios
+│   ├── tickets/      # TicketCreate, TicketsActivos, TicketsArchivados, ReporteEstadistico
+│   ├── usdts/        # MisEnvios, EnviosArchivados, Con/SinFactura, CatalogoServicios
 │   └── usuarios/     # CRUD de usuarios
 ├── router/           # AppRouter.tsx — todas las rutas protegidas por rol
 ├── services/         # Servicios API
 │   ├── authService.ts
+│   ├── bancosService.ts
 │   ├── cargoExtraService.ts
 │   ├── clienteService.ts
-│   ├── cotizacionesService.ts  # Cotizaciones (marítimas, TDI-USA)
+│   ├── comisionesService.ts
+│   ├── cotizacionesService.ts
+│   ├── cuentasService.ts
 │   ├── encuestaService.ts
-│   ├── examService.ts          # Exámenes (generación de PIN)
-│   ├── operacionesService.ts   # Operaciones logísticas
+│   ├── examService.ts
+│   ├── operacionesService.ts
+│   ├── pagosService.ts
+│   ├── polizasService.ts
+│   ├── serviciosService.ts
+│   ├── ticketsService.ts
 │   └── userService.ts
 ├── store/            # Zustand stores (authStore)
 ├── types/            # Tipos TypeScript
-└── utils/            # Utilidades
+└── utils/            # Utilidades (dateUtils, index)
 ```
 
 ## 🔐 Roles y Permisos
@@ -166,8 +273,12 @@ src/
 | **ADMIN** | Acceso completo al sistema, gestión de usuarios, configuración global |
 | **SISTEMAS** | Administración técnica, acceso a módulos de operaciones y cotizaciones |
 | **ASESOR** | Gestión de sus clientes, cotizaciones, instrucciones, guías archivadas |
-| **OPERACIONES** | Procesamiento de envíos, actualización de costos, operaciones logísticas |
-| **SERVICIO AL CLIENTE** | Gestión de pólizas, validación de costos, encuestas, cotizaciones |
+| **SERVICIO AL CLIENTE** | Gestión de pólizas, validación de costos, encuestas, cotizaciones, operaciones |
+| **ADMINISTRACIÓN** | Acceso administrativo general, clientes, cargos, tickets |
+| **TEAM LEADER** | Gestión de equipo, reportes, vista de clientes |
+| **ATENCION A CLIENTES** | Gestión de clientes, creación de tickets, cargos extra |
+| **OPERACION MARITIMA** | BLs marítimos, cotizaciones marítimas, clientes/consignatarios, navieras, weeks, validar manifiesto |
+| **CEDIS MONTERREY** | Salidas diarias, solicitud de documentos, ingresos DHL, impresión de instrucciones, recepción, búsqueda de impuesto, salida DHL |
 
 ## 🗺️ Rutas de la Aplicación
 
@@ -210,14 +321,66 @@ src/
 | `/admin/cotizaciones/maritimas` | Cotizaciones marítimas | ADMIN, SISTEMAS |
 | `/admin/cotizaciones/tdi-usa` | Cotizaciones TDI-USA | ADMIN, SISTEMAS |
 | `/admin/examen/generar-pin` | Generar PIN examen | ADMIN |
+| `/polizas/crear` | Generar póliza | SC, ASESOR, SISTEMAS, ADMIN |
+| `/polizas/mis-polizas` | Mis pólizas | SC, ASESOR, SISTEMAS, ADMIN |
 | `/polizas/nuevas` | Pólizas nuevas | SC |
-| `/polizas/pagadas` | Pólizas pagadas | SC |
-| `/tickets/activos` | Tickets activos | ADMIN, SISTEMAS |
-| `/tickets/archivados` | Tickets archivados | ADMIN, SISTEMAS |
-| `/tickets/reporte-estadistico` | Reporte de tickets | ADMIN, SISTEMAS |
-| `/paqueterias/lista` | Lista paqueterías | ADMIN, SISTEMAS |
-| `/noticias/lista` | Lista noticias | ADMIN, SISTEMAS |
-| `/proveedores/lista` | Lista proveedores | ADMIN, SISTEMAS |
+| `/polizas/pagadas` | Pólizas pagadas | SC, ADMIN |
+| `/tickets/crear` | Crear ticket | Múltiples roles |
+| `/tickets/mis-tickets` | Mis tickets | Múltiples roles |
+| `/tickets/activos` | Tickets activos | SC |
+| `/tickets/archivados` | Tickets archivados | Múltiples roles |
+| `/tickets/reporte-estadistico` | Reporte de tickets | SC |
+| `/monedero/historial` | Historial monedero | ASESOR, SC, SISTEMAS, ADMIN |
+| `/monedero/saldo` | Saldo monedero | ASESOR, SC, SISTEMAS, ADMIN |
+| `/monedero/subir-pagos` | Subir pagos | ASESOR, SC, SISTEMAS, ADMIN |
+| `/dolares/solicitud/con-factura` | Envío dólares con factura | ASESOR, SC, SISTEMAS, ADMIN |
+| `/dolares/catalogo-servicios` | Catálogo servicios dólares | ASESOR, SC, SISTEMAS, ADMIN |
+| `/dolares/mis-envios` | Mis envíos dólares | ASESOR, SC, SISTEMAS, ADMIN |
+| `/dolares/envios-archivados` | Envíos archivados dólares | ASESOR, SC, SISTEMAS, ADMIN |
+| `/rmbs/solicitud/con-factura` | RMBs con factura | ASESOR, SC, SISTEMAS, ADMIN |
+| `/rmbs/solicitud/sin-factura` | RMBs sin factura | ASESOR, SC, SISTEMAS, ADMIN |
+| `/rmbs/mis-envios` | Mis envíos RMBs | ASESOR, SC, SISTEMAS, ADMIN |
+| `/rmbs/envios-archivados` | Envíos archivados RMBs | ASESOR, SC, SISTEMAS, ADMIN |
+| `/rmbs/catalogo-servicios` | Catálogo servicios RMBs | ASESOR, SC, SISTEMAS, ADMIN |
+| `/usdts/solicitud/con-factura` | USDTs con factura | ASESOR, SC, SISTEMAS, ADMIN |
+| `/usdts/solicitud/sin-factura` | USDTs sin factura | ASESOR, SC, SISTEMAS, ADMIN |
+| `/usdts/mis-envios` | Mis envíos USDTs | ASESOR, SC, SISTEMAS, ADMIN |
+| `/usdts/envios-archivados` | Envíos archivados USDTs | ASESOR, SC, SISTEMAS, ADMIN |
+| `/usdts/catalogo-servicios` | Catálogo servicios USDTs | ASESOR, SC, SISTEMAS, ADMIN |
+| `/maritimos/cotizaciones` | Cotizaciones marítimas | ASESOR, SC, SISTEMAS, ADMIN |
+| `/maritimos/panel-pl-instrucciones` | Panel PL instrucciones | ASESOR, SC, SISTEMAS, ADMIN |
+| `/maritima/clientes` | Clientes marítimos | OPERACION MARITIMA, SISTEMAS, ADMIN |
+| `/maritima/consignatarios` | Consignatarios | OPERACION MARITIMA, SISTEMAS, ADMIN |
+| `/maritima/cotizaciones` | Cotizaciones OP marítima | OPERACION MARITIMA, SISTEMAS, ADMIN |
+| `/maritima/navieras` | Navieras y puertos | OPERACION MARITIMA, SISTEMAS, ADMIN |
+| `/maritima/pctl` | PCTL | OPERACION MARITIMA, SISTEMAS, ADMIN |
+| `/maritima/pls-pendientes` | PLs pendientes | OPERACION MARITIMA, SISTEMAS, ADMIN |
+| `/maritima/subir-week` | Subir nuevo week | OPERACION MARITIMA, SISTEMAS, ADMIN |
+| `/maritima/dhl` | Validar DHL | OPERACION MARITIMA, SISTEMAS, ADMIN |
+| `/maritima/validar-manifiesto` | Validar manifiesto | OPERACION MARITIMA, SISTEMAS, ADMIN |
+| `/admin/bls/agregar-usuario-maritimo` | Agregar usuario marítimo | OPERACION MARITIMA, SISTEMAS, ADMIN |
+| `/admin/bls/cargados` | BLs cargados | OPERACION MARITIMA, SISTEMAS, ADMIN |
+| `/admin/bancos/listado-archivos` | Listado archivos cuentas | ADMIN |
+| `/admin/bancos/reporte-estado-cuenta` | Reporte estado de cuenta | ADMIN |
+| `/admin/bancos/subir-estado-cuenta` | Subir estado de cuenta | ADMIN |
+| `/admin/bancos/transferir-saldo` | Transferir saldo | ADMIN |
+| `/admin/clientes` | Clientes (panel admin) | ADMIN |
+| `/admin/reporte-us` | Reporte US | ADMIN |
+| `/admin/comisiones/reporte` | Reporte comisiones | ADMIN |
+| `/admin/examen/observar-resultados` | Observar resultados examen | ADMIN |
+| `/configuracion/cuentas` | Cuentas | SISTEMAS, ADMIN |
+| `/configuracion/bancos` | Bancos | SISTEMAS, ADMIN |
+| `/configuracion/servicios` | Servicios | SISTEMAS, ADMIN |
+| `/configuracion/generales` | Generales | SISTEMAS |
+| `/ia/entregax` | IA EntregaX | SISTEMAS |
+| `/cedis/salidas` | Salidas diarias | CEDIS MONTERREY |
+| `/cedis/solicitud-documentos` | Solicitud de documentos | CEDIS MONTERREY |
+| `/cedis/dhl/ingresos-diarios` | Ingresos diarios DHL | CEDIS MONTERREY |
+| `/cedis/dhl/imp-instrucciones` | Impresión instrucciones | CEDIS MONTERREY |
+| `/cedis/dhl/recepcion` | Recepción | SC, SISTEMAS, ADMIN, CEDIS MONTERREY |
+| `/cedis/dhl/busqueda-impuesto` | Búsqueda impuesto | SC, SISTEMAS, ADMIN, CEDIS MONTERREY |
+| `/cedis/dhl/salida` | Salida DHL | SC, SISTEMAS, ADMIN, CEDIS MONTERREY |
+| `/paqueterias/lista` | Lista paqueterías | SISTEMAS |
 | `/perfil` | Perfil de usuario | Todos |
 
 ## 🚀 Instalación
@@ -410,5 +573,5 @@ Para soporte técnico, contactar al equipo de desarrollo.
 
 ---
 
-**Última actualización**: Abril 2026  
-**Versión**: 2.2.0 
+**Última actualización**: Mayo 2026  
+**Versión**: 2.3.0 
