@@ -568,16 +568,24 @@ export const MainLayout = () => {
       icon: <DollarCircleOutlined />,
       label: 'USA',
       children: [
-        { key: '/cedis/usa/ingresos-diarios', label: 'Ingresos diarios' },
-        { key: '/cedis/usa/imp-instrucciones', label: 'Imp. instrucciones' },
-        { key: '/cedis/usa/recepcion', label: 'Recepcion' },
-        { key: '/cedis/usa/salida', label: 'Salida' },
+        { key: '/usa/ingresos-diarios', label: 'Ingresos diarios' },
+        { key: '/usa/imp-instrucciones', label: 'Imp. instrucciones' },
+        { key: '/usa/recepcion', label: 'Recepcion' },
+        { key: '/usa/salida', label: 'Salida' },
       ],
     },
     {
-      key: '/cedis/tdi-dhl',
+      key: 'cedis-tdi-dhl',
       icon: <CloudUploadOutlined />,
       label: 'TDI-DHL',
+      children: [
+        { key: '/tdi/ingresos-diarios', label: 'Ingresos diarios' },
+        { key: '/tdi/ingresar-guias-inventario', label: 'Ingresar guias a inventario' },
+        { key: '/tdi/inventario', label: 'Inventario' },
+        { key: '/tdi/ingresar-guias', label: 'Ingresar guias' },
+        { key: '/tdi/imp-instrucciones', label: 'Imp. Instrucciones' },
+        { key: '/tdi/salida', label: 'Salida' },
+      ],
     },
   ];
 

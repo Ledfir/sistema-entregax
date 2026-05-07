@@ -47,6 +47,17 @@ import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { IAEntregaX } from '@/pages/ia/IAEntregaX';
 import { CedisIngresosDiarios } from '@/pages/dhl/CedisIngresosDiarios';
 import { ImpresionInstrucciones } from '@/pages/dhl/ImpresionInstrucciones';
+import ImpInstruccionesTdi from '@/pages/tdi/ImpInstruccionesTdi';
+import RecepcionTdi from '@/pages/tdi/RecepcionTdi';
+import ReimprimirQrTdi from '@/pages/tdi/ReimprimirQrTdi';
+import SalidaTdi from '@/pages/tdi/SalidaTdi';
+import ImpInstruccionesUsa from '@/pages/usa/ImpInstruccionesUsa';
+import IngresosDiarios from '@/pages/usa/IngresosDiarios';
+import RecepcionUsa from '@/pages/usa/RecepcionUsa';
+import SalidaUsa from '@/pages/usa/SalidaUsa';
+import IngresosDiariosTdi from '@/pages/tdi-dhl/IngresosDiariosTdi';
+import IngresarGuiasInventario from '@/pages/tdi-dhl/IngresarGuiasInventario';
+import InventarioTdi from '@/pages/tdi-dhl/InventarioTdi';
 import Recepcion from '@/pages/dhl/Recepcion';
 import Salida from '@/pages/dhl/Salida';
 import BusquedaImpuesto from '@/pages/dhl/BusquedaImpuesto';
@@ -386,7 +397,63 @@ export const AppRouter = () => {
               </ProtectedRoute>
             } 
           />
-          
+          <Route
+            path="/usa/ingresos-diarios"
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY']}>
+                <IngresosDiarios />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/usa/imp-instrucciones"
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY']}>
+                <ImpInstruccionesUsa />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/usa/recepcion"
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY']}>
+                <RecepcionUsa />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/usa/salida"
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY']}>
+                <SalidaUsa />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tdi/ingresos-diarios"
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY']}>
+                <IngresosDiariosTdi />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tdi/ingresar-guias-inventario"
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY']}>
+                <IngresarGuiasInventario />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tdi/inventario"
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY']}>
+                <InventarioTdi />
+              </ProtectedRoute>
+            }
+          />
+
           {/* Rutas de cotizaciones */}
           <Route 
             path="/cotizaciones/lista" 
@@ -893,6 +960,38 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['CEDIS MONTERREY']}>
                 <ImpresionInstrucciones />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cedis/tdi/imp-instrucciones"
+            element={
+              <ProtectedRoute roles={['CEDIS MONTERREY']}>
+                <ImpInstruccionesTdi />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cedis/tdi/recepcion"
+            element={
+              <ProtectedRoute roles={['CEDIS MONTERREY']}>
+                <RecepcionTdi />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cedis/tdi/reimprimir-qr"
+            element={
+              <ProtectedRoute roles={['CEDIS MONTERREY']}>
+                <ReimprimirQrTdi />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cedis/tdi/salida"
+            element={
+              <ProtectedRoute roles={['CEDIS MONTERREY']}>
+                <SalidaTdi />
               </ProtectedRoute>
             }
           />

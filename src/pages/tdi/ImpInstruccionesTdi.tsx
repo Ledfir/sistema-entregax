@@ -1,14 +1,23 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Card, Input, Alert } from 'antd';
 import type { InputRef } from 'antd';
 import apiClient from '@/api/axios';
 
-export const ImpresionInstrucciones: React.FC = () => {
-  const [value, setValue] = useState('');
+const ImpInstruccionesTdi: React.FC = () => {
   const inputRef = useRef<InputRef | null>(null);
+  const [value, setValue] = useState('');
   const [messages, setMessages] = useState<Array<{ type: string; text: string }>>([]);
-  const [htmlContent, setHtmlContent] = useState<string>('');
-  const hiddenDivRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+
+    const handleMouseDown = () => {
+      setTimeout(() => inputRef.current?.focus(), 0);
+    };
+
+    document.addEventListener('mousedown', handleMouseDown);
+    return () => document.removeEventListener('mousedown', handleMouseDown);
+  }, []);
 
   const onEnter = () => {
     const guide = value?.trim();
@@ -19,7 +28,7 @@ export const ImpresionInstrucciones: React.FC = () => {
 
     setMessages([]);
     apiClient
-      .get(`/cedis/imprimir-instrucciones/dhl/${encodeURIComponent(guide)}`)
+      .get(`/cedis/imprimir-instrucciones/tdi/${encodeURIComponent(guide)}`)
       .then((res) => {
         const payload = res.data || {};
         const isSuccess = payload.success === true || payload.status === 'success' || payload.estatus === 'success' || payload.status === 'ok';
@@ -34,15 +43,11 @@ export const ImpresionInstrucciones: React.FC = () => {
           return;
         }
 
-        // Si success, la API devuelve HTML en message
         const html = String(payload.message || payload.html || payload.data || '');
-        setHtmlContent(html);
         setMessages([{ type: 'success', text: 'Instrucción lista para imprimir' }]);
-        // Limpiar input y devolver foco
         setValue('');
         inputRef.current?.focus();
 
-        // Imprimir usando un iframe oculto en la misma página (no abrir nueva pestaña)
         try {
           const iframe = document.createElement('iframe');
           iframe.style.position = 'absolute';
@@ -60,7 +65,6 @@ export const ImpresionInstrucciones: React.FC = () => {
             idoc.close();
           }
 
-          // Dar un pequeño tiempo para garantizar renderizado, luego imprimir desde el iframe
           setTimeout(() => {
             try {
               iframe.contentWindow?.focus();
@@ -68,7 +72,6 @@ export const ImpresionInstrucciones: React.FC = () => {
             } catch (e) {
               console.error('Error al imprimir desde iframe', e);
             }
-            // Remover iframe después de un retraso
             setTimeout(() => {
               try { document.body.removeChild(iframe); } catch (e) { /* ignore */ }
             }, 500);
@@ -90,27 +93,13 @@ export const ImpresionInstrucciones: React.FC = () => {
       });
   };
 
-  useEffect(() => {
-    // Enfocar al montar
-    inputRef.current?.focus();
-
-    // Re-enfocar tras cualquier click en la página (para mantener foco en esta sección)
-    const handleMouseDown = () => {
-      // Pequeño timeout para dejar que el click original se procese
-      setTimeout(() => inputRef.current?.focus(), 0);
-    };
-
-    document.addEventListener('mousedown', handleMouseDown);
-    return () => document.removeEventListener('mousedown', handleMouseDown);
-  }, []);
-
   return (
     <div style={{ padding: 16 }}>
-      <Card title="DHL - Impresion de instrucciones">
+      <Card title="Impresion de instrucciones">
         <div style={{ paddingTop: 12 }}>
-          <div style={{ textAlign: 'center', fontWeight: 600, marginBottom: 8 }}>Capturar Guia Unica</div>
+          <label style={{ display: 'block', textAlign: 'center', marginBottom: 8, fontWeight: 600 }}>Escanea guia de ingreso (AIR)</label>
           <Input
-            placeholder="Introduce número de guía o guía única y presiona Enter"
+            placeholder="Escanea guia de ingreso (AIR)"
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onPressEnter={onEnter}
@@ -125,12 +114,12 @@ export const ImpresionInstrucciones: React.FC = () => {
             ))}
           </div>
 
-          {/* No inyectar HTML devuelto directamente en el DOM (evita que rompa estilos de la app) */}
-          <div ref={hiddenDivRef} style={{ display: 'none' }} />
+          {/* hidden div removed to avoid injecting API HTML into DOM */}
         </div>
       </Card>
     </div>
   );
 };
 
-export default ImpresionInstrucciones;
+export default ImpInstruccionesTdi;
+export { ImpInstruccionesTdi };

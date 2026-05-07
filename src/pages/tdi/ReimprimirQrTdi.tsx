@@ -1,14 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Card, Input, Alert } from 'antd';
 import type { InputRef } from 'antd';
 import apiClient from '@/api/axios';
 
-export const ImpresionInstrucciones: React.FC = () => {
-  const [value, setValue] = useState('');
+const ReimprimirQrTdi: React.FC = () => {
   const inputRef = useRef<InputRef | null>(null);
+  const [value, setValue] = useState('');
   const [messages, setMessages] = useState<Array<{ type: string; text: string }>>([]);
-  const [htmlContent, setHtmlContent] = useState<string>('');
-  const hiddenDivRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    inputRef.current?.focus();
+
+    const handleMouseDown = () => setTimeout(() => inputRef.current?.focus(), 0);
+    document.addEventListener('mousedown', handleMouseDown);
+    return () => document.removeEventListener('mousedown', handleMouseDown);
+  }, []);
 
   const onEnter = () => {
     const guide = value?.trim();
@@ -19,10 +25,10 @@ export const ImpresionInstrucciones: React.FC = () => {
 
     setMessages([]);
     apiClient
-      .get(`/cedis/imprimir-instrucciones/dhl/${encodeURIComponent(guide)}`)
+      .get(`/cedis/reimprimir-qr/${encodeURIComponent(guide)}`)
       .then((res) => {
         const payload = res.data || {};
-        const isSuccess = payload.success === true || payload.status === 'success' || payload.estatus === 'success' || payload.status === 'ok';
+        const isSuccess = payload.status === 'success' || payload.success === true || payload.estatus === 'success';
 
         const msgs: Array<{ type: string; text: string }> = [];
         if (payload.message) msgs.push({ type: isSuccess ? 'success' : 'error', text: String(payload.message) });
@@ -34,15 +40,11 @@ export const ImpresionInstrucciones: React.FC = () => {
           return;
         }
 
-        // Si success, la API devuelve HTML en message
-        const html = String(payload.message || payload.html || payload.data || '');
-        setHtmlContent(html);
-        setMessages([{ type: 'success', text: 'Instrucción lista para imprimir' }]);
-        // Limpiar input y devolver foco
+        const html = String(payload.data || payload.html || payload.message || '');
+        setMessages([{ type: 'success', text: 'QR listo para imprimir' }]);
         setValue('');
         inputRef.current?.focus();
 
-        // Imprimir usando un iframe oculto en la misma página (no abrir nueva pestaña)
         try {
           const iframe = document.createElement('iframe');
           iframe.style.position = 'absolute';
@@ -56,29 +58,20 @@ export const ImpresionInstrucciones: React.FC = () => {
           const idoc = iframe.contentDocument || iframe.contentWindow?.document;
           if (idoc) {
             idoc.open();
-            idoc.write(`<!doctype html><html><head><meta charset="utf-8"><title>Impresión</title></head><body>${html}</body></html>`);
+            idoc.write(`<!doctype html><html><head><meta charset="utf-8"><title>Reimprimir QR</title></head><body>${html}</body></html>`);
             idoc.close();
           }
 
-          // Dar un pequeño tiempo para garantizar renderizado, luego imprimir desde el iframe
           setTimeout(() => {
-            try {
-              iframe.contentWindow?.focus();
-              iframe.contentWindow?.print();
-            } catch (e) {
-              console.error('Error al imprimir desde iframe', e);
-            }
-            // Remover iframe después de un retraso
-            setTimeout(() => {
-              try { document.body.removeChild(iframe); } catch (e) { /* ignore */ }
-            }, 500);
+            try { iframe.contentWindow?.focus(); iframe.contentWindow?.print(); } catch (e) { console.error('Error al imprimir desde iframe', e); }
+            setTimeout(() => { try { document.body.removeChild(iframe); } catch (e) { /* ignore */ } }, 500);
           }, 500);
         } catch (e) {
-          console.error('No se pudo crear iframe para impresión, abriendo en nueva ventana como fallback', e);
+          console.error('Fallback: abrir en nueva ventana', e);
           const printWindow = window.open('', '_blank');
           if (printWindow) {
             printWindow.document.open();
-            printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Impresión</title></head><body>${html}</body></html>`);
+            printWindow.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Reimprimir QR</title></head><body>${html}</body></html>`);
             printWindow.document.close();
             printWindow.onload = () => { printWindow.focus(); printWindow.print(); };
           }
@@ -90,27 +83,13 @@ export const ImpresionInstrucciones: React.FC = () => {
       });
   };
 
-  useEffect(() => {
-    // Enfocar al montar
-    inputRef.current?.focus();
-
-    // Re-enfocar tras cualquier click en la página (para mantener foco en esta sección)
-    const handleMouseDown = () => {
-      // Pequeño timeout para dejar que el click original se procese
-      setTimeout(() => inputRef.current?.focus(), 0);
-    };
-
-    document.addEventListener('mousedown', handleMouseDown);
-    return () => document.removeEventListener('mousedown', handleMouseDown);
-  }, []);
-
   return (
     <div style={{ padding: 16 }}>
-      <Card title="DHL - Impresion de instrucciones">
+      <Card title="Reimprimir QR guia AIR">
         <div style={{ paddingTop: 12 }}>
-          <div style={{ textAlign: 'center', fontWeight: 600, marginBottom: 8 }}>Capturar Guia Unica</div>
+          <label style={{ display: 'block', textAlign: 'center', marginBottom: 8, fontWeight: 600 }}>Ingresa el numero de guia</label>
           <Input
-            placeholder="Introduce número de guía o guía única y presiona Enter"
+            placeholder="Ingresa el numero de guia"
             value={value}
             onChange={(e) => setValue(e.target.value)}
             onPressEnter={onEnter}
@@ -125,12 +104,12 @@ export const ImpresionInstrucciones: React.FC = () => {
             ))}
           </div>
 
-          {/* No inyectar HTML devuelto directamente en el DOM (evita que rompa estilos de la app) */}
-          <div ref={hiddenDivRef} style={{ display: 'none' }} />
+          {/* hiddenDiv removed to avoid injecting API HTML into DOM */}
         </div>
       </Card>
     </div>
   );
 };
 
-export default ImpresionInstrucciones;
+export default ReimprimirQrTdi;
+export { ReimprimirQrTdi };
