@@ -522,6 +522,58 @@ export const MainLayout = () => {
     },
   ];
 
+  // Menú para CEDIS CDMX
+  const cedisCdmxMenuItems = [
+    {
+      key: '/dashboard',
+      icon: <HomeOutlined />,
+      label: 'Home',
+    },
+    {
+      key: 'cdmx-maritimo',
+      icon: <ContainerOutlined />,
+      label: 'Maritimo',
+      children: [
+        { key: '/cdmx/maritimo/historial-bl', label: 'Historial BL recibidos' },
+        { key: '/cdmx/maritimo/imp-instrucciones', label: 'Imp. Instrucciones' },
+        { key: '/cdmx/maritimo/ingresar-logs', label: 'Ingresar LOGs' },
+        { key: '/cdmx/maritimo/recibir-bl', label: 'Recibir BL' },
+        { key: '/cdmx/maritimo/salida', label: 'Salida' },
+      ],
+    },
+    {
+      key: 'cdmx-dhl',
+      icon: <RocketOutlined />,
+      label: 'DHL',
+      children: [
+        { key: '/cedis/dhl/imp-instrucciones', label: 'Imp. Instrucciones' },
+        { key: '/cedis/dhl/recepcion', label: 'Recepcion' },
+        { key: '/cedis/dhl/salida', label: 'Salida' },
+      ],
+    },
+    {
+      key: '/cedis/salidas',
+      icon: <SwapOutlined />,
+      label: 'Salidas',
+    },
+    {
+      key: '/cedis/solicitud-documentos',
+      icon: <FileTextOutlined />,
+      label: 'Solicitud de documentos',
+    },
+    {
+      key: 'cdmx-tdi',
+      icon: <CloudUploadOutlined />,
+      label: 'TDI',
+      children: [
+        { key: '/cedis/tdi/imp-instrucciones', label: 'Imp. Instrucciones' },
+        { key: '/cedis/tdi/recepcion', label: 'Recepcion' },
+        { key: '/cedis/tdi/reimprimir-qr', label: 'Reimprimir QR' },
+        { key: '/cedis/tdi/salida', label: 'Salida' },
+      ],
+    },
+  ];
+
   // Menú para CEDIS MONTERREY
   const cedisMonterreyMenuItems = [
     {
@@ -591,6 +643,10 @@ export const MainLayout = () => {
 
   // Seleccionar menú según el rol
   const menuItems = useMemo(() => {
+    // CEDIS CDMX debe ser evaluado antes de los genéricos
+    if (hasRole(['CEDIS CDMX'])) {
+      return cedisCdmxMenuItems;
+    }
     // CEDIS MONTERREY debe ser evaluado antes de los genéricos
     if (hasRole(['CEDIS MONTERREY'])) {
       return cedisMonterreyMenuItems;

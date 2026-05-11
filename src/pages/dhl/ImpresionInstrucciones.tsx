@@ -7,7 +7,6 @@ export const ImpresionInstrucciones: React.FC = () => {
   const [value, setValue] = useState('');
   const inputRef = useRef<InputRef | null>(null);
   const [messages, setMessages] = useState<Array<{ type: string; text: string }>>([]);
-  const [htmlContent, setHtmlContent] = useState<string>('');
   const hiddenDivRef = useRef<HTMLDivElement | null>(null);
 
   const onEnter = () => {
@@ -36,7 +35,6 @@ export const ImpresionInstrucciones: React.FC = () => {
 
         // Si success, la API devuelve HTML en message
         const html = String(payload.message || payload.html || payload.data || '');
-        setHtmlContent(html);
         setMessages([{ type: 'success', text: 'Instrucción lista para imprimir' }]);
         // Limpiar input y devolver foco
         setValue('');

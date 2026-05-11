@@ -58,6 +58,7 @@ import SalidaUsa from '@/pages/usa/SalidaUsa';
 import IngresosDiariosTdi from '@/pages/tdi-dhl/IngresosDiariosTdi';
 import IngresarGuiasInventario from '@/pages/tdi-dhl/IngresarGuiasInventario';
 import InventarioTdi from '@/pages/tdi-dhl/InventarioTdi';
+import IngresarGuiasTdi from '@/pages/tdi-dhl/IngresarGuiasTdi';
 import Recepcion from '@/pages/dhl/Recepcion';
 import Salida from '@/pages/dhl/Salida';
 import BusquedaImpuesto from '@/pages/dhl/BusquedaImpuesto';
@@ -450,6 +451,14 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY']}>
                 <InventarioTdi />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tdi/ingresar-guias"
+            element={
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY']}>
+                <IngresarGuiasTdi />
               </ProtectedRoute>
             }
           />
@@ -958,7 +967,7 @@ export const AppRouter = () => {
           <Route
             path="/cedis/dhl/imp-instrucciones"
             element={
-              <ProtectedRoute roles={['CEDIS MONTERREY']}>
+              <ProtectedRoute roles={['CEDIS MONTERREY', 'CEDIS CDMX']}>
                 <ImpresionInstrucciones />
               </ProtectedRoute>
             }
@@ -966,7 +975,7 @@ export const AppRouter = () => {
           <Route
             path="/cedis/tdi/imp-instrucciones"
             element={
-              <ProtectedRoute roles={['CEDIS MONTERREY']}>
+              <ProtectedRoute roles={['CEDIS MONTERREY', 'CEDIS CDMX']}>
                 <ImpInstruccionesTdi />
               </ProtectedRoute>
             }
@@ -974,7 +983,7 @@ export const AppRouter = () => {
           <Route
             path="/cedis/tdi/recepcion"
             element={
-              <ProtectedRoute roles={['CEDIS MONTERREY']}>
+              <ProtectedRoute roles={['CEDIS MONTERREY', 'CEDIS CDMX']}>
                 <RecepcionTdi />
               </ProtectedRoute>
             }
@@ -982,7 +991,7 @@ export const AppRouter = () => {
           <Route
             path="/cedis/tdi/reimprimir-qr"
             element={
-              <ProtectedRoute roles={['CEDIS MONTERREY']}>
+              <ProtectedRoute roles={['CEDIS MONTERREY', 'CEDIS CDMX']}>
                 <ReimprimirQrTdi />
               </ProtectedRoute>
             }
@@ -990,7 +999,7 @@ export const AppRouter = () => {
           <Route
             path="/cedis/tdi/salida"
             element={
-              <ProtectedRoute roles={['CEDIS MONTERREY']}>
+              <ProtectedRoute roles={['CEDIS MONTERREY', 'CEDIS CDMX']}>
                 <SalidaTdi />
               </ProtectedRoute>
             }
@@ -998,7 +1007,7 @@ export const AppRouter = () => {
           <Route
             path="/cedis/dhl/recepcion"
             element={
-              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY']}>
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY', 'CEDIS CDMX']}>
                 <Recepcion />
               </ProtectedRoute>
             }
@@ -1022,7 +1031,7 @@ export const AppRouter = () => {
           <Route
             path="/cedis/dhl/salida"
             element={
-              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY']}>
+              <ProtectedRoute roles={['SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN', 'CEDIS MONTERREY', 'CEDIS CDMX']}>
                 <Salida />
               </ProtectedRoute>
             }
@@ -1030,7 +1039,7 @@ export const AppRouter = () => {
           <Route
             path="/cedis/salidas"
             element={
-              <ProtectedRoute roles={['CEDIS MONTERREY']}>
+              <ProtectedRoute roles={['CEDIS MONTERREY', 'CEDIS CDMX']}>
                 <Salidas />
               </ProtectedRoute>
             }
@@ -1038,7 +1047,7 @@ export const AppRouter = () => {
           <Route
             path="/cedis/solicitud-documentos"
             element={
-              <ProtectedRoute roles={['CEDIS MONTERREY']}>
+              <ProtectedRoute roles={['CEDIS MONTERREY', 'CEDIS CDMX']}>
                 <SolicitudDocumentos />
               </ProtectedRoute>
             }
