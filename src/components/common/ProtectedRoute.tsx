@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 
@@ -15,6 +16,19 @@ export const ProtectedRoute = ({
   redirectTo = '/login' 
 }: ProtectedRouteProps) => {
   const { isAuthenticated, hasRole, hasPermission } = useAuthStore();
+  // Inicializar con el valor actual (ya hidratado si la navegación es interna)
+  const [hydrated, setHydrated] = useState(() => useAuthStore.persist.hasHydrated());
+
+  useEffect(() => {
+    // Si aún no hidratô (recarga de página), esperar el evento
+    if (!hydrated) {
+      const unsub = useAuthStore.persist.onFinishHydration(() => setHydrated(true));
+      return unsub;
+    }
+  }, [hydrated]);
+
+  // Pantalla en blanco mientras Zustand lee localStorage
+  if (!hydrated) return null;
 
   // Verificar autenticación
   if (!isAuthenticated) {

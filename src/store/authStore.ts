@@ -1,6 +1,17 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+// Verifica si un JWT no ha expirado
+const isJwtValid = (token: string): boolean => {
+  try {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(base64));
+    return payload.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+};
+
 interface User {
   id: number;
   name: string;
@@ -225,6 +236,7 @@ interface AuthState {
   login: (user: User) => void;
   logout: () => void;
   setUser: (user: User) => void;
+  checkAuth: () => boolean;
   hasRole: (roles: string[]) => boolean;
   hasPermission: (permission: string) => boolean;
   getUserRole: () => string | null;
@@ -236,11 +248,29 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
       
-      login: (user) => set({ user, isAuthenticated: true }),
+      login: (user) => {
+        localStorage.setItem('token', user.token);
+        set({ user, isAuthenticated: true });
+      },
       
       logout: () => {
-        set({ user: null, isAuthenticated: false });
         localStorage.removeItem('token');
+        set({ user: null, isAuthenticated: false });
+      },
+
+      // Verifica la validez del JWT actual; hace logout si expiró
+      checkAuth: () => {
+        const state = get();
+        if (!state.user?.token) {
+          set({ user: null, isAuthenticated: false });
+          return false;
+        }
+        if (!isJwtValid(state.user.token)) {
+          localStorage.removeItem('token');
+          set({ user: null, isAuthenticated: false });
+          return false;
+        }
+        return true;
       },
       
       setUser: (user) => set({ user }),
@@ -272,6 +302,16 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
+      onRehydrateStorage: () => (state) => {
+        if (!state?.user?.token) return;
+        if (!isJwtValid(state.user.token)) {
+          localStorage.removeItem('token');
+          state.user = null;
+          state.isAuthenticated = false;
+        } else {
+          localStorage.setItem('token', state.user.token);
+        }
+      },
     }
   )
 );

@@ -18,6 +18,16 @@ interface LoginResponse {
   };
 }
 
+// Decodifica el payload del JWT sin validar la firma (solo para leer el exp)
+const decodeJwtPayload = (token: string): Record<string, any> | null => {
+  try {
+    const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
+    return JSON.parse(atob(base64));
+  } catch {
+    return null;
+  }
+};
+
 export const authService = {
   /**
    * Autenticar usuario
@@ -31,7 +41,38 @@ export const authService = {
    * Cerrar sesión
    */
   logout: async (): Promise<void> => {
-    await apiClient.post('/logout');
+    try {
+      await apiClient.post('/logout');
+    } finally {
+      localStorage.removeItem('token');
+    }
+  },
+
+  /**
+   * Obtiene el JWT almacenado
+   */
+  getToken: (): string | null => {
+    return localStorage.getItem('token');
+  },
+
+  /**
+   * Verifica si el JWT almacenado es válido y no ha expirado
+   */
+  isAuthenticated: (): boolean => {
+    const token = localStorage.getItem('token');
+    if (!token) return false;
+    const payload = decodeJwtPayload(token);
+    if (!payload) return false;
+    return payload.exp * 1000 > Date.now();
+  },
+
+  /**
+   * Retorna el payload decodificado del JWT actual
+   */
+  getTokenPayload: (): Record<string, any> | null => {
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+    return decodeJwtPayload(token);
   },
 
   /**

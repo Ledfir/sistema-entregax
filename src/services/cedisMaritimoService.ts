@@ -31,6 +31,25 @@ export const cedisMaritimoService = {
     return response.data;
   },
 
+  // Obtener BLs pendientes por recibir en CEDIS
+  getBlsPorRecibir: async (): Promise<any> => {
+    const url = '/cedis/maritimo/bls-por-recibir';
+    const response = await apiClient.get(url);
+    return response.data;
+  },
+
+  // Registrar salida de LOG marítimo
+  salidaLog: async (token: string, guiaunica: string): Promise<any> => {
+    const response = await apiClient.post('/cedis/salida', { tipo: 'maritimo', token, guiaunica });
+    return response.data;
+  },
+
+  // Recibir BL marítimo en CEDIS
+  recibirBlMaritimo: async (id: string | number, cedis: string, resp: string): Promise<any> => {
+    const response = await apiClient.post('/cedis/maritimo/recepcion-bl', { id, cedis, resp });
+    return response.data;
+  },
+
   // Registrar recepción de LOG marítimo
   postRecepcion: async (token: string, guiaunica: string): Promise<any> => {
     const response = await apiClient.post('/cedis/recepcion', {

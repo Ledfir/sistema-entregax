@@ -64,7 +64,7 @@ import Salida from '@/pages/dhl/Salida';
 import BusquedaImpuesto from '@/pages/dhl/BusquedaImpuesto';
 import Salidas from '@/pages/cedis/Salidas';
 import SolicitudDocumentos from '@/pages/cedis/SolicitudDocumentos';
-import { HistorialBlRecibidos, ImprimirInstrucciones, IngresarLogs } from '@/pages/cedis-maritimo';
+import { HistorialBlRecibidos, ImprimirInstrucciones, IngresarLogs, RecibirBL, SalidaMaritimo } from '@/pages/cedis-maritimo';
 
 export const AppRouter = () => {
   return (
@@ -1076,6 +1076,22 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['CEDIS CDMX']}>
                 <IngresarLogs />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cdmx/maritimo/recibir-bl"
+            element={
+              <ProtectedRoute roles={['CEDIS CDMX']}>
+                <RecibirBL />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/cdmx/maritimo/salida"
+            element={
+              <ProtectedRoute roles={['CEDIS CDMX']}>
+                <SalidaMaritimo />
               </ProtectedRoute>
             }
           />
