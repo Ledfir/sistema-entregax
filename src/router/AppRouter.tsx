@@ -119,7 +119,7 @@ export const AppRouter = () => {
           <Route 
             path="/clientes/lista" 
             element={
-              <ProtectedRoute roles={['SISTEMAS', 'ADMINISTRACIÓN', 'ASESOR', 'TEAM LEADER', 'ATENCION A CLIENTES', 'SERVICIO AL CLIENTE']} permission="clients.view">
+              <ProtectedRoute roles={['SISTEMAS', 'ADMINISTRACIÓN', 'ASESOR', 'TEAM LEADER', 'ATENCION A CLIENTES', 'SERVICIO AL CLIENTE', 'FACTURACION']} permission="clients.view">
                 <ClientesLista />
               </ProtectedRoute>
             } 

@@ -576,6 +576,80 @@ export const MainLayout = () => {
     },
   ];
 
+  // Menú para FACTURACIÓN
+  const facturacionMenuItems = [
+    {
+      key: '/dashboard',
+      icon: <HomeOutlined />,
+      label: 'Home',
+    },
+    {
+      key: '/clientes/lista',
+      icon: <UserOutlined />,
+      label: 'Clientes',
+    },
+    {
+      key: 'facturacion-dolares',
+      icon: <DollarOutlined />,
+      label: 'Envío de dólares',
+      children: [
+        { key: '/dolares/cuentas-proveedores', label: 'Cuentas de proveedores' },
+        { key: '/dolares/listado-envios', label: 'Listado de envíos' },
+        { key: '/dolares/solicitudes-envios', label: 'Solicitudes de envíos' },
+        { key: '/dolares/tipo-cambio', label: 'Tipo de cambio' },
+        { key: '/dolares/catalogo-claves-sat', label: 'Catálogo de CLAVES SAT' },
+      ],
+    },
+    {
+      key: 'facturacion-facturas',
+      icon: <FileTextOutlined />,
+      label: 'Facturas',
+      children: [
+        { key: '/facturas/pagos-facturados', label: 'Pagos facturados' },
+        { key: '/facturas/pendientes', label: 'Pendientes' },
+      ],
+    },
+    {
+      key: '/facturacion/control-gastos',
+      icon: <CalculatorOutlined />,
+      label: 'Control de gastos',
+    },
+    {
+      key: 'facturacion-rmbs',
+      icon: <PayCircleOutlined />,
+      label: 'RMB',
+      children: [
+        { key: '/rmbs/cuentas-proveedores', label: 'Cuentas de proveedores' },
+        { key: '/rmbs/listado-envios', label: 'Listado de envíos' },
+        { key: '/rmbs/solicitudes-revision', label: 'Solicitudes en revisión' },
+        { key: '/rmbs/tipo-cambio', label: 'Tipo de cambio' },
+      ],
+    },
+    {
+      key: 'facturacion-tdi-dhl',
+      icon: <CloudUploadOutlined />,
+      label: 'TDI - DHL',
+      children: [
+        { key: '/tdi/ingresos-diarios', label: 'Ingresos diarios' },
+        { key: '/tdi/ingresar-guias-inventario', label: 'Ingresar guías a inventario' },
+        { key: '/tdi/inventario', label: 'Inventario' },
+        { key: '/tdi/ingresar-guias', label: 'Ingresar guías' },
+        { key: '/tdi/imp-instrucciones', label: 'Imp. Instrucciones' },
+        { key: '/tdi/salida', label: 'Salida' },
+      ],
+    },
+    {
+      key: 'facturacion-usdts',
+      icon: <SwapOutlined />,
+      label: 'Envío de USDT',
+      children: [
+        { key: '/usdts/listado-envios', label: 'Listado de envíos' },
+        { key: '/usdts/solicitudes-revision', label: 'Solicitudes en revisión' },
+        { key: '/usdts/tipo-cambio', label: 'Tipo de cambio' },
+      ],
+    },
+  ];
+
   // Menú para CEDIS GUADALAJARA
   const cedisGuadalajaraMenuItems = [
     {
@@ -766,6 +840,10 @@ export const MainLayout = () => {
     // CEDIS USA debe ser evaluado antes de los genéricos
     if (hasRole(['CEDIS USA'])) {
       return cedisUsaMenuItems;
+    }
+    // FACTURACIÓN debe ser evaluado antes de los genéricos
+    if (hasRole(['FACTURACIÓN', 'FACTURACION'])) {
+      return facturacionMenuItems;
     }
     if (hasRole(['ADMIN'])) {
       return adminMenuItems;
