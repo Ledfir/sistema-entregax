@@ -27,7 +27,8 @@ import { UsaRemp } from '@/pages/operaciones/UsaRemp';
 import { NBox } from '@/pages/operaciones/NBox';
 import { NBoxMaritimo } from '@/pages/operaciones/NBoxMaritimo';
 import { Instrucciones, GuiasArchivadas, PendientesCotizar, MisCotizaciones, CotizacionesMaritimas, CotizacionesTdiUsa } from '@/pages/cotizaciones';
-import { EnvioConFactura, CatalogoServicios, MisEnvios, EnviosArchivados } from '@/pages/dolares';
+import { EnvioConFactura, CatalogoServicios, MisEnvios, EnviosArchivados, CatalogoClavesSat } from '@/pages/dolares';
+import CuentasProveedores from '@/pages/dolares/CuentasProveedores';
 import { GenerarPin, ObservarResultados } from '@/pages/examen';
 import { ReporteComisiones } from '@/pages/comisiones';
 import { Cotizaciones, PanelPLInstrucciones, ClientesMaritima, ConsignatariosMaritima, CotizacionesMaritimasList, NavierasPuertos, PCTLList, PLsPendientes, SubirNuevoWeek, DHLValidar, ValidarManifiesto } from '@/pages/maritimos';
@@ -591,6 +592,22 @@ export const AppRouter = () => {
             element={
               <ProtectedRoute roles={['ASESOR', 'SERVICIO AL CLIENTE', 'SISTEMAS', 'ADMIN']}>
                 <EnviosArchivados />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dolares/cuentas-proveedores"
+            element={
+              <ProtectedRoute roles={['FACTURACIÓN', 'FACTURACION', 'SISTEMAS', 'ADMIN']}>
+                <CuentasProveedores />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dolares/catalogo-claves-sat"
+            element={
+              <ProtectedRoute roles={['FACTURACIÓN', 'FACTURACION', 'SISTEMAS', 'ADMIN']}>
+                <CatalogoClavesSat />
               </ProtectedRoute>
             }
           />

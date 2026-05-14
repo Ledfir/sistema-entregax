@@ -630,12 +630,11 @@ export const MainLayout = () => {
       icon: <CloudUploadOutlined />,
       label: 'TDI - DHL',
       children: [
-        { key: '/tdi/ingresos-diarios', label: 'Ingresos diarios' },
-        { key: '/tdi/ingresar-guias-inventario', label: 'Ingresar guías a inventario' },
-        { key: '/tdi/inventario', label: 'Inventario' },
-        { key: '/tdi/ingresar-guias', label: 'Ingresar guías' },
-        { key: '/tdi/imp-instrucciones', label: 'Imp. Instrucciones' },
-        { key: '/tdi/salida', label: 'Salida' },
+        { key: '/tdi-dhl/reporte', label: 'Reporte' },
+        { key: '/tdi-dhl/cargar-archivo', label: 'Cargar archivo' },
+        { key: '/tdi-dhl/enlazar-guias', label: 'Enlazar guias' },
+        { key: '/tdi-dhl/ingreso-cedis', label: 'Ingreso en CEDIS' },
+        { key: '/tdi-dhl/inventario', label: 'Inventario' },
       ],
     },
     {
