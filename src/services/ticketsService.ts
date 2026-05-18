@@ -17,11 +17,12 @@ export const ticketsService = {
 
   /**
    * Obtiene la lista de tickets archivados
+   * NOTA: Endpoint no disponible actualmente
    */
-  getTicketsArchivados: async (): Promise<TicketsResponse> => {
-    const response = await axios.get('/tickets/archivados');
-    return response.data;
-  },
+  // getTicketsArchivados: async (): Promise<TicketsResponse> => {
+  //   const response = await axios.get('/tickets/archivados');
+  //   return response.data;
+  // },
 
   /**
    * Finaliza un ticket
@@ -74,6 +75,25 @@ export const ticketsService = {
    */
   archiveTicket: async (token: string) => {
     const response = await axios.post('/tickets/archive', { token });
+    return response.data;
+  },
+
+  /**
+   * Obtiene los totales de tickets para estadísticas
+   */
+  getTicketsTotales: async () => {
+    const response = await axios.get('/tickets/totales');
+    return response.data;
+  },
+
+  /**
+   * Obtiene el reporte de tickets filtrado por rango de fechas
+   */
+  getReportTickets: async (fechaInicio: string, fechaFin: string) => {
+    const response = await axios.post('/tickets/report-ticket', {
+      fecha_inicio: fechaInicio,
+      fecha_fin: fechaFin,
+    });
     return response.data;
   },
 };

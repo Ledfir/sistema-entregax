@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Table, Tag, Button, Badge, Input, Modal, Timeline } from 'antd';
+import { Card, Table, Tag, Button, Badge, Input, Modal, Timeline, Tooltip } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { CheckOutlined, SearchOutlined, FileTextOutlined, FileExcelOutlined, FilePdfOutlined, ClockCircleOutlined, UnorderedListOutlined, InboxOutlined } from '@ant-design/icons';
 import ticketsService from '@/services/ticketsService';
@@ -366,6 +366,7 @@ export const TicketsActivos = () => {
       key: 'ticket',
       width: 200,
       align: 'center',
+      fixed: 'left',
       render: (value, record) => {
         const esPoliticaCompensacion = record.informacion?.toLowerCase().includes('compensaci');
         const colorTicket = esPoliticaCompensacion ? '#ff0000' : '#000';
@@ -487,56 +488,59 @@ export const TicketsActivos = () => {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
             <Tag color={color}>{value}</Tag>
             <div style={{ display: 'flex', gap: '6px' }}>
-              <Button
-                icon={<ClockCircleOutlined />}
-                size="small"
-                onClick={() => {
-                  setTicketSeleccionado(record);
-                  setTimelineModalVisible(true);
-                }}
-                title="Ver timeline"
-                style={{ 
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  boxShadow: '0 2px 4px rgba(102, 126, 234, 0.4)',
-                  transition: 'all 0.3s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(102, 126, 234, 0.6)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(102, 126, 234, 0.4)';
-                }}
-              />
-              <Button
-                icon={<UnorderedListOutlined />}
-                size="small"
-                onClick={() => {
-                  setTicketSeleccionado(record);
-                  setSubestadosModalVisible(true);
-                }}
-                title="Ver subestados"
-                style={{ 
-                  background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  boxShadow: '0 2px 4px rgba(240, 147, 251, 0.4)',
-                  transition: 'all 0.3s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(240, 147, 251, 0.6)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(240, 147, 251, 0.4)';
-                }}
-              />
+              <Tooltip title="Ver timeline">
+                <Button
+                  icon={<ClockCircleOutlined />}
+                  size="small"
+                  onClick={() => {
+                    setTicketSeleccionado(record);
+                    setTimelineModalVisible(true);
+                  }}
+                  style={{ 
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    boxShadow: '0 2px 4px rgba(102, 126, 234, 0.4)',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(102, 126, 234, 0.6)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(102, 126, 234, 0.4)';
+                  }}
+                />
+              </Tooltip>
+
+              <Tooltip title="Ver subestados">
+                <Button
+                  icon={<UnorderedListOutlined />}
+                  size="small"
+                  onClick={() => {
+                    setTicketSeleccionado(record);
+                    setSubestadosModalVisible(true);
+                  }}
+                  style={{ 
+                    background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    boxShadow: '0 2px 4px rgba(240, 147, 251, 0.4)',
+                    transition: 'all 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(240, 147, 251, 0.6)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(240, 147, 251, 0.4)';
+                  }}
+                />
+              </Tooltip>
             </div>
           </div>
         );
@@ -556,22 +560,25 @@ export const TicketsActivos = () => {
       align: 'center',
       render: (_, record) => (
         <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-          <Button
-            type="primary"
-            icon={<CheckOutlined />}
-            onClick={() => handleFinalizar(record)}
-            size="small"
-            style={{ background: '#52c41a', borderColor: '#52c41a' }}
-            title="Finalizar ticket"
-          />
-          <Button
-            type="default"
-            icon={<InboxOutlined />}
-            onClick={() => handleArchive(record)}
-            size="small"
-            style={{ background: '#f0ad4e', borderColor: '#f0ad4e', color: '#fff' }}
-            title="Archivar ticket"
-          />
+          <Tooltip title="Finalizar ticket">
+            <Button
+              type="primary"
+              icon={<CheckOutlined />}
+              onClick={() => handleFinalizar(record)}
+              size="small"
+              style={{ background: '#52c41a', borderColor: '#52c41a' }}
+            />
+          </Tooltip>
+
+          <Tooltip title="Archivar ticket">
+            <Button
+              type="default"
+              icon={<InboxOutlined />}
+              onClick={() => handleArchive(record)}
+              size="small"
+              style={{ background: '#f0ad4e', borderColor: '#f0ad4e', color: '#fff' }}
+            />
+          </Tooltip>
         </div>
       ),
     },
