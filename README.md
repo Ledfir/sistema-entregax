@@ -101,6 +101,9 @@ EntregaX es una plataforma completa que permite gestionar todos los aspectos de 
 - Solicitud de envío con factura
 - Catálogo de servicios disponibles
 - Mis envíos (activos y archivados)
+- **Cuentas de Proveedores** (`/dolares/cuentas-proveedores`): gestión de cuentas de proveedores para módulo dólares (acceso FACTURACIÓN)
+- **Catálogo de Claves SAT** (`/dolares/catalogo-claves-sat`): catálogo de claves SAT para facturación (acceso FACTURACIÓN)
+- **Tipo de Cambio** (`/dolares/tipo-cambio`): consulta y configuración del tipo de cambio (acceso FACTURACIÓN)
 
 ### 💳 Monedero
 - **Historial**: registro de movimientos del monedero del usuario
@@ -125,6 +128,7 @@ EntregaX es una plataforma completa que permite gestionar todos los aspectos de 
 
 ### 🎮 Juego
 - Juego Snake integrado en la plataforma
+- Accesible desde dos rutas: `/juego` (vista principal) y `/snake` (acceso directo al juego)
 
 ### ⚙️ Configuración del Sistema
 - **Cuentas**: gestión de cuentas bancarias
@@ -145,6 +149,8 @@ EntregaX es una plataforma completa que permite gestionar todos los aspectos de 
 - Subir nuevo week
 - Validar manifiesto
 - Validar DHL y TDI-DHL
+- **Control de Gastos** (`/maritima/control-gastos`): control y seguimiento de gastos de operación marítima
+- **TDI-DHL Marítimo** (`/maritima/tdi-dhl`): integración TDI-DHL en operación marítima
 
 ### 📦 BLS (Marítimo)
 - Agregar usuario marítimo
@@ -163,7 +169,7 @@ EntregaX es una plataforma completa que permite gestionar todos los aspectos de 
 - Reporte US
 - Reporte de gastos semanales (GastosWeek)
 
-### 🏭 CEDIS Monterrey
+### 🏭 CEDIS Monterrey / CDMX / Guadalajara
 - **Salidas Diarias**: gestión de salidas por tipo (Marítimo, USA, DHL, TDI GDL/CDMX/MTY/DHL)
   - Tabla de registros pendientes con clave cliente, cajas, fecha humanizada y responsable
   - Botón `Dar Salida` con confirmación modal
@@ -173,10 +179,49 @@ EntregaX es una plataforma completa que permite gestionar todos los aspectos de 
   - Textarea para especificar la solicitud
   - Envío al endpoint `/cedis/solicitud-documentos`
 - **DHL Ingresos Diarios**: registro de ingresos DHL del día
-- **Impresión de Instrucciones**: impresión de instrucciones para paquetes
-- **Recepción**: módulo de recepción de paquetes
+- **Impresión de Instrucciones DHL**: impresión de instrucciones para paquetes DHL
+- **Recepción DHL**: módulo de recepción de paquetes DHL
 - **Búsqueda de Impuesto**: búsqueda de impuesto por guía
 - **Salida DHL**: registro de salida DHL
+
+### 📦 CEDIS TDI
+- **Impresión de Instrucciones TDI** (`/cedis/tdi/imp-instrucciones`): impresión de instrucciones para paquetes TDI
+- **Recepción TDI** (`/cedis/tdi/recepcion`): recepción de paquetes TDI en CEDIS
+- **Reimprimir QR TDI** (`/cedis/tdi/reimprimir-qr`): reimpresión de código QR para paquetes TDI
+- **Salida TDI** (`/cedis/tdi/salida`): registro de salida de paquetes TDI
+- Acceso para roles: **CEDIS MONTERREY**, **CEDIS CDMX**, **CEDIS GUADALAJARA**
+
+### 📬 TDI-DHL (Gestión de Inventario)
+- **Ingresos Diarios TDI** (`/tdi/ingresos-diarios`): registro de ingresos diarios TDI-DHL
+- **Ingresar Guías al Inventario** (`/tdi/ingresar-guias-inventario`): alta de guías en inventario TDI
+- **Inventario TDI** (`/tdi/inventario`): consulta y gestión del inventario TDI-DHL
+- **Ingresar Guías TDI** (`/tdi/ingresar-guias`): ingreso de guías TDI al sistema
+- Acceso para roles: **SERVICIO AL CLIENTE**, **SISTEMAS**, **ADMIN**, **CEDIS MONTERREY**
+
+### 🇺🇸 CEDIS USA
+- **Ingreso** (`/usa/ingreso`): registro de ingreso de paquetes en CEDIS USA
+- **Salida** (`/usa/salida`): registro de salida de paquetes desde CEDIS USA
+- **Tarima** (`/usa/tarima`): gestión de tarimas de paquetes
+- **Cancelar** (`/usa/cancelar`): cancelación de registros en CEDIS USA
+- **Reporte** (`/usa/reporte`): reporte de operaciones CEDIS USA
+- **Reimprimir** (`/usa/reimprimir`): reimpresión de etiquetas y documentos
+- **Reempaque** (`/usa/reempaque`): registro de reempaque de paquetes USA
+- Acceso exclusivo para rol: **CEDIS USA** (+ SISTEMAS, ADMIN)
+
+### 🇺🇸 USA Operativo
+- **Ingresos Diarios** (`/usa/ingresos-diarios`): control de ingresos diarios USA
+- **Impresión de Instrucciones** (`/usa/imp-instrucciones`): impresión de instrucciones para paquetes USA
+- **Recepción** (`/usa/recepcion`): recepción de paquetes USA en CEDIS
+- **Salida** (`/usa/salida`): salida de paquetes USA desde CEDIS
+- Acceso para roles: **SERVICIO AL CLIENTE**, **SISTEMAS**, **ADMIN**, **CEDIS MONTERREY**
+
+### ⚓ CEDIS CDMX – Marítimo
+- **Historial BL Recibidos** (`/cdmx/maritimo/historial-bl`): historial de BLs marítimos recibidos en CDMX
+- **Imprimir Instrucciones** (`/cdmx/maritimo/imp-instrucciones`): impresión de instrucciones para paquetes marítimos
+- **Ingresar Logs** (`/cdmx/maritimo/ingresar-logs`): ingreso de logs de operaciones marítimas
+- **Recibir BL** (`/cdmx/maritimo/recibir-bl`): recepción de Bill of Lading en CDMX
+- **Salida Marítimo** (`/cdmx/maritimo/salida`): registro de salida de carga marítima
+- Acceso para roles: **CEDIS CDMX**, **CEDIS GUADALAJARA**
 
 ## 🛠️ Stack Tecnológico
 
@@ -221,27 +266,50 @@ src/
 │   ├── auth/         # Login, Unauthorized
 │   ├── bls/          # AgregarUsuarioMaritimo, BlsCargados
 │   ├── cargosextra/  # Lista, historial y pendientes de cargos extra
-│   ├── cedis/        # Módulos CEDIS Monterrey
+│   ├── cedis/        # Módulos CEDIS Monterrey/CDMX/GDL
 │   │   ├── Salidas.tsx              # Salidas diarias por tipo
 │   │   └── SolicitudDocumentos.tsx  # Solicitud de documentos a clientes
+│   ├── cedis-maritimo/ # CEDIS CDMX – Módulo Marítimo
+│   │   ├── HistorialBlRecibidos.tsx # Historial de BLs marítimos recibidos
+│   │   ├── ImprimirInstrucciones.tsx# Impresión de instrucciones marítimas
+│   │   ├── IngresarLogs.tsx         # Ingreso de logs de operación marítima
+│   │   ├── RecibirBL.tsx            # Recepción de BL en CDMX/GDL
+│   │   └── SalidaMaritimo.tsx       # Salida de carga marítima
+│   ├── cedis-usa/    # CEDIS USA – Operaciones de paquetes USA
+│   │   ├── Ingreso.tsx              # Ingreso de paquetes
+│   │   ├── Salida.tsx               # Salida de paquetes
+│   │   ├── Tarima.tsx               # Gestión de tarimas
+│   │   ├── Cancelar.tsx             # Cancelación de registros
+│   │   ├── Reporte.tsx              # Reportes CEDIS USA
+│   │   ├── Reimprimir.tsx           # Reimpresión de etiquetas
+│   │   └── Reempaque.tsx            # Reempaque de paquetes
 │   ├── clientes/     # CRUD clientes + direcciones de facturación + Mis Clientes
 │   ├── comisiones/   # ReporteComisiones
 │   ├── config/       # Generales, cuentas, bancos, servicios
 │   ├── cotizaciones/ # Mis Cotizaciones, Instrucciones, Guías Archivadas, Pendientes, Marítimas, TDI-USA
 │   ├── dashboard/    # Dashboard general
-│   ├── dhl/          # CedisIngresosDiarios, ImpresionInstrucciones, Recepcion, Salida, BusquedaImpuesto
-│   ├── dolares/      # EnvioConFactura, CatalogoServicios, MisEnvios, EnviosArchivados
+│   ├── dhl/          # Módulos DHL – CEDIS Monterrey/CDMX/GDL
+│   │   ├── CedisIngresosDiarios.tsx # Ingresos diarios DHL
+│   │   ├── ImpresionInstrucciones.tsx # Impresión instrucciones DHL
+│   │   ├── Recepcion.tsx            # Recepción de paquetes DHL
+│   │   ├── Salida.tsx               # Salida DHL
+│   │   └── BusquedaImpuesto.tsx     # Búsqueda de impuesto por guía
+│   ├── dolares/      # EnvioConFactura, CatalogoServicios, MisEnvios, EnviosArchivados,
+│   │                 # CuentasProveedores, CatalogoClavesSat, TipoCambio
 │   ├── encuestas/    # Encuestas pendientes y realizadas
 │   ├── examen/       # GenerarPin, ObservarResultados
 │   ├── ia/           # IAEntregaX
-│   ├── juego/        # Juego Snake
+│   ├── juego/        # Juego.tsx (menú), Snake.tsx (juego)
 │   ├── maritimos/    # Cotizaciones marítimas (ASESOR/SC), PanelPLInstrucciones
 │   ├── monedero/     # Historial, Saldo, SubirPagos
 │   ├── operaciones/  # Módulos de operaciones logísticas
 │   ├── polizas/      # PolizasNuevas, PolizasPagadas, GenerarPoliza, MisPolizas
 │   ├── profile/      # Perfil de usuario
 │   ├── rmbs/         # MisEnvios, EnviosArchivados, Con/SinFactura, CatalogoServicios
+│   ├── tdi/          # ImpInstruccionesTdi, RecepcionTdi, ReimprimirQrTdi, SalidaTdi
+│   ├── tdi-dhl/      # IngresosDiariosTdi, IngresarGuiasInventario, InventarioTdi, IngresarGuiasTdi
 │   ├── tickets/      # TicketCreate, TicketsActivos, TicketsArchivados, ReporteEstadistico
+│   ├── usa/          # ImpInstruccionesUsa, IngresosDiarios, RecepcionUsa, SalidaUsa
 │   ├── usdts/        # MisEnvios, EnviosArchivados, Con/SinFactura, CatalogoServicios
 │   └── usuarios/     # CRUD de usuarios
 ├── router/           # AppRouter.tsx — todas las rutas protegidas por rol
@@ -249,6 +317,7 @@ src/
 │   ├── authService.ts
 │   ├── bancosService.ts
 │   ├── cargoExtraService.ts
+│   ├── cedisMaritimoService.ts
 │   ├── clienteService.ts
 │   ├── comisionesService.ts
 │   ├── cotizacionesService.ts
@@ -279,6 +348,10 @@ src/
 | **ATENCION A CLIENTES** | Gestión de clientes, creación de tickets, cargos extra |
 | **OPERACION MARITIMA** | BLs marítimos, cotizaciones marítimas, clientes/consignatarios, navieras, weeks, validar manifiesto |
 | **CEDIS MONTERREY** | Salidas diarias, solicitud de documentos, ingresos DHL, impresión de instrucciones, recepción, búsqueda de impuesto, salida DHL |
+| **CEDIS CDMX** | Módulos DHL/TDI CDMX, marítimo CDMX (recibir BL, historial, salida, ingresar logs, imprimir instrucciones) |
+| **CEDIS GUADALAJARA** | Módulos DHL/TDI Guadalajara, marítimo GDL (mismos accesos que CEDIS CDMX) |
+| **CEDIS USA** | Gestión de paquetes USA: ingreso, salida, tarimas, cancelaciones, reempaque, reimprimir, reporte |
+| **FACTURACIÓN** | Acceso a cuentas de proveedores, catálogo de claves SAT y tipo de cambio (módulo Dólares) |
 
 ## 🗺️ Rutas de la Aplicación
 
@@ -373,13 +446,42 @@ src/
 | `/configuracion/servicios` | Servicios | SISTEMAS, ADMIN |
 | `/configuracion/generales` | Generales | SISTEMAS |
 | `/ia/entregax` | IA EntregaX | SISTEMAS |
-| `/cedis/salidas` | Salidas diarias | CEDIS MONTERREY |
-| `/cedis/solicitud-documentos` | Solicitud de documentos | CEDIS MONTERREY |
+| `/cedis/salidas` | Salidas diarias | CEDIS MONTERREY, CEDIS CDMX, CEDIS GUADALAJARA |
+| `/cedis/solicitud-documentos` | Solicitud de documentos | CEDIS MONTERREY, CEDIS CDMX, CEDIS GUADALAJARA, CEDIS USA |
 | `/cedis/dhl/ingresos-diarios` | Ingresos diarios DHL | CEDIS MONTERREY |
-| `/cedis/dhl/imp-instrucciones` | Impresión instrucciones | CEDIS MONTERREY |
-| `/cedis/dhl/recepcion` | Recepción | SC, SISTEMAS, ADMIN, CEDIS MONTERREY |
+| `/cedis/dhl/imp-instrucciones` | Impresión instrucciones DHL | CEDIS MONTERREY, CEDIS CDMX, CEDIS GUADALAJARA |
+| `/cedis/dhl/recepcion` | Recepción DHL | SC, SISTEMAS, ADMIN, CEDIS MONTERREY, CEDIS CDMX, CEDIS GUADALAJARA |
 | `/cedis/dhl/busqueda-impuesto` | Búsqueda impuesto | SC, SISTEMAS, ADMIN, CEDIS MONTERREY |
-| `/cedis/dhl/salida` | Salida DHL | SC, SISTEMAS, ADMIN, CEDIS MONTERREY |
+| `/cedis/dhl/salida` | Salida DHL | SC, SISTEMAS, ADMIN, CEDIS MONTERREY, CEDIS CDMX, CEDIS GUADALAJARA |
+| `/cedis/tdi/imp-instrucciones` | Impresión instrucciones TDI | CEDIS MONTERREY, CEDIS CDMX, CEDIS GUADALAJARA |
+| `/cedis/tdi/recepcion` | Recepción TDI | CEDIS MONTERREY, CEDIS CDMX, CEDIS GUADALAJARA |
+| `/cedis/tdi/reimprimir-qr` | Reimprimir QR TDI | CEDIS MONTERREY, CEDIS CDMX, CEDIS GUADALAJARA |
+| `/cedis/tdi/salida` | Salida TDI | CEDIS MONTERREY, CEDIS CDMX, CEDIS GUADALAJARA |
+| `/tdi/ingresos-diarios` | Ingresos diarios TDI-DHL | SC, SISTEMAS, ADMIN, CEDIS MONTERREY |
+| `/tdi/ingresar-guias-inventario` | Ingresar guías al inventario | SC, SISTEMAS, ADMIN, CEDIS MONTERREY |
+| `/tdi/inventario` | Inventario TDI | SC, SISTEMAS, ADMIN, CEDIS MONTERREY |
+| `/tdi/ingresar-guias` | Ingresar guías TDI | SC, SISTEMAS, ADMIN, CEDIS MONTERREY |
+| `/usa/ingreso` | Ingreso CEDIS USA | CEDIS USA, SISTEMAS, ADMIN |
+| `/usa/salida` | Salida CEDIS USA | CEDIS USA, SISTEMAS, ADMIN |
+| `/usa/tarima` | Tarima CEDIS USA | CEDIS USA, SISTEMAS, ADMIN |
+| `/usa/cancelar` | Cancelar CEDIS USA | CEDIS USA, SISTEMAS, ADMIN |
+| `/usa/reporte` | Reporte CEDIS USA | CEDIS USA, SISTEMAS, ADMIN |
+| `/usa/reimprimir` | Reimprimir CEDIS USA | CEDIS USA, SISTEMAS, ADMIN |
+| `/usa/reempaque` | Reempaque CEDIS USA | CEDIS USA, SISTEMAS, ADMIN |
+| `/usa/ingresos-diarios` | Ingresos diarios USA | SC, SISTEMAS, ADMIN, CEDIS MONTERREY, CEDIS USA |
+| `/usa/imp-instrucciones` | Impresión instrucciones USA | SC, SISTEMAS, ADMIN, CEDIS MONTERREY |
+| `/usa/recepcion` | Recepción USA | SC, SISTEMAS, ADMIN, CEDIS MONTERREY |
+| `/cdmx/maritimo/historial-bl` | Historial BL recibidos | CEDIS CDMX, CEDIS GUADALAJARA |
+| `/cdmx/maritimo/imp-instrucciones` | Imprimir instrucciones marítimo | CEDIS CDMX, CEDIS GUADALAJARA |
+| `/cdmx/maritimo/ingresar-logs` | Ingresar logs marítimo | CEDIS CDMX, CEDIS GUADALAJARA |
+| `/cdmx/maritimo/recibir-bl` | Recibir BL | CEDIS CDMX, CEDIS GUADALAJARA |
+| `/cdmx/maritimo/salida` | Salida marítimo CDMX | CEDIS CDMX, CEDIS GUADALAJARA |
+| `/dolares/cuentas-proveedores` | Cuentas de proveedores | FACTURACIÓN, SISTEMAS, ADMIN |
+| `/dolares/catalogo-claves-sat` | Catálogo claves SAT | FACTURACIÓN, SISTEMAS, ADMIN |
+| `/dolares/tipo-cambio` | Tipo de cambio | FACTURACIÓN, SISTEMAS, ADMIN |
+| `/maritima/control-gastos` | Control de gastos marítimo | OPERACION MARITIMA, SISTEMAS, ADMIN |
+| `/maritima/tdi-dhl` | TDI-DHL Marítimo | OPERACION MARITIMA, SISTEMAS, ADMIN |
+| `/snake` | Juego Snake (acceso directo) | Todos |
 | `/paqueterias/lista` | Lista paqueterías | SISTEMAS |
 | `/perfil` | Perfil de usuario | Todos |
 
@@ -574,4 +676,4 @@ Para soporte técnico, contactar al equipo de desarrollo.
 ---
 
 **Última actualización**: Mayo 2026  
-**Versión**: 2.3.0 
+**Versión**: 2.4.0 
