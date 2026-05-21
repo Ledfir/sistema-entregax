@@ -65,7 +65,7 @@ export const TicketsReporteEstadistico = () => {
     porAsesor: {},
     tiempoPromedio: 0,
   });
-  const [ticketsActivos, setTicketsActivos] = useState<TicketData[]>([]);
+  const [_ticketsActivos, setTicketsActivos] = useState<TicketData[]>([]);
   const [rangoFechas, setRangoFechas] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null] | null>(null);
   
   // Estados para controlar modales de gráficas
