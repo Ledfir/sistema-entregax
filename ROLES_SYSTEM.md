@@ -332,5 +332,5 @@ function AppMenu() {
 
 ---
 
-**Autor**: Sistema EntregaX  
+**Autor**: Angel Flores - Aflores  
 **Última actualización**: Febrero 2026
