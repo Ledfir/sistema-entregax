@@ -107,8 +107,8 @@ export const Login = () => {
                 className="logo-image"
               />
             </div>
-            <Title level={3} className="login-title">Bienvenido de nuevo!</Title>
-            <Text className="login-subtitle">Inicia sesión para continuar.</Text>
+            <Title level={3} className="login-title">¡Bienvenido!</Title>
+            <Text className="login-subtitle">Inicia sesión para ingresar al sistema de quiniela.</Text>
           </div>
 
           <Form
@@ -144,14 +144,6 @@ export const Login = () => {
                 placeholder="Ingresa tu contraseña"
                 size="large"
               />
-            </Form.Item>
-
-            <Form.Item>
-              <div style={{ textAlign: 'right', marginBottom: '8px' }}>
-                <Link href="/forgot-password" className="forgot-link">
-                  ¿Olvidaste tu contraseña?
-                </Link>
-              </div>
             </Form.Item>
 
             <Form.Item>

@@ -391,7 +391,7 @@ export const AppHeader = ({ onMenuClick }: AppHeaderProps) => {
           </Row>
         </div>
       </Drawer>
-      <div className="info-banner">
+      {/* <div className="info-banner">
         <div className="banner-content">
           {[0, 1].map((i) => (
             <div className="banner-scroll" key={i}>
@@ -402,7 +402,7 @@ export const AppHeader = ({ onMenuClick }: AppHeaderProps) => {
             </div>
           ))}
         </div>
-      </div>
+      </div> */}
     </>
   );
 };

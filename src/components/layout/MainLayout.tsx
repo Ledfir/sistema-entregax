@@ -99,259 +99,259 @@ export const MainLayout = () => {
   const { hasRole, user } = useAuthStore();
 
   // Menú completo para SISTEMAS
-  const sistemasMenuItems = [
-    {
-      key: '/dashboard',
-      icon: <HomeOutlined />,
-      label: 'Inicio',
-    },
-    {
-      key: 'clientes',
-      icon: <UserOutlined />,
-      label: 'Clientes',
-      children: [
-        { key: '/clientes/lista', label: 'Lista de clientes' },
-        { key: '/clientes/nuevo', label: 'Nuevo cliente' },
-      ],
-    },
-    {
-      key: 'cargos-extras',
-      icon: <DollarOutlined />,
-      label: 'Cargos Extras',
-      children: [
-        { key: '/cargos-extras/lista', label: 'Lista de cargos' },
-        { key: '/cargos-extras/nuevo', label: 'Nuevo cargo' },
-      ],
-    },
-    {
-      key: 'usuarios',
-      icon: <TeamOutlined />,
-      label: 'Usuarios',
-      children: [
-        { key: '/usuarios/lista', label: 'Lista de usuarios' },
-        { key: '/usuarios/nuevo', label: 'Nuevo usuario' },
-      ],
-    },
-    {
-      key: '/comunicados',
-      icon: <NotificationOutlined />,
-      label: 'Comunicados',
-    },
-    {
-      key: '/ia/entregax',
-      icon: <RocketOutlined />,
-      label: 'IA EntregaX',
-    },
-    {
-      key: '/configuracion/generales',
-      icon: <SettingOutlined />,
-      label: 'Config. Generales',
-    },
-  ];
+  // const sistemasMenuItems = [
+  //   {
+  //     key: '/dashboard',
+  //     icon: <HomeOutlined />,
+  //     label: 'Inicio',
+  //   },
+  //   {
+  //     key: 'clientes',
+  //     icon: <UserOutlined />,
+  //     label: 'Clientes',
+  //     children: [
+  //       { key: '/clientes/lista', label: 'Lista de clientes' },
+  //       { key: '/clientes/nuevo', label: 'Nuevo cliente' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'cargos-extras',
+  //     icon: <DollarOutlined />,
+  //     label: 'Cargos Extras',
+  //     children: [
+  //       { key: '/cargos-extras/lista', label: 'Lista de cargos' },
+  //       { key: '/cargos-extras/nuevo', label: 'Nuevo cargo' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'usuarios',
+  //     icon: <TeamOutlined />,
+  //     label: 'Usuarios',
+  //     children: [
+  //       { key: '/usuarios/lista', label: 'Lista de usuarios' },
+  //       { key: '/usuarios/nuevo', label: 'Nuevo usuario' },
+  //     ],
+  //   },
+  //   {
+  //     key: '/comunicados',
+  //     icon: <NotificationOutlined />,
+  //     label: 'Comunicados',
+  //   },
+  //   {
+  //     key: '/ia/entregax',
+  //     icon: <RocketOutlined />,
+  //     label: 'IA EntregaX',
+  //   },
+  //   {
+  //     key: '/configuracion/generales',
+  //     icon: <SettingOutlined />,
+  //     label: 'Config. Generales',
+  //   },
+  // ];
 
-  // Menú para SERVICIO AL CLIENTE / ATENCION A CLIENTES
-  const servicioClienteMenuItems = [
-    {
-      key: '/dashboard',
-      icon: <HomeOutlined />,
-      label: 'Home',
-    },
-    {
-      key: 'cargos-extras',
-      icon: <DollarOutlined />,
-      label: 'Cargos Extra',
-      children: [
-        { key: '/cargos-extras/lista', label: 'Lista de cargos' },
-        { key: '/cargos-extras/nuevo', label: 'Nuevo cargo' },
-      ],
-    },
-    {
-      key: 'clientes',
-      icon: <UserOutlined />,
-      label: 'Clientes',
-      children: [
-        { key: '/clientes/lista', label: 'Lista de clientes' },
-        { key: '/clientes/nuevo', label: 'Nuevo cliente' },
-      ],
-    },
-    {
-      key: 'encuestas',
-      icon: <FormOutlined />,
-      label: 'Encuestas de calidad',
-      children: [
-        { key: '/encuestas/pendientes', label: 'Pendientes de enviar' },
-        { key: '/encuestas/realizadas', label: 'Encuestas realizadas' },
-      ],
-    },
-    {
-      key: '/asesores',
-      icon: <TeamOutlined />,
-      label: 'Lista de Asesores',
-    },
-    {
-      key: 'operaciones',
-      icon: <SettingOutlined />,
-      label: 'Operaciones',
-      children: [
-        { key: '/operaciones/actualizar-costo-kilo-tc', label: 'Actualizar costo por kilo | TC (TDI)' },
-        { key: '/operaciones/actualizar-tc-aumento-maritimo', label: 'Actualizar TC aumento marítimo' },
-        { key: '/operaciones/actualizar-tc-costo', label: 'Actualizar TC / costo' },
-        { key: '/operaciones/descuentos', label: 'Descuentos' },
-        { key: '/operaciones/editar-guia-dhl', label: 'Editar guía DHL' },
-        { key: '/operaciones/nbox', label: 'N. B.O.X.' },
-        { key: '/operaciones/nbox-maritimo', label: 'N. B.O.X. Marítimo' },
-        { key: '/operaciones/operacion-maritima', label: 'Operación Marítima' },
-        { key: '/operaciones/reasignar-guia', label: 'Reasignar guía' },
-        { key: '/operaciones/reasignar-cliente', label: 'Reasignar cliente' },
-        { key: '/operaciones/usa-remp', label: 'USA REMP.' },
+  // // Menú para SERVICIO AL CLIENTE / ATENCION A CLIENTES
+  // const servicioClienteMenuItems = [
+  //   {
+  //     key: '/dashboard',
+  //     icon: <HomeOutlined />,
+  //     label: 'Home',
+  //   },
+  //   {
+  //     key: 'cargos-extras',
+  //     icon: <DollarOutlined />,
+  //     label: 'Cargos Extra',
+  //     children: [
+  //       { key: '/cargos-extras/lista', label: 'Lista de cargos' },
+  //       { key: '/cargos-extras/nuevo', label: 'Nuevo cargo' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'clientes',
+  //     icon: <UserOutlined />,
+  //     label: 'Clientes',
+  //     children: [
+  //       { key: '/clientes/lista', label: 'Lista de clientes' },
+  //       { key: '/clientes/nuevo', label: 'Nuevo cliente' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'encuestas',
+  //     icon: <FormOutlined />,
+  //     label: 'Encuestas de calidad',
+  //     children: [
+  //       { key: '/encuestas/pendientes', label: 'Pendientes de enviar' },
+  //       { key: '/encuestas/realizadas', label: 'Encuestas realizadas' },
+  //     ],
+  //   },
+  //   {
+  //     key: '/asesores',
+  //     icon: <TeamOutlined />,
+  //     label: 'Lista de Asesores',
+  //   },
+  //   {
+  //     key: 'operaciones',
+  //     icon: <SettingOutlined />,
+  //     label: 'Operaciones',
+  //     children: [
+  //       { key: '/operaciones/actualizar-costo-kilo-tc', label: 'Actualizar costo por kilo | TC (TDI)' },
+  //       { key: '/operaciones/actualizar-tc-aumento-maritimo', label: 'Actualizar TC aumento marítimo' },
+  //       { key: '/operaciones/actualizar-tc-costo', label: 'Actualizar TC / costo' },
+  //       { key: '/operaciones/descuentos', label: 'Descuentos' },
+  //       { key: '/operaciones/editar-guia-dhl', label: 'Editar guía DHL' },
+  //       { key: '/operaciones/nbox', label: 'N. B.O.X.' },
+  //       { key: '/operaciones/nbox-maritimo', label: 'N. B.O.X. Marítimo' },
+  //       { key: '/operaciones/operacion-maritima', label: 'Operación Marítima' },
+  //       { key: '/operaciones/reasignar-guia', label: 'Reasignar guía' },
+  //       { key: '/operaciones/reasignar-cliente', label: 'Reasignar cliente' },
+  //       { key: '/operaciones/usa-remp', label: 'USA REMP.' },
         
-      ],
-    },
-    {
-      key: 'cotizaciones',
-      icon: <FileTextOutlined />,
-      label: 'Cotizaciones',
-      children: [
-        { key: '/cotizaciones/instrucciones', label: 'Instrucciones' },
-      ],
-    },
-    {
-      key: 'polizas',
-      icon: <FileProtectOutlined />,
-      label: 'Pólizas',
-      children: [
-        { key: '/polizas/nuevas', label: 'Nuevas pólizas por aprobar' },
-        { key: '/polizas/pagadas', label: 'Pólizas pagadas pendientes de aprobación' },
-      ],
-    },
-    {
-      key: 'tickets',
-      icon: <CustomerServiceOutlined />,
-      label: 'Tickets',
-      children: [
-        { key: '/tickets/reporte-estadistico', label: 'Reporte estadístico' },
-        { key: '/tickets/activos', label: 'Tickets activos' },
-        { key: '/tickets/archivados', label: 'Tickets archivados' },
-      ],
-    },
-  ];
+  //     ],
+  //   },
+  //   {
+  //     key: 'cotizaciones',
+  //     icon: <FileTextOutlined />,
+  //     label: 'Cotizaciones',
+  //     children: [
+  //       { key: '/cotizaciones/instrucciones', label: 'Instrucciones' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'polizas',
+  //     icon: <FileProtectOutlined />,
+  //     label: 'Pólizas',
+  //     children: [
+  //       { key: '/polizas/nuevas', label: 'Nuevas pólizas por aprobar' },
+  //       { key: '/polizas/pagadas', label: 'Pólizas pagadas pendientes de aprobación' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'tickets',
+  //     icon: <CustomerServiceOutlined />,
+  //     label: 'Tickets',
+  //     children: [
+  //       { key: '/tickets/reporte-estadistico', label: 'Reporte estadístico' },
+  //       { key: '/tickets/activos', label: 'Tickets activos' },
+  //       { key: '/tickets/archivados', label: 'Tickets archivados' },
+  //     ],
+  //   },
+  // ];
 
-  // Menú para ASESOR
-  const asesorMenuItems = [
-    { key: '/dashboard', icon: <HomeOutlined />, label: 'Home' },
-    { key: 'cargos-extras', icon: <DollarOutlined />, label: 'Cargos extras', children: [ { key: '/cargos-extras/historial', label: 'Historial' }, { key: '/cargos-extras/pendientes', label: 'Pendientes de pago' } ] },
-    { key: '/clientes/mis-clientes', icon: <UserOutlined />, label: 'Clientes' },
-    { key: '/comisiones', icon: <PercentageOutlined />, label: 'Comisiones' },
-    { key: 'cotizaciones', icon: <FileTextOutlined />, label: 'Cotizaciones', children: [
-      { key: '/cotizaciones/lista', label: 'Cotizaciones' },
-      { key: '/cotizaciones/instrucciones', label: 'Instrucciones' },
-      { key: '/cotizaciones/pendientes', label: 'Pendientes de cotizar' },
-      { key: '/cotizaciones/guias-archivadas', label: 'Guias archivadas' },
-      { key: '/cotizaciones/validar-tdi-dhl', label: 'Validar TDI - DHL' },
-    ] },
-    { key: 'dolares', icon: <DollarOutlined />, label: 'Dolares', children: [
-      { key: 'dolares-solicitud', label: 'Solicitud de envío', children: [
-        { key: '/dolares/solicitud/con-factura', label: 'Con factura' },
-        { key: '/dolares/solicitud/sin-factura', label: 'Sin factura' },
-      ]},
-      { key: '/dolares/mis-envios', label: 'Mis envíos' },
-      { key: '/dolares/envios-archivados', label: 'Envíos archivados' },
-      { key: '/dolares/catalogo-servicios', label: 'Catálogo de servicios' },
-    ] },
-    { key: '/faqs', icon: <QuestionCircleOutlined />, label: 'FAQs' },
-    { key: 'maritimos', icon: <GlobalOutlined />, label: 'Maritimos', children: [
-      { key: '/maritimos/cotizaciones', label: 'Cotizaciones' },
-      { key: '/maritimos/panel-pl-instrucciones', label: 'Panel PL instrucciones' },
-    ] },
-    { key: 'monedero', icon: <WalletOutlined />, label: 'Monedero', children: [
-      { key: '/monedero/historial', label: 'Historial' },
-      { key: '/monedero/saldo', label: 'Saldo' },
-      { key: '/monedero/subir-pagos', label: 'Subir pagos' },
-    ] },
-    { key: 'polizas', icon: <FileProtectOutlined />, label: 'Polizas', children: [ 
-      { key: '/polizas/crear', label: 'Generar póliza' }, 
-      { key: '/polizas/mis-polizas', label: 'Mis pólizas' } 
-    ] },
-    { key: 'rmbs', icon: <PayCircleOutlined />, label: 'RMBs', children: [
-      { key: 'rmbs-solicitud', label: 'Solicitud de envio', children: [
-        { key: '/rmbs/solicitud/con-factura', label: 'Con factura' },
-        { key: '/rmbs/solicitud/sin-factura', label: 'Sin factura' },
-      ]},
-      { key: '/rmbs/mis-envios', label: 'Mis envíos' },
-      { key: '/rmbs/envios-archivados', label: 'Envíos archivados' },
-      { key: '/rmbs/catalogo-servicios', label: 'Catálogo de servicios' },
-    ] },
-    { key: '/usdts', icon: <SwapOutlined />, label: 'USDTs', children: [
-      { key: 'usdts-solicitud', label: 'Solicitud de envio', children: [
-        { key: '/usdts/solicitud/con-factura', label: 'Con factura' },
-        { key: '/usdts/solicitud/sin-factura', label: 'Sin factura' },
-      ]},
-      { key: '/usdts/mis-envios', label: 'Mis envíos' },
-      { key: '/usdts/envios-archivados', label: 'Envíos archivados' },
-      { key: '/usdts/catalogo-servicios', label: 'Catálogo de servicios' },
-    ] },
-  ];
+  // // Menú para ASESOR
+  // const asesorMenuItems = [
+  //   { key: '/dashboard', icon: <HomeOutlined />, label: 'Home' },
+  //   { key: 'cargos-extras', icon: <DollarOutlined />, label: 'Cargos extras', children: [ { key: '/cargos-extras/historial', label: 'Historial' }, { key: '/cargos-extras/pendientes', label: 'Pendientes de pago' } ] },
+  //   { key: '/clientes/mis-clientes', icon: <UserOutlined />, label: 'Clientes' },
+  //   { key: '/comisiones', icon: <PercentageOutlined />, label: 'Comisiones' },
+  //   { key: 'cotizaciones', icon: <FileTextOutlined />, label: 'Cotizaciones', children: [
+  //     { key: '/cotizaciones/lista', label: 'Cotizaciones' },
+  //     { key: '/cotizaciones/instrucciones', label: 'Instrucciones' },
+  //     { key: '/cotizaciones/pendientes', label: 'Pendientes de cotizar' },
+  //     { key: '/cotizaciones/guias-archivadas', label: 'Guias archivadas' },
+  //     { key: '/cotizaciones/validar-tdi-dhl', label: 'Validar TDI - DHL' },
+  //   ] },
+  //   { key: 'dolares', icon: <DollarOutlined />, label: 'Dolares', children: [
+  //     { key: 'dolares-solicitud', label: 'Solicitud de envío', children: [
+  //       { key: '/dolares/solicitud/con-factura', label: 'Con factura' },
+  //       { key: '/dolares/solicitud/sin-factura', label: 'Sin factura' },
+  //     ]},
+  //     { key: '/dolares/mis-envios', label: 'Mis envíos' },
+  //     { key: '/dolares/envios-archivados', label: 'Envíos archivados' },
+  //     { key: '/dolares/catalogo-servicios', label: 'Catálogo de servicios' },
+  //   ] },
+  //   { key: '/faqs', icon: <QuestionCircleOutlined />, label: 'FAQs' },
+  //   { key: 'maritimos', icon: <GlobalOutlined />, label: 'Maritimos', children: [
+  //     { key: '/maritimos/cotizaciones', label: 'Cotizaciones' },
+  //     { key: '/maritimos/panel-pl-instrucciones', label: 'Panel PL instrucciones' },
+  //   ] },
+  //   { key: 'monedero', icon: <WalletOutlined />, label: 'Monedero', children: [
+  //     { key: '/monedero/historial', label: 'Historial' },
+  //     { key: '/monedero/saldo', label: 'Saldo' },
+  //     { key: '/monedero/subir-pagos', label: 'Subir pagos' },
+  //   ] },
+  //   { key: 'polizas', icon: <FileProtectOutlined />, label: 'Polizas', children: [ 
+  //     { key: '/polizas/crear', label: 'Generar póliza' }, 
+  //     { key: '/polizas/mis-polizas', label: 'Mis pólizas' } 
+  //   ] },
+  //   { key: 'rmbs', icon: <PayCircleOutlined />, label: 'RMBs', children: [
+  //     { key: 'rmbs-solicitud', label: 'Solicitud de envio', children: [
+  //       { key: '/rmbs/solicitud/con-factura', label: 'Con factura' },
+  //       { key: '/rmbs/solicitud/sin-factura', label: 'Sin factura' },
+  //     ]},
+  //     { key: '/rmbs/mis-envios', label: 'Mis envíos' },
+  //     { key: '/rmbs/envios-archivados', label: 'Envíos archivados' },
+  //     { key: '/rmbs/catalogo-servicios', label: 'Catálogo de servicios' },
+  //   ] },
+  //   { key: '/usdts', icon: <SwapOutlined />, label: 'USDTs', children: [
+  //     { key: 'usdts-solicitud', label: 'Solicitud de envio', children: [
+  //       { key: '/usdts/solicitud/con-factura', label: 'Con factura' },
+  //       { key: '/usdts/solicitud/sin-factura', label: 'Sin factura' },
+  //     ]},
+  //     { key: '/usdts/mis-envios', label: 'Mis envíos' },
+  //     { key: '/usdts/envios-archivados', label: 'Envíos archivados' },
+  //     { key: '/usdts/catalogo-servicios', label: 'Catálogo de servicios' },
+  //   ] },
+  // ];
 
-  // Menú para OPERACION MARITIMA
-  const operacionMaritimaMenuItems = [
-    {
-      key: '/dashboard',
-      icon: <HomeOutlined />,
-      label: 'Home',
-    },
-    {
-      key: '/maritima/clientes',
-      icon: <UserOutlined />,
-      label: 'Clientes',
-    },
-    {
-      key: '/maritima/consignatarios',
-      icon: <SolutionOutlined />,
-      label: 'Consignatarios',
-    },
-    {
-      key: '/admin/cotizaciones/maritimas',
-      icon: <FileTextOutlined />,
-      label: 'Cotizaciones Maritimas',
-    },
-    {
-      key: '/maritima/control-gastos',
-      icon: <CalculatorOutlined />,
-      label: 'Control de gastos',
-    },
-    {
-      key: '/maritima/navieras',
-      icon: <ShopOutlined />,
-      label: 'Navieras',
-    },
-    {
-      key: '/maritima/pctl',
-      icon: <ControlOutlined />,
-      label: 'PCTL',
-    },
-    {
-      key: '/maritima/pls-pendientes',
-      icon: <ClockCircleOutlined />,
-      label: 'PLs Pendientes',
-    },
-    {
-      key: '/maritima/subir-week',
-      icon: <CloudUploadOutlined />,
-      label: 'Subir nuevo Week',
-    },
-    {
-      key: '/maritima/dhl',
-      icon: <RocketOutlined />,
-      label: 'DHL',
-    },
-    {
-      key: '/maritima/validar-manifiesto',
-      icon: <SafetyCertificateOutlined />,
-      label: 'Validar Manifiesto',
-    },
-  ];
+  // // Menú para OPERACION MARITIMA
+  // const operacionMaritimaMenuItems = [
+  //   {
+  //     key: '/dashboard',
+  //     icon: <HomeOutlined />,
+  //     label: 'Home',
+  //   },
+  //   {
+  //     key: '/maritima/clientes',
+  //     icon: <UserOutlined />,
+  //     label: 'Clientes',
+  //   },
+  //   {
+  //     key: '/maritima/consignatarios',
+  //     icon: <SolutionOutlined />,
+  //     label: 'Consignatarios',
+  //   },
+  //   {
+  //     key: '/admin/cotizaciones/maritimas',
+  //     icon: <FileTextOutlined />,
+  //     label: 'Cotizaciones Maritimas',
+  //   },
+  //   {
+  //     key: '/maritima/control-gastos',
+  //     icon: <CalculatorOutlined />,
+  //     label: 'Control de gastos',
+  //   },
+  //   {
+  //     key: '/maritima/navieras',
+  //     icon: <ShopOutlined />,
+  //     label: 'Navieras',
+  //   },
+  //   {
+  //     key: '/maritima/pctl',
+  //     icon: <ControlOutlined />,
+  //     label: 'PCTL',
+  //   },
+  //   {
+  //     key: '/maritima/pls-pendientes',
+  //     icon: <ClockCircleOutlined />,
+  //     label: 'PLs Pendientes',
+  //   },
+  //   {
+  //     key: '/maritima/subir-week',
+  //     icon: <CloudUploadOutlined />,
+  //     label: 'Subir nuevo Week',
+  //   },
+  //   {
+  //     key: '/maritima/dhl',
+  //     icon: <RocketOutlined />,
+  //     label: 'DHL',
+  //   },
+  //   {
+  //     key: '/maritima/validar-manifiesto',
+  //     icon: <SafetyCertificateOutlined />,
+  //     label: 'Validar Manifiesto',
+  //   },
+  // ];
 
-  // Menú para otros roles (sin Usuarios)
+  // // Menú para otros roles (sin Usuarios)
   const generalMenuItems = [
     {
       key: '/dashboard',
@@ -359,502 +359,517 @@ export const MainLayout = () => {
       label: 'Inicio',
     },
     {
-      key: 'clientes',
-      icon: <UserOutlined />,
-      label: 'Clientes',
-      children: [
-        { key: '/clientes/lista', label: 'Lista de clientes' },
-        { key: '/clientes/nuevo', label: 'Nuevo cliente' },
-      ],
-    },
-    {
-      key: 'cargos-extras',
-      icon: <DollarOutlined />,
-      label: 'Cargos Extras',
-      children: [
-        { key: '/cargos-extras/lista', label: 'Lista de cargos' },
-        { key: '/cargos-extras/nuevo', label: 'Nuevo cargo' },
-      ],
-    },
-    {
-      key: '/comunicados',
-      icon: <NotificationOutlined />,
-      label: 'Comunicados',
-    },
-  ];
-
-  // Menú para el rol ADMIN
-  const adminMenuItems = [
-    {
-      key: '/dashboard',
-      icon: <HomeOutlined />,
-      label: 'Home',
-    },
-    {
-      key: 'bancos',
-      icon: <BankOutlined />,
-      label: 'Bancos',
-      children: [
-        { 
-          key: 'estado-cuenta',
-          label: 'Estado cuenta',
-          children: [
-            { key: '/admin/bancos/estado-cuenta/ctz-lsd', label: 'CTZ LSD' },
-            { key: '/admin/bancos/estado-cuenta/ctz-ece', label: 'CTZ ECE' },
-            { key: '/admin/bancos/estado-cuenta/ctz-urban', label: 'CTZ URBAN' },
-            { key: '/admin/bancos/estado-cuenta/ctz-rcm', label: 'CTZ RCM' },
-            { key: '/admin/bancos/estado-cuenta/ctz-ba', label: 'CTZ BA' },
-          ],
-        },
-        { 
-          key: 'validar-estado-cuenta',
-          label: 'Validar estado cuenta',
-          children: [
-            { key: '/admin/bancos/validar-estado-cuenta/lsd', label: 'LSD' },
-            { key: '/admin/bancos/validar-estado-cuenta/ece', label: 'ECE' },
-            { key: '/admin/bancos/validar-estado-cuenta/urban', label: 'URBAN' },
-            { key: '/admin/bancos/validar-estado-cuenta/rcm', label: 'RCM' },
-            { key: '/admin/bancos/validar-estado-cuenta/ba', label: 'BA' },
-          ],
-        },
-        { key: '/admin/bancos/listado-archivos', label: 'Listado de archivos de cuentas' },
-        { key: '/admin/bancos/reporte-estado-cuenta', label: 'Reporte estado cuenta (Multiple)' },
-        { key: '/admin/bancos/subir-estado-cuenta', label: 'Subir estado cuenta (Multiple)' },
-        { key: '/admin/bancos/transferir-saldo', label: 'Transferir saldo' },
-      ],
-    },
-    {
-      key: 'bls',
+      key: '/partidos',
       icon: <FileTextOutlined />,
-      label: 'BLs',
-      children: [
-        { key: '/admin/bls/agregar-usuario-maritimo', label: 'Agregar nuevo usuario marítimo' },
-        { key: '/admin/bls/cargados', label: "BL'S cargados" },
-      ],
+      label: 'Partidos',
     },
     {
-      key: '/admin/clientes',
-      icon: <UserOutlined />,
-      label: 'Clientes',
-    },
-    {
-      key: 'comisiones',
-      icon: <PercentageOutlined />,
-      label: 'Comisiones',
-      children: [
-        { key: '/admin/comisiones/reporte', label: 'Reporte de comisiones' },
-      ],
-    },
-    {
-      key: 'configuracion',
-      icon: <SettingOutlined />,
-      label: 'Configuracion',
-      children: [
-        {
-          key: 'beneficios',
-          label: 'Beneficios',
-          children: [
-            { key: '/admin/configuracion/beneficios/listado', label: 'Listado' },
-            { key: '/admin/configuracion/beneficios/estadisticas', label: 'Estadísticas' },
-          ],
-        },
-        { key: '/admin/configuracion/activar-desactivar-pagos', label: "Activar/Desactivar pagos de CTZ'S" },
-        { key: '/configuracion/bancos', label: 'Bancos' },
-        { key: '/configuracion/cuentas', label: 'Cuentas' },
-        { key: '/configuracion/servicios', label: 'Servicios' },
-      ],
-    },
-    {
-      key: 'cotizaciones',
-      icon: <FormOutlined />,
-      label: 'Cotizaciones',
-      children: [
-        { key: '/admin/cotizaciones/maritimas', label: 'Marítimas' },
-        { key: '/admin/cotizaciones/tdi-usa', label: 'TDI-USA' },
-      ],
-    },
-    {
-      key: 'examen',
+      key: '/quiniela',
       icon: <EditOutlined />,
-      label: 'Examen',
-      children: [
-        { key: '/admin/examen/generar-pin', label: 'Generar PIN' },
-        { key: '/admin/examen/observar-resultados', label: 'Observar resultados' },
-      ],
+      label: 'Quiniela',
     },
     {
-      key: 'control-gastos',
-      icon: <CalculatorOutlined />,
-      label: 'Control de gastos',
-      children: [
-        { key: '/admin/control-gastos/tdi', label: 'TDI' },
-        { key: '/admin/control-gastos/maritimo', label: 'Marítimo' },
-      ],
-    },
-    {
-      key: '/admin/pctl',
-      icon: <ContainerOutlined />,
-      label: 'PCTL',
-    },
-    {
-      key: '/polizas/pagadas',
-      icon: <FileProtectOutlined />,
-      label: 'Polizas',
-    },
-    {
-      key: 'proveedores',
-      icon: <ShopOutlined />,
-      label: 'Proveedores',
-      children: [
-        { key: '/admin/proveedores/agregar', label: 'Agregar proveedor' },
-        { key: '/admin/proveedores/en-espera', label: 'En espera de aprobación' },
-        { key: '/admin/proveedores/listado', label: 'Listado de proveedores' },
-        { key: '/admin/proveedores/solicitudes-pago', label: 'Lista de solicitudes de pago' },
-      ],
-    },
-    {
-      key: '/admin/gastos-week/reporte',
+      key: '/resultados',
       icon: <BarChartOutlined />,
-      label: 'Reporte de gastos Week',
-    },
-    {
-      key: '/admin/reporte-us',
-      icon: <DollarCircleOutlined />,
-      label: 'Reporte US',
-    },
+      label: 'Resultados',
+    }
+    // {
+    //   key: 'clientes',
+    //   icon: <UserOutlined />,
+    //   label: 'Clientes',
+    //   children: [
+    //     { key: '/clientes/lista', label: 'Lista de clientes' },
+    //     { key: '/clientes/nuevo', label: 'Nuevo cliente' },
+    //   ],
+    // },
+    // {
+    //   key: 'cargos-extras',
+    //   icon: <DollarOutlined />,
+    //   label: 'Cargos Extras',
+    //   children: [
+    //     { key: '/cargos-extras/lista', label: 'Lista de cargos' },
+    //     { key: '/cargos-extras/nuevo', label: 'Nuevo cargo' },
+    //   ],
+    // },
+    // {
+    //   key: '/comunicados',
+    //   icon: <NotificationOutlined />,
+    //   label: 'Comunicados',
+    // },
   ];
 
-  // Menú para CEDIS CDMX
-  const cedisCdmxMenuItems = [
-    {
-      key: '/dashboard',
-      icon: <HomeOutlined />,
-      label: 'Home',
-    },
-    {
-      key: 'cdmx-maritimo',
-      icon: <ContainerOutlined />,
-      label: 'Maritimo',
-      children: [
-        { key: '/cdmx/maritimo/historial-bl', label: 'Historial BL recibidos' },
-        { key: '/cdmx/maritimo/imp-instrucciones', label: 'Imp. Instrucciones' },
-        { key: '/cdmx/maritimo/ingresar-logs', label: 'Ingresar LOGs' },
-        { key: '/cdmx/maritimo/recibir-bl', label: 'Recibir BL' },
-        { key: '/cdmx/maritimo/salida', label: 'Salida' },
-      ],
-    },
-    {
-      key: 'cdmx-dhl',
-      icon: <RocketOutlined />,
-      label: 'DHL',
-      children: [
-        { key: '/cedis/dhl/imp-instrucciones', label: 'Imp. Instrucciones' },
-        { key: '/cedis/dhl/recepcion', label: 'Recepcion' },
-        { key: '/cedis/dhl/salida', label: 'Salida' },
-      ],
-    },
-    {
-      key: '/cedis/salidas',
-      icon: <SwapOutlined />,
-      label: 'Salidas',
-    },
-    {
-      key: '/cedis/solicitud-documentos',
-      icon: <FileTextOutlined />,
-      label: 'Solicitud de documentos',
-    },
-    {
-      key: 'cdmx-tdi',
-      icon: <CloudUploadOutlined />,
-      label: 'TDI',
-      children: [
-        { key: '/cedis/tdi/imp-instrucciones', label: 'Imp. Instrucciones' },
-        { key: '/cedis/tdi/recepcion', label: 'Recepcion' },
-        { key: '/cedis/tdi/reimprimir-qr', label: 'Reimprimir QR' },
-        { key: '/cedis/tdi/salida', label: 'Salida' },
-      ],
-    },
-  ];
+  // // Menú para el rol ADMIN
+  // const adminMenuItems = [
+  //   {
+  //     key: '/dashboard',
+  //     icon: <HomeOutlined />,
+  //     label: 'Home',
+  //   },
+  //   {
+  //     key: 'bancos',
+  //     icon: <BankOutlined />,
+  //     label: 'Bancos',
+  //     children: [
+  //       { 
+  //         key: 'estado-cuenta',
+  //         label: 'Estado cuenta',
+  //         children: [
+  //           { key: '/admin/bancos/estado-cuenta/ctz-lsd', label: 'CTZ LSD' },
+  //           { key: '/admin/bancos/estado-cuenta/ctz-ece', label: 'CTZ ECE' },
+  //           { key: '/admin/bancos/estado-cuenta/ctz-urban', label: 'CTZ URBAN' },
+  //           { key: '/admin/bancos/estado-cuenta/ctz-rcm', label: 'CTZ RCM' },
+  //           { key: '/admin/bancos/estado-cuenta/ctz-ba', label: 'CTZ BA' },
+  //         ],
+  //       },
+  //       { 
+  //         key: 'validar-estado-cuenta',
+  //         label: 'Validar estado cuenta',
+  //         children: [
+  //           { key: '/admin/bancos/validar-estado-cuenta/lsd', label: 'LSD' },
+  //           { key: '/admin/bancos/validar-estado-cuenta/ece', label: 'ECE' },
+  //           { key: '/admin/bancos/validar-estado-cuenta/urban', label: 'URBAN' },
+  //           { key: '/admin/bancos/validar-estado-cuenta/rcm', label: 'RCM' },
+  //           { key: '/admin/bancos/validar-estado-cuenta/ba', label: 'BA' },
+  //         ],
+  //       },
+  //       { key: '/admin/bancos/listado-archivos', label: 'Listado de archivos de cuentas' },
+  //       { key: '/admin/bancos/reporte-estado-cuenta', label: 'Reporte estado cuenta (Multiple)' },
+  //       { key: '/admin/bancos/subir-estado-cuenta', label: 'Subir estado cuenta (Multiple)' },
+  //       { key: '/admin/bancos/transferir-saldo', label: 'Transferir saldo' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'bls',
+  //     icon: <FileTextOutlined />,
+  //     label: 'BLs',
+  //     children: [
+  //       { key: '/admin/bls/agregar-usuario-maritimo', label: 'Agregar nuevo usuario marítimo' },
+  //       { key: '/admin/bls/cargados', label: "BL'S cargados" },
+  //     ],
+  //   },
+  //   {
+  //     key: '/admin/clientes',
+  //     icon: <UserOutlined />,
+  //     label: 'Clientes',
+  //   },
+  //   {
+  //     key: 'comisiones',
+  //     icon: <PercentageOutlined />,
+  //     label: 'Comisiones',
+  //     children: [
+  //       { key: '/admin/comisiones/reporte', label: 'Reporte de comisiones' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'configuracion',
+  //     icon: <SettingOutlined />,
+  //     label: 'Configuracion',
+  //     children: [
+  //       {
+  //         key: 'beneficios',
+  //         label: 'Beneficios',
+  //         children: [
+  //           { key: '/admin/configuracion/beneficios/listado', label: 'Listado' },
+  //           { key: '/admin/configuracion/beneficios/estadisticas', label: 'Estadísticas' },
+  //         ],
+  //       },
+  //       { key: '/admin/configuracion/activar-desactivar-pagos', label: "Activar/Desactivar pagos de CTZ'S" },
+  //       { key: '/configuracion/bancos', label: 'Bancos' },
+  //       { key: '/configuracion/cuentas', label: 'Cuentas' },
+  //       { key: '/configuracion/servicios', label: 'Servicios' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'cotizaciones',
+  //     icon: <FormOutlined />,
+  //     label: 'Cotizaciones',
+  //     children: [
+  //       { key: '/admin/cotizaciones/maritimas', label: 'Marítimas' },
+  //       { key: '/admin/cotizaciones/tdi-usa', label: 'TDI-USA' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'examen',
+  //     icon: <EditOutlined />,
+  //     label: 'Examen',
+  //     children: [
+  //       { key: '/admin/examen/generar-pin', label: 'Generar PIN' },
+  //       { key: '/admin/examen/observar-resultados', label: 'Observar resultados' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'control-gastos',
+  //     icon: <CalculatorOutlined />,
+  //     label: 'Control de gastos',
+  //     children: [
+  //       { key: '/admin/control-gastos/tdi', label: 'TDI' },
+  //       { key: '/admin/control-gastos/maritimo', label: 'Marítimo' },
+  //     ],
+  //   },
+  //   {
+  //     key: '/admin/pctl',
+  //     icon: <ContainerOutlined />,
+  //     label: 'PCTL',
+  //   },
+  //   {
+  //     key: '/polizas/pagadas',
+  //     icon: <FileProtectOutlined />,
+  //     label: 'Polizas',
+  //   },
+  //   {
+  //     key: 'proveedores',
+  //     icon: <ShopOutlined />,
+  //     label: 'Proveedores',
+  //     children: [
+  //       { key: '/admin/proveedores/agregar', label: 'Agregar proveedor' },
+  //       { key: '/admin/proveedores/en-espera', label: 'En espera de aprobación' },
+  //       { key: '/admin/proveedores/listado', label: 'Listado de proveedores' },
+  //       { key: '/admin/proveedores/solicitudes-pago', label: 'Lista de solicitudes de pago' },
+  //     ],
+  //   },
+  //   {
+  //     key: '/admin/gastos-week/reporte',
+  //     icon: <BarChartOutlined />,
+  //     label: 'Reporte de gastos Week',
+  //   },
+  //   {
+  //     key: '/admin/reporte-us',
+  //     icon: <DollarCircleOutlined />,
+  //     label: 'Reporte US',
+  //   },
+  // ];
 
-  // Menú para FACTURACIÓN
-  const facturacionMenuItems = [
-    {
-      key: '/dashboard',
-      icon: <HomeOutlined />,
-      label: 'Home',
-    },
-    {
-      key: '/clientes/lista',
-      icon: <UserOutlined />,
-      label: 'Clientes',
-    },
-    {
-      key: 'facturacion-dolares',
-      icon: <DollarOutlined />,
-      label: 'Envío de dólares',
-      children: [
-        { key: '/dolares/cuentas-proveedores', label: 'Cuentas de proveedores' },
-        { key: '/dolares/listado-envios', label: 'Listado de envíos' },
-        { key: '/dolares/solicitudes-envios', label: 'Solicitudes de envíos' },
-        { key: '/dolares/tipo-cambio', label: 'Tipo de cambio' },
-        { key: '/dolares/catalogo-claves-sat', label: 'Catálogo de CLAVES SAT' },
-      ],
-    },
-    {
-      key: 'facturacion-facturas',
-      icon: <FileTextOutlined />,
-      label: 'Facturas',
-      children: [
-        { key: '/facturas/pagos-facturados', label: 'Pagos facturados' },
-        { key: '/facturas/pendientes', label: 'Pendientes' },
-      ],
-    },
-    {
-      key: '/facturacion/control-gastos',
-      icon: <CalculatorOutlined />,
-      label: 'Control de gastos',
-    },
-    {
-      key: 'facturacion-rmbs',
-      icon: <PayCircleOutlined />,
-      label: 'RMB',
-      children: [
-        { key: '/rmbs/cuentas-proveedores', label: 'Cuentas de proveedores' },
-        { key: '/rmbs/listado-envios', label: 'Listado de envíos' },
-        { key: '/rmbs/solicitudes-revision', label: 'Solicitudes en revisión' },
-        { key: '/rmbs/tipo-cambio', label: 'Tipo de cambio' },
-      ],
-    },
-    {
-      key: 'facturacion-tdi-dhl',
-      icon: <CloudUploadOutlined />,
-      label: 'TDI - DHL',
-      children: [
-        { key: '/tdi-dhl/reporte', label: 'Reporte' },
-        { key: '/tdi-dhl/cargar-archivo', label: 'Cargar archivo' },
-        { key: '/tdi-dhl/enlazar-guias', label: 'Enlazar guias' },
-        { key: '/tdi-dhl/ingreso-cedis', label: 'Ingreso en CEDIS' },
-        { key: '/tdi-dhl/inventario', label: 'Inventario' },
-      ],
-    },
-    {
-      key: 'facturacion-usdts',
-      icon: <SwapOutlined />,
-      label: 'Envío de USDT',
-      children: [
-        { key: '/usdts/listado-envios', label: 'Listado de envíos' },
-        { key: '/usdts/solicitudes-revision', label: 'Solicitudes en revisión' },
-        { key: '/usdts/tipo-cambio', label: 'Tipo de cambio' },
-      ],
-    },
-  ];
+  // // Menú para CEDIS CDMX
+  // const cedisCdmxMenuItems = [
+  //   {
+  //     key: '/dashboard',
+  //     icon: <HomeOutlined />,
+  //     label: 'Home',
+  //   },
+  //   {
+  //     key: 'cdmx-maritimo',
+  //     icon: <ContainerOutlined />,
+  //     label: 'Maritimo',
+  //     children: [
+  //       { key: '/cdmx/maritimo/historial-bl', label: 'Historial BL recibidos' },
+  //       { key: '/cdmx/maritimo/imp-instrucciones', label: 'Imp. Instrucciones' },
+  //       { key: '/cdmx/maritimo/ingresar-logs', label: 'Ingresar LOGs' },
+  //       { key: '/cdmx/maritimo/recibir-bl', label: 'Recibir BL' },
+  //       { key: '/cdmx/maritimo/salida', label: 'Salida' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'cdmx-dhl',
+  //     icon: <RocketOutlined />,
+  //     label: 'DHL',
+  //     children: [
+  //       { key: '/cedis/dhl/imp-instrucciones', label: 'Imp. Instrucciones' },
+  //       { key: '/cedis/dhl/recepcion', label: 'Recepcion' },
+  //       { key: '/cedis/dhl/salida', label: 'Salida' },
+  //     ],
+  //   },
+  //   {
+  //     key: '/cedis/salidas',
+  //     icon: <SwapOutlined />,
+  //     label: 'Salidas',
+  //   },
+  //   {
+  //     key: '/cedis/solicitud-documentos',
+  //     icon: <FileTextOutlined />,
+  //     label: 'Solicitud de documentos',
+  //   },
+  //   {
+  //     key: 'cdmx-tdi',
+  //     icon: <CloudUploadOutlined />,
+  //     label: 'TDI',
+  //     children: [
+  //       { key: '/cedis/tdi/imp-instrucciones', label: 'Imp. Instrucciones' },
+  //       { key: '/cedis/tdi/recepcion', label: 'Recepcion' },
+  //       { key: '/cedis/tdi/reimprimir-qr', label: 'Reimprimir QR' },
+  //       { key: '/cedis/tdi/salida', label: 'Salida' },
+  //     ],
+  //   },
+  // ];
 
-  // Menú para CEDIS GUADALAJARA
-  const cedisGuadalajaraMenuItems = [
-    {
-      key: '/dashboard',
-      icon: <HomeOutlined />,
-      label: 'Home',
-    },
-    {
-      key: 'gdl-dhl',
-      icon: <RocketOutlined />,
-      label: 'DHL',
-      children: [
-        { key: '/cedis/dhl/imp-instrucciones', label: 'Imp. Instrucciones' },
-        { key: '/cedis/dhl/recepcion', label: 'Recepcion' },
-        { key: '/cedis/dhl/salida', label: 'Salida' },
-      ],
-    },
-    {
-      key: 'gdl-maritimo',
-      icon: <ContainerOutlined />,
-      label: 'Maritimo',
-      children: [
-        { key: '/cdmx/maritimo/historial-bl', label: 'Historial BL recibidos' },
-        { key: '/cdmx/maritimo/imp-instrucciones', label: 'Imp. Instrucciones' },
-        { key: '/cdmx/maritimo/ingresar-logs', label: 'Ingresar LOGs' },
-        { key: '/cdmx/maritimo/recibir-bl', label: 'Recibir BL' },
-        { key: '/cdmx/maritimo/salida', label: 'Salida' },
-      ],
-    },
-    {
-      key: '/cedis/salidas',
-      icon: <SwapOutlined />,
-      label: 'Salidas',
-    },
-    {
-      key: '/cedis/solicitud-documentos',
-      icon: <FileTextOutlined />,
-      label: 'Solicitud de documentos',
-    },
-    {
-      key: 'gdl-tdi',
-      icon: <CloudUploadOutlined />,
-      label: 'TDI',
-      children: [
-        { key: '/cedis/tdi/imp-instrucciones', label: 'Imp. Instrucciones' },
-        { key: '/cedis/tdi/recepcion', label: 'Recepcion' },
-        { key: '/cedis/tdi/reimprimir-qr', label: 'Reimprimir QR' },
-        { key: '/cedis/tdi/salida', label: 'Salida' },
-      ],
-    },
-  ];
+  // // Menú para FACTURACIÓN
+  // const facturacionMenuItems = [
+  //   {
+  //     key: '/dashboard',
+  //     icon: <HomeOutlined />,
+  //     label: 'Home',
+  //   },
+  //   {
+  //     key: '/clientes/lista',
+  //     icon: <UserOutlined />,
+  //     label: 'Clientes',
+  //   },
+  //   {
+  //     key: 'facturacion-dolares',
+  //     icon: <DollarOutlined />,
+  //     label: 'Envío de dólares',
+  //     children: [
+  //       { key: '/dolares/cuentas-proveedores', label: 'Cuentas de proveedores' },
+  //       { key: '/dolares/listado-envios', label: 'Listado de envíos' },
+  //       { key: '/dolares/solicitudes-envios', label: 'Solicitudes de envíos' },
+  //       { key: '/dolares/tipo-cambio', label: 'Tipo de cambio' },
+  //       { key: '/dolares/catalogo-claves-sat', label: 'Catálogo de CLAVES SAT' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'facturacion-facturas',
+  //     icon: <FileTextOutlined />,
+  //     label: 'Facturas',
+  //     children: [
+  //       { key: '/facturas/pagos-facturados', label: 'Pagos facturados' },
+  //       { key: '/facturas/pendientes', label: 'Pendientes' },
+  //     ],
+  //   },
+  //   {
+  //     key: '/facturacion/control-gastos',
+  //     icon: <CalculatorOutlined />,
+  //     label: 'Control de gastos',
+  //   },
+  //   {
+  //     key: 'facturacion-rmbs',
+  //     icon: <PayCircleOutlined />,
+  //     label: 'RMB',
+  //     children: [
+  //       { key: '/rmbs/cuentas-proveedores', label: 'Cuentas de proveedores' },
+  //       { key: '/rmbs/listado-envios', label: 'Listado de envíos' },
+  //       { key: '/rmbs/solicitudes-revision', label: 'Solicitudes en revisión' },
+  //       { key: '/rmbs/tipo-cambio', label: 'Tipo de cambio' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'facturacion-tdi-dhl',
+  //     icon: <CloudUploadOutlined />,
+  //     label: 'TDI - DHL',
+  //     children: [
+  //       { key: '/tdi-dhl/reporte', label: 'Reporte' },
+  //       { key: '/tdi-dhl/cargar-archivo', label: 'Cargar archivo' },
+  //       { key: '/tdi-dhl/enlazar-guias', label: 'Enlazar guias' },
+  //       { key: '/tdi-dhl/ingreso-cedis', label: 'Ingreso en CEDIS' },
+  //       { key: '/tdi-dhl/inventario', label: 'Inventario' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'facturacion-usdts',
+  //     icon: <SwapOutlined />,
+  //     label: 'Envío de USDT',
+  //     children: [
+  //       { key: '/usdts/listado-envios', label: 'Listado de envíos' },
+  //       { key: '/usdts/solicitudes-revision', label: 'Solicitudes en revisión' },
+  //       { key: '/usdts/tipo-cambio', label: 'Tipo de cambio' },
+  //     ],
+  //   },
+  // ];
 
-  // Menú para CEDIS MONTERREY
-  const cedisMonterreyMenuItems = [
-    {
-      key: '/dashboard',
-      icon: <HomeOutlined />,
-      label: 'Home',
-    },
-    {
-      key: 'cedis-dhl',
-      icon: <RocketOutlined />,
-      label: 'DHL',
-      children: [
-        { key: '/cedis/dhl/ingresos-diarios', label: 'Ingresos diarios' },
-        { key: '/cedis/dhl/imp-instrucciones', label: 'Imp. Instrucciones' },
-        { key: '/cedis/dhl/recepcion', label: 'Recepcion' },
-        { key: '/cedis/dhl/recepcion-fedex', label: 'Recepcion FEDEX' },
-        { key: '/cedis/dhl/salida', label: 'Salida' },
-        { key: '/cedis/dhl/busqueda-impuestos', label: 'Busq. Impuestos' },
-      ],
-    },
-    {
-      key: '/cedis/salidas',
-      icon: <ContainerOutlined />,
-      label: 'SALIDAS',
-    },
-    {
-      key: '/cedis/solicitud-documentos',
-      icon: <FileTextOutlined />,
-      label: 'Solicitud de documentos',
-    },
-    {
-      key: 'cedis-tdi',
-      icon: <SwapOutlined />,
-      label: 'TDI',
-      children: [
-        { key: '/cedis/tdi/imp-instrucciones', label: 'Imp. Instrucciones' },
-        { key: '/cedis/tdi/recepcion', label: 'Recepcion' },
-        { key: '/cedis/tdi/reimprimir-qr', label: 'Reimprimir QR' },
-        { key: '/cedis/tdi/salida', label: 'Salida' },
-      ],
-    },
-    {
-      key: 'cedis-usa',
-      icon: <DollarCircleOutlined />,
-      label: 'USA',
-      children: [
-        { key: '/usa/ingresos-diarios', label: 'Ingresos diarios' },
-        { key: '/usa/imp-instrucciones', label: 'Imp. instrucciones' },
-        { key: '/usa/recepcion', label: 'Recepcion' },
-        { key: '/usa/salida', label: 'Salida' },
-      ],
-    },
-    {
-      key: 'cedis-tdi-dhl',
-      icon: <CloudUploadOutlined />,
-      label: 'TDI-DHL',
-      children: [
-        { key: '/tdi/ingresos-diarios', label: 'Ingresos diarios' },
-        { key: '/tdi/ingresar-guias-inventario', label: 'Ingresar guias a inventario' },
-        { key: '/tdi/inventario', label: 'Inventario' },
-        { key: '/tdi/ingresar-guias', label: 'Ingresar guias' },
-        { key: '/tdi/imp-instrucciones', label: 'Imp. Instrucciones' },
-        { key: '/tdi/salida', label: 'Salida' },
-      ],
-    },
-  ];
+  // // Menú para CEDIS GUADALAJARA
+  // const cedisGuadalajaraMenuItems = [
+  //   {
+  //     key: '/dashboard',
+  //     icon: <HomeOutlined />,
+  //     label: 'Home',
+  //   },
+  //   {
+  //     key: 'gdl-dhl',
+  //     icon: <RocketOutlined />,
+  //     label: 'DHL',
+  //     children: [
+  //       { key: '/cedis/dhl/imp-instrucciones', label: 'Imp. Instrucciones' },
+  //       { key: '/cedis/dhl/recepcion', label: 'Recepcion' },
+  //       { key: '/cedis/dhl/salida', label: 'Salida' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'gdl-maritimo',
+  //     icon: <ContainerOutlined />,
+  //     label: 'Maritimo',
+  //     children: [
+  //       { key: '/cdmx/maritimo/historial-bl', label: 'Historial BL recibidos' },
+  //       { key: '/cdmx/maritimo/imp-instrucciones', label: 'Imp. Instrucciones' },
+  //       { key: '/cdmx/maritimo/ingresar-logs', label: 'Ingresar LOGs' },
+  //       { key: '/cdmx/maritimo/recibir-bl', label: 'Recibir BL' },
+  //       { key: '/cdmx/maritimo/salida', label: 'Salida' },
+  //     ],
+  //   },
+  //   {
+  //     key: '/cedis/salidas',
+  //     icon: <SwapOutlined />,
+  //     label: 'Salidas',
+  //   },
+  //   {
+  //     key: '/cedis/solicitud-documentos',
+  //     icon: <FileTextOutlined />,
+  //     label: 'Solicitud de documentos',
+  //   },
+  //   {
+  //     key: 'gdl-tdi',
+  //     icon: <CloudUploadOutlined />,
+  //     label: 'TDI',
+  //     children: [
+  //       { key: '/cedis/tdi/imp-instrucciones', label: 'Imp. Instrucciones' },
+  //       { key: '/cedis/tdi/recepcion', label: 'Recepcion' },
+  //       { key: '/cedis/tdi/reimprimir-qr', label: 'Reimprimir QR' },
+  //       { key: '/cedis/tdi/salida', label: 'Salida' },
+  //     ],
+  //   },
+  // ];
 
-  // Menú para CEDIS USA
-  const cedisUsaMenuItems = [
-    {
-      key: '/dashboard',
-      icon: <HomeOutlined />,
-      label: 'Home',
-    },
-    {
-      key: '/usa/ingreso',
-      icon: <CloudUploadOutlined />,
-      label: 'Ingreso',
-    },
-    {
-      key: '/usa/salida',
-      icon: <SwapOutlined />,
-      label: 'Salida',
-    },
-    {
-      key: '/usa/tarima',
-      icon: <ContainerOutlined />,
-      label: 'Tarima',
-    },
-    {
-      key: '/usa/reempaque',
-      icon: <ShopOutlined />,
-      label: 'Reempaque',
-    },
-    {
-      key: '/usa/reimprimir',
-      icon: <PrinterOutlined />,
-      label: 'Reimprimir',
-    },
-    {
-      key: '/usa/reporte',
-      icon: <BarChartOutlined />,
-      label: 'Reporte',
-    },
-    {
-      key: '/usa/cancelar',
-      icon: <CloseCircleOutlined />,
-      label: 'Cancelar',
-    },
-    {
-      key: '/usa/ingresos-diarios',
-      icon: <DollarCircleOutlined />,
-      label: 'Ingresos diarios MTY',
-    },
-    {
-      key: '/cedis/solicitud-documentos',
-      icon: <FileTextOutlined />,
-      label: 'Solicitud de documentos',
-    },
-  ];
+  // // Menú para CEDIS MONTERREY
+  // const cedisMonterreyMenuItems = [
+  //   {
+  //     key: '/dashboard',
+  //     icon: <HomeOutlined />,
+  //     label: 'Home',
+  //   },
+  //   {
+  //     key: 'cedis-dhl',
+  //     icon: <RocketOutlined />,
+  //     label: 'DHL',
+  //     children: [
+  //       { key: '/cedis/dhl/ingresos-diarios', label: 'Ingresos diarios' },
+  //       { key: '/cedis/dhl/imp-instrucciones', label: 'Imp. Instrucciones' },
+  //       { key: '/cedis/dhl/recepcion', label: 'Recepcion' },
+  //       { key: '/cedis/dhl/recepcion-fedex', label: 'Recepcion FEDEX' },
+  //       { key: '/cedis/dhl/salida', label: 'Salida' },
+  //       { key: '/cedis/dhl/busqueda-impuestos', label: 'Busq. Impuestos' },
+  //     ],
+  //   },
+  //   {
+  //     key: '/cedis/salidas',
+  //     icon: <ContainerOutlined />,
+  //     label: 'SALIDAS',
+  //   },
+  //   {
+  //     key: '/cedis/solicitud-documentos',
+  //     icon: <FileTextOutlined />,
+  //     label: 'Solicitud de documentos',
+  //   },
+  //   {
+  //     key: 'cedis-tdi',
+  //     icon: <SwapOutlined />,
+  //     label: 'TDI',
+  //     children: [
+  //       { key: '/cedis/tdi/imp-instrucciones', label: 'Imp. Instrucciones' },
+  //       { key: '/cedis/tdi/recepcion', label: 'Recepcion' },
+  //       { key: '/cedis/tdi/reimprimir-qr', label: 'Reimprimir QR' },
+  //       { key: '/cedis/tdi/salida', label: 'Salida' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'cedis-usa',
+  //     icon: <DollarCircleOutlined />,
+  //     label: 'USA',
+  //     children: [
+  //       { key: '/usa/ingresos-diarios', label: 'Ingresos diarios' },
+  //       { key: '/usa/imp-instrucciones', label: 'Imp. instrucciones' },
+  //       { key: '/usa/recepcion', label: 'Recepcion' },
+  //       { key: '/usa/salida', label: 'Salida' },
+  //     ],
+  //   },
+  //   {
+  //     key: 'cedis-tdi-dhl',
+  //     icon: <CloudUploadOutlined />,
+  //     label: 'TDI-DHL',
+  //     children: [
+  //       { key: '/tdi/ingresos-diarios', label: 'Ingresos diarios' },
+  //       { key: '/tdi/ingresar-guias-inventario', label: 'Ingresar guias a inventario' },
+  //       { key: '/tdi/inventario', label: 'Inventario' },
+  //       { key: '/tdi/ingresar-guias', label: 'Ingresar guias' },
+  //       { key: '/tdi/imp-instrucciones', label: 'Imp. Instrucciones' },
+  //       { key: '/tdi/salida', label: 'Salida' },
+  //     ],
+  //   },
+  // ];
+
+  // // Menú para CEDIS USA
+  // const cedisUsaMenuItems = [
+  //   {
+  //     key: '/dashboard',
+  //     icon: <HomeOutlined />,
+  //     label: 'Home',
+  //   },
+  //   {
+  //     key: '/usa/ingreso',
+  //     icon: <CloudUploadOutlined />,
+  //     label: 'Ingreso',
+  //   },
+  //   {
+  //     key: '/usa/salida',
+  //     icon: <SwapOutlined />,
+  //     label: 'Salida',
+  //   },
+  //   {
+  //     key: '/usa/tarima',
+  //     icon: <ContainerOutlined />,
+  //     label: 'Tarima',
+  //   },
+  //   {
+  //     key: '/usa/reempaque',
+  //     icon: <ShopOutlined />,
+  //     label: 'Reempaque',
+  //   },
+  //   {
+  //     key: '/usa/reimprimir',
+  //     icon: <PrinterOutlined />,
+  //     label: 'Reimprimir',
+  //   },
+  //   {
+  //     key: '/usa/reporte',
+  //     icon: <BarChartOutlined />,
+  //     label: 'Reporte',
+  //   },
+  //   {
+  //     key: '/usa/cancelar',
+  //     icon: <CloseCircleOutlined />,
+  //     label: 'Cancelar',
+  //   },
+  //   {
+  //     key: '/usa/ingresos-diarios',
+  //     icon: <DollarCircleOutlined />,
+  //     label: 'Ingresos diarios MTY',
+  //   },
+  //   {
+  //     key: '/cedis/solicitud-documentos',
+  //     icon: <FileTextOutlined />,
+  //     label: 'Solicitud de documentos',
+  //   },
+  // ];
 
   // Seleccionar menú según el rol
   const menuItems = useMemo(() => {
     // CEDIS CDMX debe ser evaluado antes de los genéricos
-    if (hasRole(['CEDIS CDMX'])) {
-      return cedisCdmxMenuItems;
-    }
-    // CEDIS MONTERREY debe ser evaluado antes de los genéricos
-    if (hasRole(['CEDIS MONTERREY'])) {
-      return cedisMonterreyMenuItems;
-    }
-    // CEDIS GUADALAJARA debe ser evaluado antes de los genéricos
-    if (hasRole(['CEDIS GUADALAJARA'])) {
-      return cedisGuadalajaraMenuItems;
-    }
-    // CEDIS USA debe ser evaluado antes de los genéricos
-    if (hasRole(['CEDIS USA'])) {
-      return cedisUsaMenuItems;
-    }
-    // FACTURACIÓN debe ser evaluado antes de los genéricos
-    if (hasRole(['FACTURACIÓN', 'FACTURACION'])) {
-      return facturacionMenuItems;
-    }
-    if (hasRole(['ADMIN'])) {
-      return adminMenuItems;
-    } else if (hasRole(['SISTEMAS'])) {
-      return sistemasMenuItems;
-    } else if (hasRole(['ASESOR'])) {
-      return asesorMenuItems;
-    } else if (hasRole(['ATENCION A CLIENTES', 'SERVICIO AL CLIENTE'])) {
-      return servicioClienteMenuItems;
-    } else if (hasRole(['OPERACION MARITIMA'])) {
-      return operacionMaritimaMenuItems;
-    }
+    // if (hasRole(['CEDIS CDMX'])) {
+    //   return cedisCdmxMenuItems;
+    // }
+    // // CEDIS MONTERREY debe ser evaluado antes de los genéricos
+    // if (hasRole(['CEDIS MONTERREY'])) {
+    //   return cedisMonterreyMenuItems;
+    // }
+    // // CEDIS GUADALAJARA debe ser evaluado antes de los genéricos
+    // if (hasRole(['CEDIS GUADALAJARA'])) {
+    //   return cedisGuadalajaraMenuItems;
+    // }
+    // // CEDIS USA debe ser evaluado antes de los genéricos
+    // if (hasRole(['CEDIS USA'])) {
+    //   return cedisUsaMenuItems;
+    // }
+    // // FACTURACIÓN debe ser evaluado antes de los genéricos
+    // if (hasRole(['FACTURACIÓN', 'FACTURACION'])) {
+    //   return facturacionMenuItems;
+    // }
+    // if (hasRole(['ADMIN'])) {
+    //   return adminMenuItems;
+    // } else if (hasRole(['SISTEMAS'])) {
+    //   return sistemasMenuItems;
+    // } else if (hasRole(['ASESOR'])) {
+    //   return asesorMenuItems;
+    // } else if (hasRole(['ATENCION A CLIENTES', 'SERVICIO AL CLIENTE'])) {
+    //   return servicioClienteMenuItems;
+    // } else if (hasRole(['OPERACION MARITIMA'])) {
+    //   return operacionMaritimaMenuItems;
+    // }
     return generalMenuItems;
   }, [hasRole, user]);
 
