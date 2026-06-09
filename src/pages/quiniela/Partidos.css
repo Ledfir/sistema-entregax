@@ -1,0 +1,275 @@
+.partidos-container {
+  padding: 24px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+/* Header */
+.partidos-header {
+  background: linear-gradient(135deg, #ff6b35 0%, #f39915 100%);
+  color: white;
+  padding: 32px 24px;
+  border-radius: 12px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.2);
+}
+
+.partidos-header h1 {
+  font-size: 32px;
+  font-weight: bold;
+  margin: 0 0 12px 0;
+}
+
+.partidos-header p {
+  font-size: 15px;
+  margin: 0;
+  opacity: 0.95;
+  line-height: 1.5;
+}
+
+/* Controles */
+.partidos-controles {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.partidos-controles .ant-tabs {
+  flex: 1;
+  min-width: 300px;
+}
+
+.partidos-controles .ant-tabs-tab {
+  font-weight: 500;
+}
+
+.ordenar-select {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Grid de Partidos */
+.partidos-grid {
+  margin-bottom: 24px;
+}
+
+/* Tarjeta de Partido */
+.partido-card {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.partido-card:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+}
+
+.partido-card.ant-card {
+  padding: 0;
+}
+
+.partido-card .ant-card-body {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.partido-header {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.partido-hora {
+  font-size: 12px;
+  color: #666;
+  white-space: nowrap;
+}
+
+.partido-content {
+  padding: 24px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  flex: 1;
+  gap: 12px;
+}
+
+.equipo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  text-align: center;
+}
+
+.equipo-nombre {
+  font-weight: 600;
+  font-size: 13px;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.versus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 60px;
+}
+
+.vs-text {
+  font-weight: 700;
+  color: #bbb;
+  font-size: 13px;
+}
+
+.estadio {
+  font-size: 10px;
+  font-weight: bold;
+  color: #999;
+  background-color: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.en-vivo {
+  font-size: 10px;
+  font-weight: bold;
+  color: white;
+  background-color: #52c41a;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.partido-footer {
+  padding: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.partido-footer .ant-btn {
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.partido-footer .ant-btn-primary {
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+
+.partido-footer .ant-btn-primary:hover {
+  background-color: #c82333;
+  border-color: #c82333;
+}
+
+/* Más partidos */
+.mas-partidos {
+  background-color: #fafafa;
+  border: 2px dashed #d9d9d9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .partidos-header {
+    padding: 24px 16px;
+    margin-bottom: 24px;
+  }
+
+  .partidos-header h1 {
+    font-size: 24px;
+  }
+
+  .partidos-header p {
+    font-size: 14px;
+  }
+
+  .partidos-controles {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .partidos-controles .ant-tabs {
+    min-width: auto;
+  }
+
+  .ordenar-select {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .ordenar-select select {
+    flex: 1;
+  }
+
+  .partido-content {
+    padding: 20px 12px;
+  }
+
+  .equipo-nombre {
+    font-size: 12px;
+    max-width: 70px;
+  }
+}
+
+@media (max-width: 480px) {
+  .partidos-container {
+    padding: 16px;
+  }
+
+  .partidos-header {
+    padding: 20px 16px;
+    margin-bottom: 16px;
+  }
+
+  .partidos-header h1 {
+    font-size: 20px;
+  }
+
+  .partidos-header p {
+    font-size: 13px;
+  }
+
+  .partido-content {
+    padding: 16px 8px;
+    gap: 8px;
+  }
+
+  .equipo {
+    gap: 6px;
+  }
+
+  .equipo-nombre {
+    font-size: 11px;
+    max-width: 60px;
+  }
+
+  .vs-text {
+    font-size: 11px;
+  }
+}

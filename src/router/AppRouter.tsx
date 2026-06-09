@@ -43,6 +43,7 @@ import { CuentasList } from '@/pages/config/cuentas';
 import { BancosList } from '@/pages/config/bancos';
 import { ServiciosList } from '@/pages/config/servicios';
 import { Generales } from '@/pages/config/Generales';
+import { Partidos, Quiniela } from '@/pages/quiniela';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { ProtectedRoute } from '@/components/common/ProtectedRoute';
 import { IAEntregaX } from '@/pages/ia/IAEntregaX';
@@ -89,6 +90,8 @@ export const AppRouter = () => {
           </ProtectedRoute>
         }>
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/partidos" element={<Partidos />} />
+          <Route path="/quiniela" element={<Quiniela />} />
           
           {/* Rutas de usuarios - Solo SISTEMAS */}
           <Route 

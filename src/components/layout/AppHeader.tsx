@@ -31,16 +31,16 @@ interface AppHeaderProps {
   onMenuClick?: () => void;
 }
 
-interface MarqueeData {
-  generico: string;
-  tc: string;
-  contenedor: string;
-  dolar: string;
-}
+// interface MarqueeData {
+//   generico: string;
+//   tc: string;
+//   contenedor: string;
+//   dolar: string;
+// }
 
 export const AppHeader = ({ onMenuClick }: AppHeaderProps) => {
   const [searchValue, setSearchValue] = useState('');
-  const [marqueeData, setMarqueeData] = useState<MarqueeData | null>(null);
+  // const [marqueeData, setMarqueeData] = useState<MarqueeData | null>(null);
   const [rolesDrawerOpen, setRolesDrawerOpen] = useState(false);
   const [roles, setRoles] = useState<any[]>([]);
 
@@ -48,7 +48,7 @@ export const AppHeader = ({ onMenuClick }: AppHeaderProps) => {
     try {
       const response = await axios.get('/get-data-marquee');
       if (response.data?.status === 'success' && response.data?.data) {
-        setMarqueeData(response.data.data);
+        // setMarqueeData(response.data.data);
       }
     } catch (error) {
       console.error('Error al obtener datos de la marquesina:', error);

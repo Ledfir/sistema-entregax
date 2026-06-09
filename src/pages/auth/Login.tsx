@@ -6,7 +6,7 @@ import { useAuthStore } from '@/store/authStore';
 import { authService } from '@/services/authService';
 import './Login.css';
 
-const { Title, Text, Link } = Typography;
+const { Title, Text} = Typography;
 
 interface LoginFormValues {
   email: string;
