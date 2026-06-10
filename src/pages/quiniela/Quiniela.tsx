@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Tabs, Row, Col, Avatar, Tag, Spin, Empty, Button, Badge } from 'antd';
-import { EditOutlined } from '@ant-design/icons';
+import { Card, Tabs, Row, Col, Avatar, Tag, Spin, Empty, Badge } from 'antd';
 import { quinielaService } from '@/services/quinielaService';
 import { useAuthStore } from '@/store/authStore';
 import './Quiniela.css';
@@ -155,7 +154,6 @@ export const Quiniela = () => {
                 <div className="vs">VS</div>
               )}
             </div>
-            <div className="label">MARCADOR ACTUAL</div>
           </div>
 
           <div className="equipo">
@@ -170,7 +168,9 @@ export const Quiniela = () => {
         <div className="prediccion-label">TU PREDICCIÓN</div>
         <div className="prediccion-content">
           <div className="prediccion-resultado">
-            {prediccion.tu_prediccion.goles1} - {prediccion.tu_prediccion.goles2}
+            {prediccion.tu_prediccion.prediccion === 'HOME' && `Gana ${prediccion.equipo1.nombre}`}
+            {prediccion.tu_prediccion.prediccion === 'DRAW' && 'Empate'}
+            {prediccion.tu_prediccion.prediccion === 'AWAY' && `Gana ${prediccion.equipo2.nombre}`}
           </div>
           {prediccion.puntos_proyectados !== undefined && (
             <div className="prediccion-puntos">
@@ -185,16 +185,6 @@ export const Quiniela = () => {
             </div>
           )}
         </div>
-        {prediccion.estado === 'activa' && (
-          <Button
-            type="text"
-            icon={<EditOutlined />}
-            style={{ color: '#ff6b35' }}
-            size="small"
-          >
-            Editar
-          </Button>
-        )}
       </div>
     </Card>
   );

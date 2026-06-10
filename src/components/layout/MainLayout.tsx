@@ -372,6 +372,11 @@ export const MainLayout = () => {
       key: '/resultados',
       icon: <BarChartOutlined />,
       label: 'Resultados',
+    },
+    {
+      key: '/ranking',
+      icon: <BarChartOutlined />,
+      label: 'Ranking',
     }
     // {
     //   key: 'clientes',

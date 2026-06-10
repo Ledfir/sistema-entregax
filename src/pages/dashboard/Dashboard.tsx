@@ -1,94 +1,68 @@
-import { useEffect } from 'react';
-import { Card, Button, Tag, Row, Col, Table } from 'antd';
-import { TrophyOutlined, RiseOutlined, ClockCircleOutlined, BellOutlined } from '@ant-design/icons';
+import { useEffect, useState } from 'react';
+import { Card, Button, Tag, Row, Col, Spin } from 'antd';
+import { TrophyOutlined, BellOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/store/authStore';
+import { quinielaService } from '@/services/quinielaService';
 import './Dashboard.css';
+
+interface ProximoPartido {
+  id: string;
+  home_team: string;
+  flag_home: string;
+  away_team: string;
+  flag_away: string;
+  match_date: string;
+  fecha_formateada: string;
+  hora: string;
+  liga: string;
+}
 
 export const Dashboard = () => {
   const { user } = useAuthStore();
+  const [proximoPartido, setProximoPartido] = useState<ProximoPartido | null>(null);
+  const [cargandoPartido, setCargandoPartido] = useState(true);
+  const [historial, setHistorial] = useState<any[]>([]);
+  const [cargandoHistorial, setCargandoHistorial] = useState(true);
 
   useEffect(() => {
     document.title = 'Sistema Entregax | Dashboard';
   }, []);
 
-  const leaderboardData = [
-    {
-      key: '1',
-      position: 1,
-      name: 'Juan Delgado',
-      aciertos: '42/50',
-      puntos: '2,105',
-      estado: 'ASCENDIENDO',
-      estadoColor: 'success'
-    },
-    {
-      key: '2',
-      position: 14,
-      name: 'Angel Aldahir (Tú)',
-      aciertos: '38/50',
-      puntos: '1,842',
-      estado: 'ESTABLE',
-      estadoColor: 'default'
-    },
-    {
-      key: '3',
-      position: 15,
-      name: 'Maria Castro',
-      aciertos: '37/50',
-      puntos: '1,810',
-      estado: 'DESCENDIENDO',
-      estadoColor: 'error'
-    }
-  ];
+  useEffect(() => {
+    const cargarProximoPartido = async () => {
+      try {
+        setCargandoPartido(true);
+        const partido = await quinielaService.getProximoPartido();
+        setProximoPartido(partido);
+      } catch (error) {
+        console.error('Error al cargar próximo partido:', error);
+      } finally {
+        setCargandoPartido(false);
+      }
+    };
 
-  const columns = [
-    {
-      title: 'POSICIÓN',
-      dataIndex: 'position',
-      key: 'position',
-      width: 100,
-      render: (pos: number) => (
-        <div style={{ 
-          width: '32px', 
-          height: '32px', 
-          borderRadius: '6px', 
-          backgroundColor: pos === 1 ? '#fff7e6' : '#f5f5f5',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontWeight: 'bold',
-          color: pos === 1 ? '#fa8c16' : '#000'
-        }}>
-          {pos}
-        </div>
-      )
-    },
-    {
-      title: 'USUARIO',
-      dataIndex: 'name',
-      key: 'name',
-      render: (name: string) => <span style={{ fontWeight: name.includes('Tú') ? 'bold' : 'normal' }}>{name}</span>
-    },
-    {
-      title: 'ACIERTOS',
-      dataIndex: 'aciertos',
-      key: 'aciertos'
-    },
-    {
-      title: 'PUNTOS',
-      dataIndex: 'puntos',
-      key: 'puntos',
-      render: (puntos: string) => <span style={{ fontWeight: 'bold', color: '#f39915' }}>{puntos}</span>
-    },
-    {
-      title: 'ESTADO',
-      dataIndex: 'estado',
-      key: 'estado',
-      render: (estado: string, record: any) => (
-        <Tag color={record.estadoColor}>{estado}</Tag>
-      )
-    }
-  ];
+    cargarProximoPartido();
+  }, []);
+
+  useEffect(() => {
+    const cargarHistorial = async () => {
+      if (!user?.id) {
+        setCargandoHistorial(false);
+        return;
+      }
+      try {
+        setCargandoHistorial(true);
+        const datos = await quinielaService.getHistorialPredicciones(user.id);
+        setHistorial(datos);
+      } catch (error) {
+        console.error('Error al cargar historial:', error);
+      } finally {
+        setCargandoHistorial(false);
+      }
+    };
+
+    cargarHistorial();
+  }, [user?.id]);
 
   return (
     <div className="dashboard-container" style={{ padding: '24px', backgroundColor: '#f5f5f5' }}>
@@ -108,30 +82,18 @@ export const Dashboard = () => {
           <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
             <Col xs={24} md={8}>
               <Card style={{ textAlign: 'center' }}>
-                <div style={{ color: '#f39915', fontSize: '24px', marginBottom: '8px' }}>
-                  <TrophyOutlined />
-                  <span style={{ marginLeft: '8px', color: '#52c41a', fontSize: '14px' }}>+15 pts hoy</span>
-                </div>
                 <div style={{ color: '#999', fontSize: '12px', marginBottom: '4px' }}>PUNTOS TOTALES</div>
-                <div style={{ fontSize: '32px', fontWeight: 'bold' }}>1,842</div>
+                <div style={{ fontSize: '32px', fontWeight: 'bold' }}>0</div>
               </Card>
             </Col>
             <Col xs={24} md={8}>
               <Card style={{ textAlign: 'center' }}>
-                <div style={{ color: '#52c41a', fontSize: '24px', marginBottom: '8px' }}>
-                  <RiseOutlined />
-                  <span style={{ marginLeft: '8px', color: '#ff4d4f', fontSize: '14px' }}>-2 lugares</span>
-                </div>
                 <div style={{ color: '#999', fontSize: '12px', marginBottom: '4px' }}>RANKING GLOBAL</div>
-                <div style={{ fontSize: '32px', fontWeight: 'bold' }}>#14</div>
+                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>- EN ESPERA DEL INICIO DE PARTIDOS -</div>
               </Card>
             </Col>
             <Col xs={24} md={8}>
               <Card style={{ textAlign: 'center' }}>
-                <div style={{ color: '#1890ff', fontSize: '24px', marginBottom: '8px' }}>
-                  <ClockCircleOutlined />
-                  <span style={{ marginLeft: '8px', color: '#999', fontSize: '14px' }}>Cierra en 2d</span>
-                </div>
                 <div style={{ color: '#999', fontSize: '12px', marginBottom: '4px' }}>APUESTAS PENDIENTES</div>
                 <div style={{ fontSize: '32px', fontWeight: 'bold' }}>4</div>
               </Card>
@@ -146,91 +108,80 @@ export const Dashboard = () => {
               marginBottom: '16px'
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <Tag color="orange">COPA DEL MUNDO 2024</Tag>
-              <span style={{ fontSize: '12px' }}>📅 24 Nov • 14:00</span>
-            </div>
-            <Row gutter={[16, 16]} align="middle" style={{ textAlign: 'center' }}>
-              <Col span={10}>
-                <div style={{ 
-                  width: '80px', 
-                  height: '80px', 
-                  margin: '0 auto 12px',
-                  borderRadius: '8px',
-                  overflow: 'hidden',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-                }}>
-                  <img 
-                    src="https://flagcdn.com/w160/mx.png" 
-                    alt="México" 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
+            {cargandoPartido ? (
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <Spin />
+              </div>
+            ) : proximoPartido ? (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                  <Tag color="orange">{proximoPartido.liga.toUpperCase()}</Tag>
+                  <span style={{ fontSize: '12px' }}>📅 {proximoPartido.fecha_formateada} • {proximoPartido.hora}</span>
                 </div>
-                <h3 style={{ color: 'white', margin: 0 }}>México</h3>
-              </Col>
-              <Col span={4}>
-                <h2 style={{ color: 'rgba(255,255,255,0.5)', margin: 0, fontSize: '36px' }}>VS</h2>
-              </Col>
-              <Col span={10}>
-                <div style={{ 
-                  width: '80px', 
-                  height: '80px', 
-                  margin: '0 auto 12px',
-                  borderRadius: '8px',
-                  overflow: 'hidden',
-                  boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-                }}>
-                  <img 
-                    src="https://flagcdn.com/w160/pl.png" 
-                    alt="Polonia" 
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  />
+                <Row gutter={[16, 16]} align="middle" style={{ textAlign: 'center' }}>
+                  <Col span={10}>
+                    <div style={{ 
+                      width: '80px', 
+                      height: '80px', 
+                      margin: '0 auto 12px',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                    }}>
+                      <img 
+                        src={proximoPartido.flag_home} 
+                        alt={proximoPartido.home_team} 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </div>
+                    <h3 style={{ color: 'white', margin: 0 }}>{proximoPartido.home_team}</h3>
+                  </Col>
+                  <Col span={4}>
+                    <h2 style={{ color: 'rgba(255,255,255,0.5)', margin: 0, fontSize: '36px' }}>VS</h2>
+                  </Col>
+                  <Col span={10}>
+                    <div style={{ 
+                      width: '80px', 
+                      height: '80px', 
+                      margin: '0 auto 12px',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                    }}>
+                      <img 
+                        src={proximoPartido.flag_away} 
+                        alt={proximoPartido.away_team} 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      />
+                    </div>
+                    <h3 style={{ color: 'white', margin: 0 }}>{proximoPartido.away_team}</h3>
+                  </Col>
+                </Row>
+                <div style={{ textAlign: 'center', marginTop: '24px' }}>
+                  <Button 
+                    type="primary" 
+                    size="large"
+                    href={`/quiniela`}
+                    danger
+                    icon={<TrophyOutlined />}
+                    style={{ 
+                      background: 'white',
+                      color: '#ff4d4f',
+                      border: 'none',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    Pronosticar Ahora
+                  </Button>
                 </div>
-                <h3 style={{ color: 'white', margin: 0 }}>Polonia</h3>
-              </Col>
-            </Row>
-            <div style={{ textAlign: 'center', marginTop: '24px' }}>
-              <Button 
-                type="primary" 
-                size="large"
-                danger
-                icon={<TrophyOutlined />}
-                style={{ 
-                  background: 'white',
-                  color: '#ff4d4f',
-                  border: 'none',
-                  fontWeight: 'bold'
-                }}
-              >
-                Pronosticar Ahora
-              </Button>
-            </div>
+              </>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,0.7)' }}>
+                <p>No hay próximos partidos disponibles</p>
+              </div>
+            )}
           </Card>
 
-          {/* Leaderboard */}
-          <Card title="Top 5 Leaderboard - Depto. Sistemas" style={{ marginBottom: '16px' }}>
-            <Table 
-              columns={columns} 
-              dataSource={leaderboardData} 
-              pagination={false}
-              size="middle"
-            />
-            <div style={{ 
-              marginTop: '16px', 
-              padding: '12px', 
-              backgroundColor: '#2c2c2c', 
-              borderRadius: '8px',
-              color: 'white',
-              textAlign: 'center',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px'
-            }}>
-              <span style={{ fontSize: '18px' }}>✅</span>
-              <span>¡Tus apuestas han sido guardadas con éxito!</span>
-            </div>
-          </Card>
         </Col>
 
         {/* Columna derecha */}
@@ -241,45 +192,38 @@ export const Dashboard = () => {
             extra={<a href="#" style={{ color: '#f39915' }}>Ver todo</a>}
             style={{ marginBottom: '16px' }}
           >
-            <div style={{ marginBottom: '12px', padding: '12px', border: '1px solid #e8e8e8', borderRadius: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <span style={{ fontWeight: 'bold' }}>BRA</span>
-                  <span style={{ margin: '0 8px', color: '#999' }}>VS</span>
-                  <span style={{ fontWeight: 'bold' }}>SRB</span>
-                </div>
-                <div>
-                  <Tag color="success">Ganaste</Tag>
-                  <span style={{ color: '#52c41a', fontWeight: 'bold' }}>+16 pts</span>
-                </div>
+            {cargandoHistorial ? (
+              <div style={{ textAlign: 'center', padding: '20px' }}>
+                <Spin size="small" />
               </div>
-            </div>
-            <div style={{ marginBottom: '12px', padding: '12px', border: '1px solid #e8e8e8', borderRadius: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <span style={{ fontWeight: 'bold' }}>ARG</span>
-                  <span style={{ margin: '0 8px', color: '#999' }}>VS</span>
-                  <span style={{ fontWeight: 'bold' }}>SAU</span>
+            ) : historial.length > 0 ? (
+              historial.map((prediccion) => (
+                <div key={prediccion.id} style={{ marginBottom: '12px', padding: '12px', border: '1px solid #e8e8e8', borderRadius: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div>
+                      <span style={{ fontWeight: 'bold' }}>{prediccion.equipo1.nombre}</span>
+                      <span style={{ margin: '0 8px', color: '#999' }}>VS</span>
+                      <span style={{ fontWeight: 'bold' }}>{prediccion.equipo2.nombre}</span>
+                    </div>
+                    <div style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                      {prediccion.tu_prediccion.prediccion === 'HOME' && (
+                        <span style={{ color: '#52c41a' }}>Gana {prediccion.equipo1.nombre}</span>
+                      )}
+                      {prediccion.tu_prediccion.prediccion === 'DRAW' && (
+                        <span style={{ color: '#999' }}>Empate</span>
+                      )}
+                      {prediccion.tu_prediccion.prediccion === 'AWAY' && (
+                        <span style={{ color: '#ff4d4f' }}>Gana {prediccion.equipo2.nombre}</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <Tag color="error">Perdiste</Tag>
-                  <span style={{ color: '#999', fontWeight: 'bold' }}>0 pts</span>
-                </div>
+              ))
+            ) : (
+              <div style={{ textAlign: 'center', color: '#999', padding: '20px' }}>
+                <p>Sin registros disponibles</p>
               </div>
-            </div>
-            <div style={{ padding: '12px', border: '1px solid #e8e8e8', borderRadius: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <span style={{ fontWeight: 'bold' }}>FRA</span>
-                  <span style={{ margin: '0 8px', color: '#999' }}>VS</span>
-                  <span style={{ fontWeight: 'bold' }}>AUS</span>
-                </div>
-                <div>
-                  <Tag color="success">Ganaste</Tag>
-                  <span style={{ color: '#52c41a', fontWeight: 'bold' }}>+15 pts</span>
-                </div>
-              </div>
-            </div>
+            )}
           </Card>
 
           {/* Anuncios */}
@@ -295,18 +239,8 @@ export const Dashboard = () => {
               <h3 style={{ margin: 0, color: 'white' }}>Anuncios</h3>
             </div>
             <p style={{ marginBottom: '16px', fontSize: '14px' }}>
-              ¡Se han abierto las apuestas para la Gran Final de la Champions League! No te quedes fuera.
+              No olvides cargar tus predicciones antes del próximo partido. ¡Cada punto cuenta para subir en el ranking!
             </p>
-            <Button 
-              style={{ 
-                background: 'white',
-                color: '#ff6b35',
-                border: 'none',
-                fontWeight: 'bold'
-              }}
-            >
-              Leer más
-            </Button>
           </Card>
         </Col>
       </Row>
