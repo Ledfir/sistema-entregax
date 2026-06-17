@@ -23,6 +23,10 @@ export const Dashboard = () => {
   const [cargandoPartido, setCargandoPartido] = useState(true);
   const [historial, setHistorial] = useState<any[]>([]);
   const [cargandoHistorial, setCargandoHistorial] = useState(true);
+  const [prediccionesPendientes, setPrediccionesPendientes] = useState(0);
+  const [cargandoPendientes, setCargandoPendientes] = useState(true);
+  const [puntosTotales, setPuntosTotales] = useState(0);
+  const [cargandoPuntos, setCargandoPuntos] = useState(true);
 
   useEffect(() => {
     document.title = 'Sistema Entregax | Dashboard';
@@ -43,6 +47,46 @@ export const Dashboard = () => {
 
     cargarProximoPartido();
   }, []);
+
+  useEffect(() => {
+    const cargarPuntosTotales = async () => {
+      if (!user?.id) {
+        setCargandoPuntos(false);
+        return;
+      }
+      try {
+        setCargandoPuntos(true);
+        const puntos = await quinielaService.getPuntosTotales(user.id);
+        setPuntosTotales(puntos);
+      } catch (error) {
+        console.error('Error al cargar puntos totales:', error);
+      } finally {
+        setCargandoPuntos(false);
+      }
+    };
+
+    cargarPuntosTotales();
+  }, [user?.id]);
+
+  useEffect(() => {
+    const cargarPrediccionesPendientes = async () => {
+      if (!user?.id) {
+        setCargandoPendientes(false);
+        return;
+      }
+      try {
+        setCargandoPendientes(true);
+        const count = await quinielaService.getPrediccionesPendientes(user.id);
+        setPrediccionesPendientes(count);
+      } catch (error) {
+        console.error('Error al cargar predicciones pendientes:', error);
+      } finally {
+        setCargandoPendientes(false);
+      }
+    };
+
+    cargarPrediccionesPendientes();
+  }, [user?.id]);
 
   useEffect(() => {
     const cargarHistorial = async () => {
@@ -83,7 +127,7 @@ export const Dashboard = () => {
             <Col xs={24} md={8}>
               <Card style={{ textAlign: 'center' }}>
                 <div style={{ color: '#999', fontSize: '12px', marginBottom: '4px' }}>PUNTOS TOTALES</div>
-                <div style={{ fontSize: '32px', fontWeight: 'bold' }}>0</div>
+                <div style={{ fontSize: '32px', fontWeight: 'bold' }}>{cargandoPuntos ? '-' : puntosTotales}</div>
               </Card>
             </Col>
             <Col xs={24} md={8}>
@@ -95,7 +139,7 @@ export const Dashboard = () => {
             <Col xs={24} md={8}>
               <Card style={{ textAlign: 'center' }}>
                 <div style={{ color: '#999', fontSize: '12px', marginBottom: '4px' }}>APUESTAS PENDIENTES</div>
-                <div style={{ fontSize: '32px', fontWeight: 'bold' }}>4</div>
+                <div style={{ fontSize: '32px', fontWeight: 'bold' }}>{cargandoPendientes ? '-' : prediccionesPendientes}</div>
               </Card>
             </Col>
           </Row>

@@ -197,13 +197,17 @@ export const quinielaService = {
    * @param idUsuario Token del usuario
    * @param idPartido ID del partido
    * @param prediccion Predicción (1=Home, 2=Draw, 3=Away)
+   * @param golesLocal Goles del equipo local
+   * @param golesVisitante Goles del equipo visitante
    */
-  async guardarPrediccion(idUsuario: string, idPartido: string, prediccion: number): Promise<void> {
+  async guardarPrediccion(idUsuario: string, idPartido: string, prediccion: number, golesLocal?: number, golesVisitante?: number): Promise<void> {
     try {
       const response = await apiClient.post('/quiniela/guardar-prediccion', {
         id_usuario: idUsuario,
         id_partido: idPartido,
-        prediccion: prediccion
+        prediccion: prediccion,
+        goles_local: golesLocal,
+        goles_visitante: golesVisitante
       });
 
       if (response.data.status !== 'success') {
@@ -420,6 +424,111 @@ export const quinielaService = {
     } catch (error) {
       console.error('Error al obtener historial de predicciones:', error);
       return [];
+    }
+  },
+
+  /**
+   * Obtiene el ranking de posiciones de puntos
+   */
+  async getRanking(): Promise<Array<{total_points: string; username: string; position?: number}>> {
+    try {
+      const response = await apiClient.get('/quiniela/ranking');
+
+      if (response.data.status === 'success' && Array.isArray(response.data.data)) {
+        // Agregar posición a cada jugador
+        return response.data.data.map((item: {total_points: string; username: string}, index: number) => ({
+          ...item,
+          position: index + 1
+        }));
+      }
+
+      return [];
+    } catch (error) {
+      console.error('Error al obtener ranking:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtiene los resultados de partidos finalizados
+   */
+  async getResultados(): Promise<Array<{
+    id: string;
+    match_number: string;
+    stage: string;
+    group_letter: string;
+    home_team: string;
+    home_flag: string;
+    away_team: string;
+    away_flag: string;
+    home_score: number;
+    away_score: number;
+    status: string;
+    match_date: string;
+  }>> {
+    try {
+      const response = await apiClient.get('/quiniela/resultados');
+
+      if (response.data.status === 'success' && Array.isArray(response.data.data)) {
+        return response.data.data;
+      }
+
+      return [];
+    } catch (error) {
+      console.error('Error al obtener resultados:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Obtiene el count de predicciones pendientes del usuario
+   * @param idUsuario ID del usuario
+   */
+  async getPrediccionesPendientes(idUsuario: string | number): Promise<number> {
+    try {
+      const response = await apiClient.post('/quiniela/predicciones-pendientes', {
+        id_usuario: idUsuario
+      });
+
+      if (response.data.status === 'success') {
+        // Retorna el count directamente o del array/objeto de datos
+        if (typeof response.data.data === 'number') {
+          return response.data.data;
+        } else if (Array.isArray(response.data.data)) {
+          return response.data.data.length;
+        } else if (typeof response.data.data === 'object' && response.data.data !== null) {
+          // Si es un objeto con índices numéricos
+          return Object.keys(response.data.data).length;
+        }
+      }
+
+      return 0;
+    } catch (error) {
+      console.error('Error al obtener predicciones pendientes:', error);
+      return 0;
+    }
+  },
+
+  /**
+   * Obtiene los puntos totales del usuario
+   * @param idUsuario ID del usuario
+   */
+  async getPuntosTotales(idUsuario: string | number): Promise<number> {
+    try {
+      const response = await apiClient.post('/quiniela/puntos-totales', {
+        id_usuario: idUsuario
+      });
+
+      if (response.data.status === 'success' && response.data.data) {
+        // El backend retorna total_points en data
+        const totalPoints = response.data.data.total_points || response.data.data;
+        return typeof totalPoints === 'string' ? parseInt(totalPoints, 10) : totalPoints;
+      }
+
+      return 0;
+    } catch (error) {
+      console.error('Error al obtener puntos totales:', error);
+      return 0;
     }
   }
 };

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Tabs, Button, Row, Col, Avatar, Tag, Spin, Empty, message, Modal } from 'antd';
+import { Card, Tabs, Button, Row, Col, Avatar, Tag, Spin, Empty, message, Modal, Input } from 'antd';
 import { TrophyOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { quinielaService } from '@/services/quinielaService';
 import { useAuthStore } from '@/store/authStore';
@@ -36,6 +36,8 @@ export const Partidos = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [partidoSeleccionado, setPartidoSeleccionado] = useState<Partido | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const [golesLocal, setGolesLocal] = useState<number>(0);
+  const [golesVisitante, setGolesVisitante] = useState<number>(0);
   const { user } = useAuthStore();
 
   // Cargar partidos desde la API
@@ -75,6 +77,8 @@ export const Partidos = () => {
       if (!validacion.valida) {
         // No hay predicción previa, abrir modal normal
         setPartidoSeleccionado(partido);
+        setGolesLocal(0);
+        setGolesVisitante(0);
         setModalVisible(true);
       } else {
         // Ya existe una predicción previa
@@ -102,6 +106,8 @@ export const Partidos = () => {
   const cerrarModal = () => {
     setModalVisible(false);
     setPartidoSeleccionado(null);
+    setGolesLocal(0);
+    setGolesVisitante(0);
   };
 
   const handlePrediccion = (resultado: string) => {
@@ -152,11 +158,13 @@ export const Partidos = () => {
           prediccion = 3;
         }
 
-        // Llamar al servicio para guardar la predicción
+        // Llamar al servicio para guardar la predicción con los goles
         await quinielaService.guardarPrediccion(
           String(user.id),
           partidoSeleccionado.id,
-          prediccion
+          prediccion,
+          golesLocal,
+          golesVisitante
         );
 
         message.success('¡Predicción guardada exitosamente!');
@@ -324,6 +332,36 @@ export const Partidos = () => {
                 <div style={{ fontWeight: 'bold' }}>
                   {partidoSeleccionado.equipo2.nombre}
                 </div>
+              </div>
+            </div>
+
+            {/* Inputs de goles */}
+            <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ flex: 1 }}>
+                <p style={{ marginBottom: '8px', fontWeight: 'bold', textAlign: 'left' }}>
+                  Goles - {partidoSeleccionado.equipo1.nombre}
+                </p>
+                <Input
+                  type="number"
+                  min="0"
+                  value={golesLocal}
+                  onChange={(e) => setGolesLocal(parseInt(e.target.value) || 0)}
+                  placeholder="Ingresa los goles"
+                  style={{ fontSize: '16px' }}
+                />
+              </div>
+              <div style={{ flex: 1 }}>
+                <p style={{ marginBottom: '8px', fontWeight: 'bold', textAlign: 'left' }}>
+                  Goles - {partidoSeleccionado.equipo2.nombre}
+                </p>
+                <Input
+                  type="number"
+                  min="0"
+                  value={golesVisitante}
+                  onChange={(e) => setGolesVisitante(parseInt(e.target.value) || 0)}
+                  placeholder="Ingresa los goles"
+                  style={{ fontSize: '16px' }}
+                />
               </div>
             </div>
 
