@@ -13,6 +13,7 @@ const Ranking = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [filter, setFilter] = useState('group_stage_1');
   
   const itemsPerPage = 10;
 
@@ -20,7 +21,9 @@ const Ranking = () => {
     const fetchRanking = async () => {
       try {
         setLoading(true);
-        setRanking(await quinielaService.getRanking());
+        setCurrentPage(1); // Reiniciar paginación al cambiar filtro
+        const rankingData = await quinielaService.getRankingPorEtapa(filter);
+        setRanking(rankingData);
         setError(null);
       } catch (err) {
         setError('Error al cargar el ranking');
@@ -31,7 +34,7 @@ const Ranking = () => {
     };
 
     fetchRanking();
-  }, []);
+  }, [filter]);
 
   // Obtener top 3
   const topThree = ranking.slice(0, 3);
@@ -58,17 +61,18 @@ const Ranking = () => {
           <h1>Tabla de Posiciones</h1>
           <p>Sigue el progreso de tus colegas y compite por el primer lugar.</p>
         </div>
-        {/* <div className="header-right">
+        <div className="header-right">
           <select className="filter-select" value={filter} onChange={(e) => setFilter(e.target.value)}>
-            <option value="SISTEMAS">SISTEMAS</option>
-            <option value="LOGISTICA">LOGISTICA</option>
-            <option value="VENTAS">VENTAS</option>
-            <option value="OPERACIONES">OPERACIONES</option>
+            <option value="group_stage_1">Jornada 1</option>
+            <option value="group_stage_2">Jornada 2</option>
+            <option value="group_stage_3">Jornada 3</option>
+            <option value="round_of_16">Dieciseisavos</option>
+            <option value="quarterfinals">Cuartos</option>
+            <option value="semifinals">Semifinales</option>
+            <option value="third_place">Tercer Lugar</option>
+            <option value="final">Final</option>
           </select>
-          <button className="export-btn" onClick={handleExport}>
-            📥 Exportar
-          </button>
-        </div> */}
+        </div>
       </div>
 
       {/* Top 3 Tarjetas */}

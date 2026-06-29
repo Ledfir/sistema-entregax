@@ -10,6 +10,7 @@ interface Prediccion {
   liga: string;
   jornada: string;
   fecha: string;
+  fecha_unix?: number;
   estado: 'activa' | 'finalizada';
   equipo1: {
     nombre: string;
@@ -40,7 +41,8 @@ const DEMO_DATA: Prediccion[] = [
     id_partido: 'partido_1',
     liga: 'LIGA MX',
     jornada: 'Jornada 12',
-    fecha: 'Hoy, 19:00',
+    fecha: '2026-06-20 19:00:00',
+    fecha_unix: new Date('2026-06-20 19:00:00').getTime(),
     estado: 'activa',
     equipo1: { nombre: 'América', logo: 'https://flagcdn.com/mx.svg' },
     equipo2: { nombre: 'Cruz Azul', logo: 'https://flagcdn.com/mx.svg' },
@@ -55,7 +57,8 @@ const DEMO_DATA: Prediccion[] = [
     id_partido: 'partido_2',
     liga: 'PREMIER LEAGUE',
     jornada: 'Mañana, 14:00',
-    fecha: 'Mañana',
+    fecha: '2026-06-21 14:00:00',
+    fecha_unix: new Date('2026-06-21 14:00:00').getTime(),
     estado: 'activa',
     equipo1: { nombre: 'Chelsea', logo: 'https://flagcdn.com/gb.svg' },
     equipo2: { nombre: 'Liverpool', logo: 'https://flagcdn.com/gb.svg' },
@@ -67,7 +70,8 @@ const DEMO_DATA: Prediccion[] = [
     id_partido: 'partido_3',
     liga: 'LALIGA',
     jornada: 'Jornada 20',
-    fecha: 'Hace 2 días',
+    fecha: '2026-06-15 20:00:00',
+    fecha_unix: new Date('2026-06-15 20:00:00').getTime(),
     estado: 'finalizada',
     equipo1: { nombre: 'Real Madrid', logo: 'https://flagcdn.com/es.svg' },
     equipo2: { nombre: 'Barcelona', logo: 'https://flagcdn.com/es.svg' },
@@ -113,8 +117,71 @@ export const Quiniela = () => {
     cargarQuinielas();
   }, [user?.id]);
 
-  const quinielas_activas = quinielas.filter(q => q.estado === 'activa');
-  const quinielas_finalizadas = quinielas.filter(q => q.estado === 'finalizada');
+  // Función para determinar si una predicción está activa basada en fecha
+  const isActivaByDate = (prediccion: Prediccion): boolean => {
+    let fechaComparacion: number | null = null;
+
+    // Prioridad 1: Intentar parsear el campo fecha como string (formato backend)
+    if (typeof prediccion.fecha === 'string' && prediccion.fecha.includes('-')) {
+      try {
+        // Convertir formato "YYYY-MM-DD HH:MM:SS" a ISO 8601 "YYYY-MM-DDTHH:MM:SS"
+        const fechaFormateada = prediccion.fecha.replace(' ', 'T');
+        const fechaObj = new Date(fechaFormateada);
+        
+        // Validar que la fecha sea válida
+        if (!isNaN(fechaObj.getTime())) {
+          fechaComparacion = fechaObj.getTime();
+          console.log(`Predicción ${prediccion.id}: fecha="${prediccion.fecha}" -> timestamp=${fechaComparacion}, ahora=${Date.now()}, activa=${fechaComparacion > Date.now()}`);
+        }
+      } catch (e) {
+        console.error('Error parseando fecha:', prediccion.fecha, e);
+      }
+    }
+    
+    // Prioridad 2: Si tiene fecha_unix y no se pudo parsear, usarlo
+    if (fechaComparacion === null && prediccion.fecha_unix) {
+      fechaComparacion = prediccion.fecha_unix;
+      console.log(`Predicción ${prediccion.id}: usando fecha_unix=${fechaComparacion}, ahora=${Date.now()}, activa=${fechaComparacion > Date.now()}`);
+    }
+
+    // Si se logró obtener una fecha válida, compararla
+    if (fechaComparacion !== null) {
+      return fechaComparacion > Date.now();
+    }
+
+    // Fallback: usar el campo estado
+    console.log(`Predicción ${prediccion.id}: usando fallback, estado=${prediccion.estado}`);
+    return prediccion.estado === 'activa';
+  };
+
+  // Función auxiliar para obtener el timestamp de una predicción
+  const getFechaTimestamp = (prediccion: Prediccion): number => {
+    if (prediccion.fecha_unix) {
+      return prediccion.fecha_unix;
+    }
+    if (typeof prediccion.fecha === 'string' && prediccion.fecha.includes('-')) {
+      try {
+        const fechaFormateada = prediccion.fecha.replace(' ', 'T');
+        const fecha = new Date(fechaFormateada);
+        if (!isNaN(fecha.getTime())) {
+          return fecha.getTime();
+        }
+      } catch (e) {
+        // ignorar error
+      }
+    }
+    return 0;
+  };
+
+  const quinielas_activas = quinielas
+    .filter(isActivaByDate)
+    .sort((a, b) => getFechaTimestamp(a) - getFechaTimestamp(b)); // Ordenar de menor a mayor (próximas primero)
+  
+  const quinielas_finalizadas = quinielas
+    .filter(q => !isActivaByDate(q))
+    .sort((a, b) => getFechaTimestamp(b) - getFechaTimestamp(a)); // Ordenar de mayor a menor (más recientes primero)
+  
+  console.log(`Total: ${quinielas.length}, Activas: ${quinielas_activas.length}, Finalizadas: ${quinielas_finalizadas.length}`);
 
   const renderQuinielaCard = (prediccion: Prediccion) => (
     <Card key={prediccion.id} className="quiniela-card">
@@ -127,10 +194,16 @@ export const Quiniela = () => {
           {prediccion.en_vivo && (
             <Tag color="success" style={{ fontSize: '12px' }}>EN VIVO - 72'</Tag>
           )}
-          {!prediccion.en_vivo && prediccion.estado === 'activa' && (
+          {!prediccion.en_vivo && prediccion.fecha_unix && prediccion.fecha_unix > Date.now() && (
             <span style={{ fontSize: '12px', color: '#999' }}>{prediccion.fecha}</span>
           )}
-          {prediccion.estado === 'finalizada' && (
+          {!prediccion.en_vivo && prediccion.fecha_unix && prediccion.fecha_unix <= Date.now() && (
+            <span style={{ fontSize: '12px', color: '#999' }}>FINALIZADO</span>
+          )}
+          {!prediccion.en_vivo && !prediccion.fecha_unix && prediccion.estado === 'activa' && (
+            <span style={{ fontSize: '12px', color: '#999' }}>{prediccion.fecha}</span>
+          )}
+          {!prediccion.en_vivo && !prediccion.fecha_unix && prediccion.estado === 'finalizada' && (
             <span style={{ fontSize: '12px', color: '#999' }}>FINALIZADO</span>
           )}
         </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Tabs, Button, Row, Col, Avatar, Tag, Spin, Empty, message, Modal, Input } from 'antd';
+import { Card, Tabs, Button, Row, Col, Avatar, Tag, Spin, Empty, message, Modal, Input, Select } from 'antd';
 import { TrophyOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { quinielaService } from '@/services/quinielaService';
 import { useAuthStore } from '@/store/authStore';
@@ -259,15 +259,43 @@ export const Partidos = () => {
 
       {/* Controles */}
       <div className="partidos-controles">
-        <Tabs
-          activeKey={filtroJornada}
-          onChange={setFiltroJornada}
-          items={[
-            { label: 'Jornada 1', key: 'group_stage_1' },
-            { label: 'Jornada 2', key: 'group_stage_2' },
-            { label: 'Jornada 3', key: 'group_stage_3' }
-          ]}
-        />
+        {/* Tabs para Desktop */}
+        <div className="filtros-desktop">
+          <Tabs
+            activeKey={filtroJornada}
+            onChange={setFiltroJornada}
+            items={[
+              { label: 'Jornada 1', key: 'group_stage_1' },
+              { label: 'Jornada 2', key: 'group_stage_2' },
+              { label: 'Jornada 3', key: 'group_stage_3' },
+              { label: 'Dieciseisavos', key: 'round_of_16' },
+              { label: 'Cuartos', key: 'quarter_finals' },
+              { label: 'Semifinales', key: 'semi_finals' },
+              { label: 'Tercer Lugar', key: 'third_place' },
+              { label: 'Final', key: 'final' },
+            ]}
+          />
+        </div>
+
+        {/* Select para Mobile */}
+        <div className="filtros-mobile">
+          <Select
+            value={filtroJornada}
+            onChange={setFiltroJornada}
+            style={{ width: '100%' }}
+            size="large"
+            options={[
+              { label: 'Jornada 1', value: 'group_stage_1' },
+              { label: 'Jornada 2', value: 'group_stage_2' },
+              { label: 'Jornada 3', value: 'group_stage_3' },
+              { label: 'Dieciseisavos', value: 'round_of_16' },
+              { label: 'Cuartos', value: 'quarter_finals' },
+              { label: 'Semifinales', value: 'semi_finals' },
+              { label: 'Tercer Lugar', value: 'third_place' },
+              { label: 'Final', value: 'final' },
+            ]}
+          />
+        </div>
       </div>
 
       {/* Grid de Partidos */}

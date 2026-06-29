@@ -56,14 +56,15 @@ export const authService = {
   },
 
   /**
-   * Verifica si el JWT almacenado es válido y no ha expirado
+   * Verifica si el JWT almacenado es válido (sin validar expiración)
+   * La sesión permanece activa hasta que el usuario se desconecte explícitamente
    */
   isAuthenticated: (): boolean => {
     const token = localStorage.getItem('token');
     if (!token) return false;
     const payload = decodeJwtPayload(token);
-    if (!payload) return false;
-    return payload.exp * 1000 > Date.now();
+    // Siempre retorna true si el token existe - la sesión no expira por tiempo
+    return !!payload;
   },
 
   /**

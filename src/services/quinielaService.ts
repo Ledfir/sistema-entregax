@@ -281,6 +281,7 @@ export const quinielaService = {
             liga: 'QUINIELA',
             jornada: 'Jornada Actual',
             fecha: fechaFormato,
+            fecha_unix: fecha.getTime(),
             estado: item.estado || 'activa',
             equipo1: {
               nombre: item.home_team,
@@ -529,6 +530,31 @@ export const quinielaService = {
     } catch (error) {
       console.error('Error al obtener puntos totales:', error);
       return 0;
+    }
+  },
+
+  /**
+   * Obtiene el ranking filtrado por etapa/grupo
+   * @param stage Etapa/grupo a filtrar (ej: 'group_stage_1', 'group_stage_2', 'group_stage_3')
+   */
+  async getRankingPorEtapa(stage: string): Promise<Array<{total_points: string; username: string; position?: number}>> {
+    try {
+      const response = await apiClient.post('/quiniela/ranking-por-etapa', {
+        stage: stage
+      });
+
+      if (response.data.status === 'success' && Array.isArray(response.data.data)) {
+        // Agregar posición a cada jugador
+        return response.data.data.map((item: {total_points: string; username: string}, index: number) => ({
+          ...item,
+          position: index + 1
+        }));
+      }
+
+      return [];
+    } catch (error) {
+      console.error('Error al obtener ranking por etapa:', error);
+      throw error;
     }
   }
 };

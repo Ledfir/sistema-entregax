@@ -1,12 +1,14 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-// Verifica si un JWT no ha expirado
+// Verifica si un JWT es válido (sin validar expiración)
+// La sesión permanece activa hasta que el usuario se desconecte explícitamente
 const isJwtValid = (token: string): boolean => {
   try {
     const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
     const payload = JSON.parse(atob(base64));
-    return payload.exp * 1000 > Date.now();
+    // Siempre retorna true - la sesión no expira por tiempo
+    return !!payload;
   } catch {
     return false;
   }

@@ -41,13 +41,39 @@
   gap: 16px;
 }
 
-.partidos-controles .ant-tabs {
-  flex: 1;
-  min-width: 300px;
+/* Filtros Desktop (Tabs) */
+.filtros-desktop {
+  width: 100%;
+  display: block;
 }
 
-.partidos-controles .ant-tabs-tab {
+.filtros-desktop .ant-tabs {
+  width: 100%;
+}
+
+.filtros-desktop .ant-tabs-tab {
   font-weight: 500;
+}
+
+/* Filtros Mobile (Select) */
+.filtros-mobile {
+  width: 100%;
+  display: none;
+}
+
+/* Media Query para Mobile */
+@media (max-width: 768px) {
+  .filtros-desktop {
+    display: none;
+  }
+
+  .filtros-mobile {
+    display: block;
+  }
+
+  .partidos-controles {
+    padding: 16px;
+  }
 }
 
 .ordenar-select {
