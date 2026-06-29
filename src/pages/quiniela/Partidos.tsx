@@ -31,6 +31,8 @@ interface Partido {
 export const Partidos = () => {
   const [partidos, setPartidos] = useState<Partido[]>([]);
   const [partidosFiltrados, setPartidosFiltrados] = useState<Partido[]>([]);
+  const [torneos, setTorneos] = useState<Array<{ id: string; name: string }>>([]);
+  const [torneoSeleccionado, setTorneoSeleccionado] = useState<string>('');
   const [filtroJornada, setFiltroJornada] = useState<string>('group_stage_1');
   const [cargando, setCargando] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
@@ -40,13 +42,32 @@ export const Partidos = () => {
   const [golesVisitante, setGolesVisitante] = useState<number>(0);
   const { user } = useAuthStore();
 
-  // Cargar partidos desde la API
   useEffect(() => {
+    const cargarTorneos = async () => {
+      try {
+        const listaTorneos = await quinielaService.getTorneos();
+        setTorneos(listaTorneos);
+        if (listaTorneos.length > 0) {
+          setTorneoSeleccionado(listaTorneos[0].id);
+        }
+      } catch (error) {
+        console.error('Error al cargar torneos:', error);
+        message.error('Error al cargar los torneos');
+      }
+    };
+
+    cargarTorneos();
+  }, []);
+
+  useEffect(() => {
+    if (!torneoSeleccionado) return;
+
     const cargarPartidos = async () => {
       try {
         setCargando(true);
-        const datos = await quinielaService.getPartidos();
+        const datos = await quinielaService.getPartidos(torneoSeleccionado);
         setPartidos(datos);
+        setFiltroJornada('group_stage_1');
       } catch (error) {
         console.error('Error al cargar partidos:', error);
         message.error('Error al cargar los partidos');
@@ -56,7 +77,7 @@ export const Partidos = () => {
     };
 
     cargarPartidos();
-  }, []);
+  }, [torneoSeleccionado]);
 
   useEffect(() => {
     document.title = 'Sistema Entregax | Partidos';
@@ -259,6 +280,22 @@ export const Partidos = () => {
 
       {/* Controles */}
       <div className="partidos-controles">
+        <div className="torneo-select">
+          <span className="torneo-select-label">Torneo</span>
+          <Select
+            value={torneoSeleccionado || undefined}
+            onChange={setTorneoSeleccionado}
+            style={{ width: '100%', maxWidth: 320 }}
+            size="large"
+            placeholder="Selecciona un torneo"
+            loading={torneos.length === 0}
+            options={torneos.map(torneo => ({
+              label: torneo.name,
+              value: torneo.id,
+            }))}
+          />
+        </div>
+
         {/* Tabs para Desktop */}
         <div className="filtros-desktop">
           <Tabs

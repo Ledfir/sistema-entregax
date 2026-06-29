@@ -67,7 +67,8 @@ const Ranking = () => {
             <option value="group_stage_2">Jornada 2</option>
             <option value="group_stage_3">Jornada 3</option>
             <option value="round_of_16">Dieciseisavos</option>
-            <option value="quarterfinals">Cuartos</option>
+            <option value="round_of_8">Octavos</option>
+            <option value="round_of_4">Cuartos</option>
             <option value="semifinals">Semifinales</option>
             <option value="third_place">Tercer Lugar</option>
             <option value="final">Final</option>

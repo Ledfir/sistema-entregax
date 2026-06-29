@@ -94,13 +94,41 @@ interface ProximoPartido {
   liga: string;
 }
 
+interface TorneoAPI {
+  id: string;
+  name: string;
+}
+
+interface Torneo {
+  id: string;
+  name: string;
+}
+
 export const quinielaService = {
+  /**
+   * Obtiene la lista de torneos disponibles
+   */
+  async getTorneos(): Promise<Torneo[]> {
+    const response = await apiClient.get('/quiniela/torneos');
+
+    if (response.data.status === 'success' && Array.isArray(response.data.data)) {
+      return response.data.data.map((torneo: TorneoAPI) => ({
+        id: String(torneo.id),
+        name: torneo.name,
+      }));
+    }
+
+    return [];
+  },
+
   /**
    * Obtiene los próximos partidos desde la API
    */
-  async getPartidos(): Promise<Partido[]> {
+  async getPartidos(idTorneo?: string): Promise<Partido[]> {
     try {
-      const response = await apiClient.get('/quiniela/partidos');
+      const response = await apiClient.get('/quiniela/partidos', {
+        params: idTorneo ? { id_torneo: idTorneo } : undefined,
+      });
       
       if (response.data.status === 'success' && Array.isArray(response.data.data)) {
         return response.data.data.map((partido: PartidoAPI) => {
