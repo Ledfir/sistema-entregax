@@ -97,11 +97,18 @@ interface ProximoPartido {
 interface TorneoAPI {
   id: string;
   name: string;
+  stages?: Array<{ stage: string; name: string }>;
 }
 
-interface Torneo {
+export interface TorneoStage {
+  stage: string;
+  name: string;
+}
+
+export interface Torneo {
   id: string;
   name: string;
+  stages: TorneoStage[];
 }
 
 export const quinielaService = {
@@ -115,6 +122,12 @@ export const quinielaService = {
       return response.data.data.map((torneo: TorneoAPI) => ({
         id: String(torneo.id),
         name: torneo.name,
+        stages: Array.isArray(torneo.stages)
+          ? torneo.stages.map((fase) => ({
+              stage: fase.stage,
+              name: fase.name,
+            }))
+          : [],
       }));
     }
 
@@ -350,9 +363,19 @@ export const quinielaService = {
   async getProximoPartido(): Promise<ProximoPartido | null> {
     try {
       const response = await apiClient.get('/quiniela/proximo-partido');
+      console.log('Respuesta del servicio:', response);
 
       if (response.data.status === 'success' && response.data.data) {
-        const partido = response.data.data;
+        const datos = response.data.data;
+        
+        // Si es un array, devolver el array (nueva estructura)
+        if (Array.isArray(datos)) {
+          console.log('Datos es array, devolviendo directamente');
+          return datos as any;
+        }
+        
+        // Si es un objeto individual (estructura antigua)
+        const partido = datos;
         const fecha = new Date(partido.match_date);
         
         const fecha_formateada = fecha.toLocaleDateString('es-ES', {
@@ -565,10 +588,11 @@ export const quinielaService = {
    * Obtiene el ranking filtrado por etapa/grupo
    * @param stage Etapa/grupo a filtrar (ej: 'group_stage_1', 'group_stage_2', 'group_stage_3')
    */
-  async getRankingPorEtapa(stage: string): Promise<Array<{total_points: string; username: string; position?: number}>> {
+  async getRankingPorEtapa(stage: string, torneoId: string): Promise<Array<{total_points: string; username: string; position?: number}>> {
     try {
       const response = await apiClient.post('/quiniela/ranking-por-etapa', {
-        stage: stage
+        stage: stage,
+        torneo_id: torneoId
       });
 
       if (response.data.status === 'success' && Array.isArray(response.data.data)) {

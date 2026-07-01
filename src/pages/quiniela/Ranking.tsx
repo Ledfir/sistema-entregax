@@ -2,6 +2,17 @@ import { useState, useEffect } from 'react';
 import { quinielaService } from '@/services/quinielaService';
 import './Ranking.css';
 
+interface Stage {
+  stage: string;
+  name: string;
+}
+
+interface Tournament {
+  id: string;
+  name: string;
+  stages: Stage[];
+}
+
 interface RankingItem {
   position?: number;
   total_points: string;
@@ -13,16 +24,40 @@ const Ranking = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [selectedTournament, setSelectedTournament] = useState('1');
   const [filter, setFilter] = useState('group_stage_1');
   
   const itemsPerPage = 10;
 
+  // Cargar torneos disponibles
+  useEffect(() => {
+    const fetchTournaments = async () => {
+      try {
+        const data = await quinielaService.getTorneos();
+        console.log('Torneos cargados:', data);
+        if (Array.isArray(data)) {
+          setTournaments(data);
+          if (data.length > 0) {
+            setSelectedTournament(data[0].id);
+            setFilter(data[0].stages[0]?.stage || 'group_stage_1');
+          }
+        }
+      } catch (err) {
+        console.error('Error al cargar torneos:', err);
+      }
+    };
+
+    fetchTournaments();
+  }, []);
+
+  // Cargar ranking cuando cambia el filtro o torneo
   useEffect(() => {
     const fetchRanking = async () => {
       try {
         setLoading(true);
-        setCurrentPage(1); // Reiniciar paginación al cambiar filtro
-        const rankingData = await quinielaService.getRankingPorEtapa(filter);
+        setCurrentPage(1);
+        const rankingData = await quinielaService.getRankingPorEtapa(filter, selectedTournament);
         setRanking(rankingData);
         setError(null);
       } catch (err) {
@@ -34,7 +69,7 @@ const Ranking = () => {
     };
 
     fetchRanking();
-  }, [filter]);
+  }, [filter, selectedTournament]);
 
   // Obtener top 3
   const topThree = ranking.slice(0, 3);
@@ -62,16 +97,34 @@ const Ranking = () => {
           <p>Sigue el progreso de tus colegas y compite por el primer lugar.</p>
         </div>
         <div className="header-right">
-          <select className="filter-select" value={filter} onChange={(e) => setFilter(e.target.value)}>
-            <option value="group_stage_1">Jornada 1</option>
-            <option value="group_stage_2">Jornada 2</option>
-            <option value="group_stage_3">Jornada 3</option>
-            <option value="round_of_16">Dieciseisavos</option>
-            <option value="round_of_8">Octavos</option>
-            <option value="round_of_4">Cuartos</option>
-            <option value="semifinals">Semifinales</option>
-            <option value="third_place">Tercer Lugar</option>
-            <option value="final">Final</option>
+          <select 
+            className="filter-select" 
+            value={selectedTournament} 
+            onChange={(e) => {
+              setSelectedTournament(e.target.value);
+              const tournament = tournaments.find(t => t.id === e.target.value);
+              if (tournament && tournament.stages.length > 0) {
+                setFilter(tournament.stages[0].stage);
+              }
+            }}
+          >
+            {tournaments.map((tournament) => (
+              <option key={tournament.id} value={tournament.id}>
+                {tournament.name}
+              </option>
+            ))}
+          </select>
+
+          <select 
+            className="filter-select" 
+            value={filter} 
+            onChange={(e) => setFilter(e.target.value)}
+          >
+            {tournaments.find(t => t.id === selectedTournament)?.stages.map((stage) => (
+              <option key={stage.stage} value={stage.stage}>
+                {stage.name}
+              </option>
+            ))}
           </select>
         </div>
       </div>

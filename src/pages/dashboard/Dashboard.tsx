@@ -1,25 +1,31 @@
 import { useEffect, useState } from 'react';
-import { Card, Button, Tag, Row, Col, Spin } from 'antd';
+import { Card, Button, Tag, Row, Col, Spin, Carousel } from 'antd';
 import { TrophyOutlined, BellOutlined } from '@ant-design/icons';
 import { useAuthStore } from '@/store/authStore';
 import { quinielaService } from '@/services/quinielaService';
 import './Dashboard.css';
 
-interface ProximoPartido {
+interface Partido {
   id: string;
   home_team: string;
-  flag_home: string;
+  home_flag: string;
   away_team: string;
-  flag_away: string;
+  away_flag: string;
   match_date: string;
-  fecha_formateada: string;
-  hora: string;
-  liga: string;
+  stage?: string;
+  match_number?: string;
+  group_letter?: string;
+}
+
+interface Torneo {
+  id: string;
+  name: string;
+  proximo_partido: Partido;
 }
 
 export const Dashboard = () => {
   const { user } = useAuthStore();
-  const [proximoPartido, setProximoPartido] = useState<ProximoPartido | null>(null);
+  const [torneos, setTorneos] = useState<Torneo[]>([]);
   const [cargandoPartido, setCargandoPartido] = useState(true);
   const [historial, setHistorial] = useState<any[]>([]);
   const [cargandoHistorial, setCargandoHistorial] = useState(true);
@@ -33,19 +39,29 @@ export const Dashboard = () => {
   }, []);
 
   useEffect(() => {
-    const cargarProximoPartido = async () => {
+    const cargarTorneos = async () => {
       try {
         setCargandoPartido(true);
-        const partido = await quinielaService.getProximoPartido();
-        setProximoPartido(partido);
+        const respuesta = await quinielaService.getProximoPartido();
+        console.log('Respuesta del Dashboard:', respuesta);
+        
+        // Verificar si es un array (nuevos datos)
+        if (Array.isArray(respuesta)) {
+          console.log('✅ Es un array de torneos:', respuesta);
+          setTorneos(respuesta);
+        } else {
+          console.log('Solo objeto individual, lo convertimos a array');
+          setTorneos([]);
+        }
       } catch (error) {
-        console.error('Error al cargar próximo partido:', error);
+        console.error('Error al cargar torneos:', error);
+        setTorneos([]);
       } finally {
         setCargandoPartido(false);
       }
     };
 
-    cargarProximoPartido();
+    cargarTorneos();
   }, []);
 
   useEffect(() => {
@@ -122,108 +138,124 @@ export const Dashboard = () => {
       <Row gutter={[16, 16]}>
         {/* Columna izquierda */}
         <Col xs={24} lg={16}>
-          {/* Estadísticas principales */}
-          <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
-            <Col xs={24} md={8}>
-              <Card style={{ textAlign: 'center' }}>
-                <div style={{ color: '#999', fontSize: '12px', marginBottom: '4px' }}>PUNTOS TOTALES</div>
-                <div style={{ fontSize: '32px', fontWeight: 'bold' }}>{cargandoPuntos ? '-' : puntosTotales}</div>
-              </Card>
-            </Col>
-            <Col xs={24} md={8}>
-              <Card style={{ textAlign: 'center' }}>
-                <div style={{ color: '#999', fontSize: '12px', marginBottom: '4px' }}>RANKING GLOBAL</div>
-                <div style={{ fontSize: '16px', fontWeight: 'bold' }}>- EN ESPERA DEL INICIO DE PARTIDOS -</div>
-              </Card>
-            </Col>
-            <Col xs={24} md={8}>
-              <Card style={{ textAlign: 'center' }}>
-                <div style={{ color: '#999', fontSize: '12px', marginBottom: '4px' }}>APUESTAS PENDIENTES</div>
-                <div style={{ fontSize: '32px', fontWeight: 'bold' }}>{cargandoPendientes ? '-' : prediccionesPendientes}</div>
-              </Card>
-            </Col>
-          </Row>
+          <Card style={{ marginBottom: '16px' }}>
+            {/* Estadísticas principales */}
+            <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+              <Col xs={24} md={8}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ color: '#999', fontSize: '12px', marginBottom: '4px' }}>PUNTOS TOTALES</div>
+                  <div style={{ fontSize: '32px', fontWeight: 'bold' }}>{cargandoPuntos ? '-' : puntosTotales}</div>
+                </div>
+              </Col>
+              <Col xs={24} md={8}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ color: '#999', fontSize: '12px', marginBottom: '4px' }}>RANKING GLOBAL</div>
+                  <div style={{ fontSize: '16px', fontWeight: 'bold' }}>- EN ESPERA DEL INICIO DE PARTIDOS -</div>
+                </div>
+              </Col>
+              <Col xs={24} md={8}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ color: '#999', fontSize: '12px', marginBottom: '4px' }}>APUESTAS PENDIENTES</div>
+                  <div style={{ fontSize: '32px', fontWeight: 'bold' }}>{cargandoPendientes ? '-' : prediccionesPendientes}</div>
+                </div>
+              </Col>
+            </Row>
 
-          {/* Partido destacado */}
-          <Card 
-            style={{ 
-              background: 'linear-gradient(135deg, #654321 0%, #3a3a3a 100%)',
-              color: 'white',
-              marginBottom: '16px'
-            }}
-          >
-            {cargandoPartido ? (
-              <div style={{ textAlign: 'center', padding: '40px' }}>
-                <Spin />
-              </div>
-            ) : proximoPartido ? (
-              <>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                  <Tag color="orange">{proximoPartido.liga.toUpperCase()}</Tag>
-                  <span style={{ fontSize: '12px' }}>📅 {proximoPartido.fecha_formateada} • {proximoPartido.hora}</span>
+            {/* Divider */}
+            <div style={{ borderTop: '1px solid #e8e8e8', margin: '24px 0' }}></div>
+
+            {/* Carrusel de torneos */}
+            <div 
+              style={{ 
+                background: 'linear-gradient(135deg, #654321 0%, #3a3a3a 100%)',
+                color: 'white',
+                padding: '24px',
+                borderRadius: '8px'
+              }}
+            >
+              {cargandoPartido ? (
+                <div style={{ textAlign: 'center', padding: '40px' }}>
+                  <Spin />
                 </div>
-                <Row gutter={[16, 16]} align="middle" style={{ textAlign: 'center' }}>
-                  <Col span={10}>
-                    <div style={{ 
-                      width: '80px', 
-                      height: '80px', 
-                      margin: '0 auto 12px',
-                      borderRadius: '8px',
-                      overflow: 'hidden',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-                    }}>
-                      <img 
-                        src={proximoPartido.flag_home} 
-                        alt={proximoPartido.home_team} 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
+              ) : torneos.length > 0 ? (
+                <Carousel
+                  arrows
+                  dots={true}
+                  autoplay={true}
+                  autoplaySpeed={10000}
+                  style={{ padding: '0 20px' }}
+                >
+                  {torneos.map((torneo) => (
+                    <div key={torneo.id}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                        <Tag color="orange">{torneo.name.toUpperCase()}</Tag>
+                        <span style={{ fontSize: '12px', color: 'white' }}>📅 {new Date(torneo.proximo_partido.match_date).toLocaleDateString('es-ES')} • {new Date(torneo.proximo_partido.match_date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
+                      <Row gutter={[16, 16]} align="middle" style={{ textAlign: 'center' }}>
+                        <Col span={10}>
+                          <div style={{ 
+                            width: '80px', 
+                            height: '80px', 
+                            margin: '0 auto 12px',
+                            borderRadius: '8px',
+                            overflow: 'hidden',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                          }}>
+                            <img 
+                              src={torneo.proximo_partido.home_flag} 
+                              alt={torneo.proximo_partido.home_team} 
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          </div>
+                          <h3 style={{ color: 'white', margin: 0 }}>{torneo.proximo_partido.home_team}</h3>
+                        </Col>
+                        <Col span={4}>
+                          <h2 style={{ color: 'rgba(255,255,255,0.5)', margin: 0, fontSize: '36px' }}>VS</h2>
+                        </Col>
+                        <Col span={10}>
+                          <div style={{ 
+                            width: '80px', 
+                            height: '80px', 
+                            margin: '0 auto 12px',
+                            borderRadius: '8px',
+                            overflow: 'hidden',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
+                          }}>
+                            <img 
+                              src={torneo.proximo_partido.away_flag} 
+                              alt={torneo.proximo_partido.away_team} 
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          </div>
+                          <h3 style={{ color: 'white', margin: 0 }}>{torneo.proximo_partido.away_team}</h3>
+                        </Col>
+                      </Row>
+                      <div style={{ textAlign: 'center', marginTop: '24px' }}>
+                        <Button 
+                          type="primary" 
+                          size="large"
+                          href={`/quiniela`}
+                          danger
+                          icon={<TrophyOutlined />}
+                          style={{ 
+                            background: 'white',
+                            color: '#ff4d4f',
+                            border: 'none',
+                            fontWeight: 'bold'
+                          }}
+                        >
+                          Pronosticar Ahora
+                        </Button>
+                      </div>
                     </div>
-                    <h3 style={{ color: 'white', margin: 0 }}>{proximoPartido.home_team}</h3>
-                  </Col>
-                  <Col span={4}>
-                    <h2 style={{ color: 'rgba(255,255,255,0.5)', margin: 0, fontSize: '36px' }}>VS</h2>
-                  </Col>
-                  <Col span={10}>
-                    <div style={{ 
-                      width: '80px', 
-                      height: '80px', 
-                      margin: '0 auto 12px',
-                      borderRadius: '8px',
-                      overflow: 'hidden',
-                      boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-                    }}>
-                      <img 
-                        src={proximoPartido.flag_away} 
-                        alt={proximoPartido.away_team} 
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    </div>
-                    <h3 style={{ color: 'white', margin: 0 }}>{proximoPartido.away_team}</h3>
-                  </Col>
-                </Row>
-                <div style={{ textAlign: 'center', marginTop: '24px' }}>
-                  <Button 
-                    type="primary" 
-                    size="large"
-                    href={`/quiniela`}
-                    danger
-                    icon={<TrophyOutlined />}
-                    style={{ 
-                      background: 'white',
-                      color: '#ff4d4f',
-                      border: 'none',
-                      fontWeight: 'bold'
-                    }}
-                  >
-                    Pronosticar Ahora
-                  </Button>
+                  ))}
+                </Carousel>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,0.7)' }}>
+                  <p>No hay próximos partidos disponibles</p>
                 </div>
-              </>
-            ) : (
-              <div style={{ textAlign: 'center', padding: '40px', color: 'rgba(255,255,255,0.7)' }}>
-                <p>No hay próximos partidos disponibles</p>
-              </div>
-            )}
+              )}
+            </div>
           </Card>
 
         </Col>

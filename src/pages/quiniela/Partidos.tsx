@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, Tabs, Button, Row, Col, Avatar, Tag, Spin, Empty, message, Modal, Input, Select } from 'antd';
 import { TrophyOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
-import { quinielaService } from '@/services/quinielaService';
+import { quinielaService, type Torneo } from '@/services/quinielaService';
 import { useAuthStore } from '@/store/authStore';
 import './Partidos.css';
 
@@ -31,9 +31,9 @@ interface Partido {
 export const Partidos = () => {
   const [partidos, setPartidos] = useState<Partido[]>([]);
   const [partidosFiltrados, setPartidosFiltrados] = useState<Partido[]>([]);
-  const [torneos, setTorneos] = useState<Array<{ id: string; name: string }>>([]);
+  const [torneos, setTorneos] = useState<Torneo[]>([]);
   const [torneoSeleccionado, setTorneoSeleccionado] = useState<string>('');
-  const [filtroJornada, setFiltroJornada] = useState<string>('group_stage_1');
+  const [filtroJornada, setFiltroJornada] = useState<string>('');
   const [cargando, setCargando] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [partidoSeleccionado, setPartidoSeleccionado] = useState<Partido | null>(null);
@@ -41,6 +41,22 @@ export const Partidos = () => {
   const [golesLocal, setGolesLocal] = useState<number>(0);
   const [golesVisitante, setGolesVisitante] = useState<number>(0);
   const { user } = useAuthStore();
+
+  const fasesTorneo = useMemo(() => {
+    const torneo = torneos.find(t => t.id === torneoSeleccionado);
+    return torneo?.stages ?? [];
+  }, [torneos, torneoSeleccionado]);
+
+  const fasesTabs = useMemo(
+    () => fasesTorneo.map(fase => ({ label: fase.name, key: fase.stage })),
+    [fasesTorneo]
+  );
+
+  useEffect(() => {
+    if (!torneoSeleccionado || fasesTorneo.length === 0) return;
+
+    setFiltroJornada(fasesTorneo[0].stage);
+  }, [torneoSeleccionado, fasesTorneo]);
 
   useEffect(() => {
     const cargarTorneos = async () => {
@@ -67,7 +83,6 @@ export const Partidos = () => {
         setCargando(true);
         const datos = await quinielaService.getPartidos(torneoSeleccionado);
         setPartidos(datos);
-        setFiltroJornada('group_stage_1');
       } catch (error) {
         console.error('Error al cargar partidos:', error);
         message.error('Error al cargar los partidos');
@@ -301,16 +316,7 @@ export const Partidos = () => {
           <Tabs
             activeKey={filtroJornada}
             onChange={setFiltroJornada}
-            items={[
-              { label: 'Jornada 1', key: 'group_stage_1' },
-              { label: 'Jornada 2', key: 'group_stage_2' },
-              { label: 'Jornada 3', key: 'group_stage_3' },
-              { label: 'Dieciseisavos', key: 'round_of_16' },
-              { label: 'Cuartos', key: 'quarter_finals' },
-              { label: 'Semifinales', key: 'semi_finals' },
-              { label: 'Tercer Lugar', key: 'third_place' },
-              { label: 'Final', key: 'final' },
-            ]}
+            items={fasesTabs}
           />
         </div>
 
@@ -321,16 +327,10 @@ export const Partidos = () => {
             onChange={setFiltroJornada}
             style={{ width: '100%' }}
             size="large"
-            options={[
-              { label: 'Jornada 1', value: 'group_stage_1' },
-              { label: 'Jornada 2', value: 'group_stage_2' },
-              { label: 'Jornada 3', value: 'group_stage_3' },
-              { label: 'Dieciseisavos', value: 'round_of_16' },
-              { label: 'Cuartos', value: 'quarter_finals' },
-              { label: 'Semifinales', value: 'semi_finals' },
-              { label: 'Tercer Lugar', value: 'third_place' },
-              { label: 'Final', value: 'final' },
-            ]}
+            options={fasesTorneo.map(fase => ({
+              label: fase.name,
+              value: fase.stage,
+            }))}
           />
         </div>
       </div>
