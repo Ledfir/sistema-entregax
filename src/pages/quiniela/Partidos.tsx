@@ -42,22 +42,6 @@ export const Partidos = () => {
   const [golesVisitante, setGolesVisitante] = useState<number>(0);
   const { user } = useAuthStore();
 
-  const fasesTorneo = useMemo(() => {
-    const torneo = torneos.find(t => t.id === torneoSeleccionado);
-    return torneo?.stages ?? [];
-  }, [torneos, torneoSeleccionado]);
-
-  const fasesTabs = useMemo(
-    () => fasesTorneo.map(fase => ({ label: fase.name, key: fase.stage })),
-    [fasesTorneo]
-  );
-
-  useEffect(() => {
-    if (!torneoSeleccionado || fasesTorneo.length === 0) return;
-
-    setFiltroJornada(fasesTorneo[0].stage);
-  }, [torneoSeleccionado, fasesTorneo]);
-
   useEffect(() => {
     const cargarTorneos = async () => {
       try {
@@ -83,6 +67,7 @@ export const Partidos = () => {
         setCargando(true);
         const datos = await quinielaService.getPartidos(torneoSeleccionado);
         setPartidos(datos);
+        setFiltroJornada('group_stage_1');
       } catch (error) {
         console.error('Error al cargar partidos:', error);
         message.error('Error al cargar los partidos');
@@ -107,32 +92,32 @@ export const Partidos = () => {
   const abrirModalPrediccion = async (partido: Partido) => {
     if (!user?.id) return;
     
+    // Verificar si la fecha del partido ya pasó
+    const fechaPartido = new Date(partido.hora || '');
+    const ahora = new Date();
+    const partidoYaPaso = fechaPartido < ahora;
+    
+    if (partidoYaPaso) {
+      message.error('No puedes modificar predicciones de partidos que ya se jugaron');
+      return;
+    }
+    
     try {
       const validacion = await quinielaService.validarPrediccion(String(user.id), partido.id);
       
-      if (!validacion.valida) {
-        // No hay predicción previa, abrir modal normal
-        setPartidoSeleccionado(partido);
+      // Abrir modal siempre que haya o no predicción previa
+      setPartidoSeleccionado(partido);
+      
+      // Cargar los goles anteriores si existen en la predicción
+      if (validacion.prediction) {
+        setGolesLocal(parseInt(validacion.prediction.home_score) || 0);
+        setGolesVisitante(parseInt(validacion.prediction.away_score) || 0);
+      } else {
         setGolesLocal(0);
         setGolesVisitante(0);
-        setModalVisible(true);
-      } else {
-        // Ya existe una predicción previa
-        let prediccionTexto = '';
-        if (validacion.prediccion === 'HOME') {
-          prediccionTexto = `Gana ${partido.equipo1.nombre}`;
-        } else if (validacion.prediccion === 'DRAW') {
-          prediccionTexto = 'Empate';
-        } else if (validacion.prediccion === 'AWAY') {
-          prediccionTexto = `Gana ${partido.equipo2.nombre}`;
-        }
-        
-        Modal.info({
-          title: 'Predicción Existente',
-          content: `Ya tienes una predicción para este partido: ${prediccionTexto}`,
-          okText: 'Entendido',
-        });
       }
+      
+      setModalVisible(true);
     } catch (error) {
       console.error('Error al validar predicción:', error);
       message.error('Error al validar la predicción');
@@ -316,7 +301,16 @@ export const Partidos = () => {
           <Tabs
             activeKey={filtroJornada}
             onChange={setFiltroJornada}
-            items={fasesTabs}
+            items={[
+              { label: 'Jornada 1', key: 'group_stage_1' },
+              { label: 'Jornada 2', key: 'group_stage_2' },
+              { label: 'Jornada 3', key: 'group_stage_3' },
+              { label: 'Dieciseisavos', key: 'round_of_16' },
+              { label: 'Cuartos', key: 'quarter_finals' },
+              { label: 'Semifinales', key: 'semi_finals' },
+              { label: 'Tercer Lugar', key: 'third_place' },
+              { label: 'Final', key: 'final' },
+            ]}
           />
         </div>
 
@@ -327,10 +321,16 @@ export const Partidos = () => {
             onChange={setFiltroJornada}
             style={{ width: '100%' }}
             size="large"
-            options={fasesTorneo.map(fase => ({
-              label: fase.name,
-              value: fase.stage,
-            }))}
+            options={[
+              { label: 'Jornada 1', value: 'group_stage_1' },
+              { label: 'Jornada 2', value: 'group_stage_2' },
+              { label: 'Jornada 3', value: 'group_stage_3' },
+              { label: 'Dieciseisavos', value: 'round_of_16' },
+              { label: 'Cuartos', value: 'quarter_finals' },
+              { label: 'Semifinales', value: 'semi_finals' },
+              { label: 'Tercer Lugar', value: 'third_place' },
+              { label: 'Final', value: 'final' },
+            ]}
           />
         </div>
       </div>
