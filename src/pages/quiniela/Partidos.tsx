@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, Tabs, Button, Row, Col, Avatar, Tag, Spin, Empty, message, Modal, Input, Select } from 'antd';
 import { TrophyOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { quinielaService, type Torneo } from '@/services/quinielaService';
@@ -26,6 +26,13 @@ interface Partido {
   verDetalles?: boolean;
 }
 
+interface Prediccion {
+  id?: string;
+  prediction: 'HOME' | 'DRAW' | 'AWAY';
+  home_score: number;
+  away_score: number;
+}
+
 // const PARTIDOS_DATA: Partido[] = [];
 
 export const Partidos = () => {
@@ -34,12 +41,14 @@ export const Partidos = () => {
   const [torneos, setTorneos] = useState<Torneo[]>([]);
   const [torneoSeleccionado, setTorneoSeleccionado] = useState<string>('');
   const [filtroJornada, setFiltroJornada] = useState<string>('');
+  const [stagesActuales, setStagesActuales] = useState<any[]>([]);
   const [cargando, setCargando] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
   const [partidoSeleccionado, setPartidoSeleccionado] = useState<Partido | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [golesLocal, setGolesLocal] = useState<number>(0);
   const [golesVisitante, setGolesVisitante] = useState<number>(0);
+  const [prediccionMostrar, setPrediccionMostrar] = useState<Prediccion | null>(null);
   const { user } = useAuthStore();
 
   useEffect(() => {
@@ -49,6 +58,10 @@ export const Partidos = () => {
         setTorneos(listaTorneos);
         if (listaTorneos.length > 0) {
           setTorneoSeleccionado(listaTorneos[0].id);
+          setStagesActuales(listaTorneos[0].stages);
+          if (listaTorneos[0].stages.length > 0) {
+            setFiltroJornada(listaTorneos[0].stages[0].stage);
+          }
         }
       } catch (error) {
         console.error('Error al cargar torneos:', error);
@@ -62,12 +75,23 @@ export const Partidos = () => {
   useEffect(() => {
     if (!torneoSeleccionado) return;
 
+    const torneo = torneos.find(t => t.id === torneoSeleccionado);
+    if (torneo) {
+      setStagesActuales(torneo.stages);
+      if (torneo.stages.length > 0) {
+        setFiltroJornada(torneo.stages[0].stage);
+      }
+    }
+  }, [torneoSeleccionado, torneos]);
+
+  useEffect(() => {
+    if (!torneoSeleccionado) return;
+
     const cargarPartidos = async () => {
       try {
         setCargando(true);
         const datos = await quinielaService.getPartidos(torneoSeleccionado);
         setPartidos(datos);
-        setFiltroJornada('group_stage_1');
       } catch (error) {
         console.error('Error al cargar partidos:', error);
         message.error('Error al cargar los partidos');
@@ -105,13 +129,20 @@ export const Partidos = () => {
     try {
       const validacion = await quinielaService.validarPrediccion(String(user.id), partido.id);
       
-      // Abrir modal siempre que haya o no predicción previa
-      setPartidoSeleccionado(partido);
+      // Si valida es false, no permitir hacer predicción
+      if (!validacion.valida) {
+        message.error('No puedes modificar esta predicción');
+        return;
+      }
       
-      // Cargar los goles anteriores si existen en la predicción
-      if (validacion.prediction) {
-        setGolesLocal(parseInt(validacion.prediction.home_score) || 0);
-        setGolesVisitante(parseInt(validacion.prediction.away_score) || 0);
+      // Establecer todos los valores ANTES de abrir el modal
+      setPartidoSeleccionado(partido);
+      setPrediccionMostrar(validacion.prediccion || null);
+      
+      // Establecer goles si hay predicción previa
+      if (validacion.prediccion) {
+        setGolesLocal(validacion.prediccion.home_score || 0);
+        setGolesVisitante(validacion.prediccion.away_score || 0);
       } else {
         setGolesLocal(0);
         setGolesVisitante(0);
@@ -127,6 +158,7 @@ export const Partidos = () => {
   const cerrarModal = () => {
     setModalVisible(false);
     setPartidoSeleccionado(null);
+    setPrediccionMostrar(null);
     setGolesLocal(0);
     setGolesVisitante(0);
   };
@@ -185,7 +217,8 @@ export const Partidos = () => {
           partidoSeleccionado.id,
           prediccion,
           golesLocal,
-          golesVisitante
+          golesVisitante,
+          prediccionMostrar?.id ? String(prediccionMostrar.id) : undefined
         );
 
         message.success('¡Predicción guardada exitosamente!');
@@ -301,16 +334,10 @@ export const Partidos = () => {
           <Tabs
             activeKey={filtroJornada}
             onChange={setFiltroJornada}
-            items={[
-              { label: 'Jornada 1', key: 'group_stage_1' },
-              { label: 'Jornada 2', key: 'group_stage_2' },
-              { label: 'Jornada 3', key: 'group_stage_3' },
-              { label: 'Dieciseisavos', key: 'round_of_16' },
-              { label: 'Cuartos', key: 'quarter_finals' },
-              { label: 'Semifinales', key: 'semi_finals' },
-              { label: 'Tercer Lugar', key: 'third_place' },
-              { label: 'Final', key: 'final' },
-            ]}
+            items={stagesActuales.map(stage => ({
+              label: stage.name,
+              key: stage.stage,
+            }))}
           />
         </div>
 
@@ -321,16 +348,10 @@ export const Partidos = () => {
             onChange={setFiltroJornada}
             style={{ width: '100%' }}
             size="large"
-            options={[
-              { label: 'Jornada 1', value: 'group_stage_1' },
-              { label: 'Jornada 2', value: 'group_stage_2' },
-              { label: 'Jornada 3', value: 'group_stage_3' },
-              { label: 'Dieciseisavos', value: 'round_of_16' },
-              { label: 'Cuartos', value: 'quarter_finals' },
-              { label: 'Semifinales', value: 'semi_finals' },
-              { label: 'Tercer Lugar', value: 'third_place' },
-              { label: 'Final', value: 'final' },
-            ]}
+            options={stagesActuales.map(stage => ({
+              label: stage.name,
+              value: stage.stage,
+            }))}
           />
         </div>
       </div>
@@ -365,7 +386,29 @@ export const Partidos = () => {
       >
         {partidoSeleccionado && (
           <div style={{ textAlign: 'center' }}>
-            <h2 style={{ marginBottom: '24px' }}>Haz tu predicción</h2>
+            <h2 style={{ marginBottom: '8px' }}>
+              {prediccionMostrar ? 'Modifica tu predicción' : 'Haz tu predicción'}
+            </h2>
+            
+            {/* Mostrar predicción anterior si existe */}
+            {prediccionMostrar && (
+              <div style={{ 
+                marginBottom: '24px', 
+                padding: '12px',
+                backgroundColor: '#f0f0f0',
+                borderRadius: '6px',
+                fontSize: '14px',
+                color: '#666'
+              }}>
+                <p style={{ margin: '0' }}>
+                  Tu predicción anterior: <strong>
+                    {prediccionMostrar.prediction === 'HOME' ? partidoSeleccionado.equipo1.nombre : 
+                     prediccionMostrar.prediction === 'AWAY' ? partidoSeleccionado.equipo2.nombre : 
+                     'Empate'} {prediccionMostrar.home_score} - {prediccionMostrar.away_score}
+                  </strong>
+                </p>
+              </div>
+            )}
             
             {/* Resumen del partido */}
             <div style={{ 
@@ -447,20 +490,23 @@ export const Partidos = () => {
                 ✓ Gana {partidoSeleccionado.equipo1.nombre}
               </Button>
               
-              <Button
-                type="default"
-                size="large"
-                style={{ 
-                  height: '50px',
-                  fontSize: '16px',
-                  color: '#faad14',
-                  borderColor: '#faad14'
-                }}
-                onClick={() => handlePrediccion('Empate')}
-                disabled={enviando}
-              >
-                = Empate
-              </Button>
+              {/* Mostrar empate solo en fase de grupos */}
+              {partidoSeleccionado.stage.startsWith('group_stage_') && (
+                <Button
+                  type="default"
+                  size="large"
+                  style={{ 
+                    height: '50px',
+                    fontSize: '16px',
+                    color: '#faad14',
+                    borderColor: '#faad14'
+                  }}
+                  onClick={() => handlePrediccion('Empate')}
+                  disabled={enviando}
+                >
+                  = Empate
+                </Button>
+              )}
 
               <Button
                 type="primary"

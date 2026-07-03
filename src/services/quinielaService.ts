@@ -241,14 +241,15 @@ export const quinielaService = {
    * @param golesLocal Goles del equipo local
    * @param golesVisitante Goles del equipo visitante
    */
-  async guardarPrediccion(idUsuario: string, idPartido: string, prediccion: number, golesLocal?: number, golesVisitante?: number): Promise<void> {
+  async guardarPrediccion(idUsuario: string, idPartido: string, prediccion: number, golesLocal?: number, golesVisitante?: number, idPrediccion?: string): Promise<void> {
     try {
       const response = await apiClient.post('/quiniela/guardar-prediccion', {
         id_usuario: idUsuario,
         id_partido: idPartido,
         prediccion: prediccion,
         goles_local: golesLocal,
-        goles_visitante: golesVisitante
+        goles_visitante: golesVisitante,
+        ...(idPrediccion ? { id_prediccion: idPrediccion } : {})
       });
 
       if (response.data.status !== 'success') {
@@ -267,7 +268,12 @@ export const quinielaService = {
    */
   async validarPrediccion(idUsuario: string, idPartido: string): Promise<{
     valida: boolean;
-    prediccion: 'HOME' | 'DRAW' | 'AWAY' | null;
+    prediccion: {
+      id?: string;
+      prediction: 'HOME' | 'DRAW' | 'AWAY';
+      home_score: number;
+      away_score: number;
+    } | null;
   }> {
     try {
       const response = await apiClient.post('/quiniela/validar-prediccion', {
