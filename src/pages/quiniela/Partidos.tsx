@@ -54,6 +54,9 @@ export const Partidos = () => {
   const [jugadoresEncontrados, setJugadoresEncontrados] = useState<any[]>([]);
   const [jugadorSeleccionado, setJugadorSeleccionado] = useState<any>(null);
   const [cargandoJugadores, setCargandoJugadores] = useState(false);
+  const [equipoModal, setEquipoModal] = useState<any>(null);
+  const [modalEquipoVisible, setModalEquipoVisible] = useState(false);
+  const [cargandoEquipo, setCargandoEquipo] = useState(false);
   const { user } = useAuthStore();
 
   useEffect(() => {
@@ -226,6 +229,32 @@ export const Partidos = () => {
     }
   };
 
+  const buscarEquipo = async (nombreEquipo: string) => {
+    try {
+      setCargandoEquipo(true);
+      console.log('Buscando equipo:', nombreEquipo);
+
+      const respuesta = await fetch(
+        `https://www.thesportsdb.com/api/v1/json/3/searchteams.php?t=${nombreEquipo}`
+      );
+      const datos = await respuesta.json();
+
+      console.log('Datos de equipo:', datos);
+
+      if (datos.teams && Array.isArray(datos.teams) && datos.teams.length > 0) {
+        setEquipoModal(datos.teams[0]);
+        setModalEquipoVisible(true);
+      } else {
+        message.error('No se encontró información del equipo');
+      }
+    } catch (error) {
+      console.error('Error al buscar equipo:', error);
+      message.error('Error al buscar el equipo');
+    } finally {
+      setCargandoEquipo(false);
+    }
+  };
+
   const handlePrediccion = (resultado: string) => {
     if (partidoSeleccionado) {
       mostrarConfirmacion(resultado);
@@ -326,7 +355,8 @@ export const Partidos = () => {
           <Avatar
             size={60}
             src={partido.equipo1.logo}
-            style={{ marginBottom: '8px', borderColor: '#000000' }}
+            style={{ marginBottom: '8px', borderColor: '#000000', cursor: 'pointer' }}
+            onClick={() => buscarEquipo(partido.equipo1.nombre)}
           />
           <div className="equipo-nombre">{partido.equipo1.nombre}</div>
         </div>
@@ -347,7 +377,8 @@ export const Partidos = () => {
           <Avatar
             size={60}
             src={partido.equipo2.logo}
-            style={{ marginBottom: '8px', borderColor: '#000000' }}
+            style={{ marginBottom: '8px', borderColor: '#000000', cursor: 'pointer' }}
+            onClick={() => buscarEquipo(partido.equipo2.nombre)}
           />
           <div className="equipo-nombre">{partido.equipo2.nombre}</div>
         </div>
@@ -757,6 +788,90 @@ export const Partidos = () => {
               disabled={enviando}
             >
               Cancelar
+            </Button>
+          </div>
+        )}
+      </Modal>
+      {/* Modal de Equipo */}
+      <Modal
+        title={null}
+        open={modalEquipoVisible}
+        onCancel={() => setModalEquipoVisible(false)}
+        footer={null}
+        width={600}
+        centered
+        bodyStyle={{ padding: '32px' }}
+        loading={cargandoEquipo}
+      >
+        {equipoModal && (
+          <div style={{ textAlign: 'center' }}>
+            <h2 style={{ marginBottom: '24px' }}>{equipoModal.strTeam}</h2>
+
+            {/* Logo del equipo */}
+            {equipoModal.strBadge && (
+              <div style={{ marginBottom: '24px' }}>
+                <img
+                  src={equipoModal.strBadge}
+                  alt={equipoModal.strTeam}
+                  style={{
+                    maxHeight: '150px',
+                    maxWidth: '150px',
+                    objectFit: 'contain'
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Información del equipo */}
+            <div style={{ textAlign: 'left', marginTop: '24px' }}>
+              {equipoModal.strCountry && (
+                <p>
+                  <strong>País:</strong> {equipoModal.strCountry}
+                </p>
+              )}
+              {equipoModal.intFormedYear && (
+                <p>
+                  <strong>Fundado:</strong> {equipoModal.intFormedYear}
+                </p>
+              )}
+              {equipoModal.strLeague && (
+                <p>
+                  <strong>Liga:</strong> {equipoModal.strLeague}
+                </p>
+              )}
+              {equipoModal.strManager && (
+                <p>
+                  <strong>Entrenador:</strong> {equipoModal.strManager}
+                </p>
+              )}
+              {equipoModal.strStadium && (
+                <p>
+                  <strong>Estadio:</strong> {equipoModal.strStadium}
+                </p>
+              )}
+              {equipoModal.intStadiumCapacity && (
+                <p>
+                  <strong>Capacidad del Estadio:</strong> {equipoModal.intStadiumCapacity?.toLocaleString()}
+                </p>
+              )}
+
+              {/* Descripción */}
+              {equipoModal.strDescriptionEN && (
+                <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #eee' }}>
+                  <p style={{ fontWeight: 'bold', marginBottom: '10px' }}>Descripción:</p>
+                  <p style={{ fontSize: '14px', lineHeight: '1.6', color: '#666' }}>
+                    {equipoModal.strDescriptionEN}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <Button
+              type="primary"
+              style={{ marginTop: '24px', width: '100%' }}
+              onClick={() => setModalEquipoVisible(false)}
+            >
+              Cerrar
             </Button>
           </div>
         )}
