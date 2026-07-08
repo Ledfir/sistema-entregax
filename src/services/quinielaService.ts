@@ -240,8 +240,10 @@ export const quinielaService = {
    * @param prediccion Predicción (1=Home, 2=Draw, 3=Away)
    * @param golesLocal Goles del equipo local
    * @param golesVisitante Goles del equipo visitante
+   * @param primerGoleador Quién anotará primero (home o away)
+   * @param nombreJugador Nombre del jugador que anotará
    */
-  async guardarPrediccion(idUsuario: string, idPartido: string, prediccion: number, golesLocal?: number, golesVisitante?: number, idPrediccion?: string): Promise<void> {
+  async guardarPrediccion(idUsuario: string, idPartido: string, prediccion: number, golesLocal?: number, golesVisitante?: number, idPrediccion?: string, primerGoleador?: string, nombreJugador?: string): Promise<void> {
     try {
       const response = await apiClient.post('/quiniela/guardar-prediccion', {
         id_usuario: idUsuario,
@@ -249,7 +251,9 @@ export const quinielaService = {
         prediccion: prediccion,
         goles_local: golesLocal,
         goles_visitante: golesVisitante,
-        ...(idPrediccion ? { id_prediccion: idPrediccion } : {})
+        ...(idPrediccion ? { id_prediccion: idPrediccion } : {}),
+        ...(primerGoleador ? { primer_goleador: primerGoleador } : {}),
+        ...(nombreJugador ? { nombre_jugador: nombreJugador } : {})
       });
 
       if (response.data.status !== 'success') {
@@ -273,6 +277,8 @@ export const quinielaService = {
       prediction: 'HOME' | 'DRAW' | 'AWAY';
       home_score: number;
       away_score: number;
+      primer_goleador?: string;
+      nombre_jugador?: string;
     } | null;
   }> {
     try {

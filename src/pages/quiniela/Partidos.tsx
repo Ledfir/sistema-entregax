@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Tabs, Button, Row, Col, Avatar, Tag, Spin, Empty, message, Modal, Input, Select } from 'antd';
+import { Card, Tabs, Button, Row, Col, Avatar, Tag, Spin, Empty, message, Modal, Input, Select, Collapse } from 'antd';
 import { TrophyOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { quinielaService, type Torneo } from '@/services/quinielaService';
 import { useAuthStore } from '@/store/authStore';
@@ -49,6 +49,11 @@ export const Partidos = () => {
   const [golesLocal, setGolesLocal] = useState<number>(0);
   const [golesVisitante, setGolesVisitante] = useState<number>(0);
   const [prediccionMostrar, setPrediccionMostrar] = useState<Prediccion | null>(null);
+  const [primerGoleador, setPrimerGoleador] = useState<string>('');
+  const [busquedaJugador, setBusquedaJugador] = useState<string>('');
+  const [jugadoresEncontrados, setJugadoresEncontrados] = useState<any[]>([]);
+  const [jugadorSeleccionado, setJugadorSeleccionado] = useState<any>(null);
+  const [cargandoJugadores, setCargandoJugadores] = useState(false);
   const { user } = useAuthStore();
 
   useEffect(() => {
@@ -143,11 +148,30 @@ export const Partidos = () => {
       if (validacion.prediccion) {
         setGolesLocal(validacion.prediccion.home_score || 0);
         setGolesVisitante(validacion.prediccion.away_score || 0);
+        
+        // Cargar puntos extras si existen
+        const primerGol = (validacion.prediccion as any)?.initial_goal || (validacion.prediccion as any)?.primer_goleador;
+        const nombreJugador = (validacion.prediccion as any)?.anotador || (validacion.prediccion as any)?.nombre_jugador;
+        
+        if (primerGol) {
+          // Convertir "HOME" a "home" y "AWAY" a "away"
+          const goleadorFormato = primerGol.toLowerCase() === 'home' ? 'home' : primerGol.toLowerCase() === 'away' ? 'away' : primerGol;
+          setPrimerGoleador(goleadorFormato);
+        }
+        
+        if (nombreJugador) {
+          setJugadorSeleccionado({
+            strPlayer: nombreJugador,
+            strCutout: null
+          });
+        }
       } else {
         setGolesLocal(0);
         setGolesVisitante(0);
       }
       
+      setBusquedaJugador('');
+      setJugadoresEncontrados([]);
       setModalVisible(true);
     } catch (error) {
       console.error('Error al validar predicción:', error);
@@ -161,6 +185,45 @@ export const Partidos = () => {
     setPrediccionMostrar(null);
     setGolesLocal(0);
     setGolesVisitante(0);
+    setPrimerGoleador('');
+    setBusquedaJugador('');
+    setJugadoresEncontrados([]);
+    setJugadorSeleccionado(null);
+  };
+
+  const buscarJugador = async (nombre: string) => {
+    if (!nombre.trim()) {
+      setJugadoresEncontrados([]);
+      return;
+    }
+
+    try {
+      setCargandoJugadores(true);
+      // Convertir espacios a guiones bajos
+      const nombreFormato = nombre.trim().replace(/\s+/g, '_');
+      console.log('Buscando jugador:', nombreFormato);
+      
+      const respuesta = await fetch(
+        `https://www.thesportsdb.com/api/v1/json/123/searchplayers.php?p=${nombreFormato}`
+      );
+      const datos = await respuesta.json();
+      
+      console.log('Datos de API:', datos);
+      
+      if (datos.player && Array.isArray(datos.player)) {
+        console.log('Jugadores encontrados:', datos.player.length);
+        setJugadoresEncontrados(datos.player);
+      } else {
+        console.log('No se encontraron jugadores');
+        setJugadoresEncontrados([]);
+      }
+    } catch (error) {
+      console.error('Error al buscar jugador:', error);
+      message.error('Error al buscar el jugador');
+      setJugadoresEncontrados([]);
+    } finally {
+      setCargandoJugadores(false);
+    }
   };
 
   const handlePrediccion = (resultado: string) => {
@@ -211,14 +274,27 @@ export const Partidos = () => {
           prediccion = 3;
         }
 
-        // Llamar al servicio para guardar la predicción con los goles
+        console.log('Enviando predicción:', {
+          usuario: String(user.id),
+          partido: partidoSeleccionado.id,
+          prediccion,
+          golesLocal,
+          golesVisitante,
+          idPrediccion: prediccionMostrar?.id ? String(prediccionMostrar.id) : undefined,
+          primerGoleador: primerGoleador || undefined,
+          nombreJugador: jugadorSeleccionado?.strPlayer || undefined
+        });
+
+        // Llamar al servicio para guardar la predicción con los goles y puntos extras
         await quinielaService.guardarPrediccion(
           String(user.id),
           partidoSeleccionado.id,
           prediccion,
           golesLocal,
           golesVisitante,
-          prediccionMostrar?.id ? String(prediccionMostrar.id) : undefined
+          prediccionMostrar?.id ? String(prediccionMostrar.id) : undefined,
+          primerGoleador,
+          jugadorSeleccionado?.strPlayer
         );
 
         message.success('¡Predicción guardada exitosamente!');
@@ -471,6 +547,156 @@ export const Partidos = () => {
                   style={{ fontSize: '16px' }}
                 />
               </div>
+            </div>
+
+            {/* Desplegable de Puntos Extras */}
+            <div style={{ marginBottom: '24px' }}>
+              <Collapse
+                items={[
+                  {
+                    key: '1',
+                    label: 'Puntos extras',
+                    children: (
+                      <div>
+                        <p style={{ marginBottom: '12px', fontWeight: 'bold', textAlign: 'left' }}>
+                          Quién anotará primero
+                        </p>
+                        <Select
+                          placeholder="Selecciona un equipo"
+                          value={primerGoleador || undefined}
+                          onChange={setPrimerGoleador}
+                          options={[
+                            {
+                              label: partidoSeleccionado.equipo1.nombre,
+                              value: 'home'
+                            },
+                            {
+                              label: partidoSeleccionado.equipo2.nombre,
+                              value: 'away'
+                            }
+                          ]}
+                          style={{ width: '100%', marginBottom: '20px' }}
+                        />
+
+                        {/* Buscador de Jugador */}
+                        <p style={{ marginBottom: '12px', fontWeight: 'bold', textAlign: 'left', marginTop: '20px' }}>
+                          Buscar jugador que anotará
+                        </p>
+                        <Input
+                          placeholder="Ingresa nombre del jugador (ej: Lionel Messi)"
+                          value={busquedaJugador}
+                          onChange={(e) => {
+                            setBusquedaJugador(e.target.value);
+                            buscarJugador(e.target.value);
+                          }}
+                          style={{ marginBottom: '12px' }}
+                          allowClear
+                        />
+
+                        {/* Resultados de búsqueda */}
+                        {cargandoJugadores && (
+                          <div style={{ textAlign: 'center', padding: '12px' }}>
+                            <Spin size="small" />
+                          </div>
+                        )}
+
+                        {!cargandoJugadores && jugadoresEncontrados.length > 0 && (
+                          <div style={{ 
+                            border: '1px solid #d9d9d9',
+                            borderRadius: '4px',
+                            maxHeight: '300px',
+                            overflowY: 'auto',
+                            marginBottom: '12px'
+                          }}>
+                            {jugadoresEncontrados.map((jugador) => (
+                              <div
+                                key={jugador.idPlayer}
+                                onClick={() => {
+                                  setJugadorSeleccionado(jugador);
+                                  setBusquedaJugador('');
+                                  setJugadoresEncontrados([]);
+                                }}
+                                style={{
+                                  padding: '12px',
+                                  borderBottom: '1px solid #f0f0f0',
+                                  cursor: 'pointer',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '12px',
+                                  transition: 'background-color 0.2s',
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#f5f5f5';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = 'transparent';
+                                }}
+                              >
+                                {jugador.strCutout && (
+                                  <img
+                                    src={jugador.strCutout}
+                                    alt={jugador.strPlayer}
+                                    style={{
+                                      width: '40px',
+                                      height: '40px',
+                                      borderRadius: '4px',
+                                      objectFit: 'cover'
+                                    }}
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                    }}
+                                  />
+                                )}
+                                <span>{jugador.strPlayer}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Jugador Seleccionado */}
+                        {jugadorSeleccionado && (
+                          <div style={{
+                            padding: '12px',
+                            backgroundColor: '#e6f7ff',
+                            borderRadius: '4px',
+                            border: '1px solid #91d5ff',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            marginBottom: '12px'
+                          }}>
+                            {jugadorSeleccionado.strCutout && (
+                              <img
+                                src={jugadorSeleccionado.strCutout}
+                                alt={jugadorSeleccionado.strPlayer}
+                                style={{
+                                  width: '50px',
+                                  height: '50px',
+                                  borderRadius: '4px',
+                                  objectFit: 'cover'
+                                }}
+                              />
+                            )}
+                            <div>
+                              <p style={{ margin: '0', fontWeight: 'bold' }}>
+                                {jugadorSeleccionado.strPlayer}
+                              </p>
+                              <Button
+                                type="text"
+                                size="small"
+                                danger
+                                onClick={() => setJugadorSeleccionado(null)}
+                              >
+                                Cambiar
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ),
+                  },
+                ]}
+              />
             </div>
 
             {/* Opciones de predicción */}
