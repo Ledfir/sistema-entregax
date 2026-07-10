@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, Tabs, Button, Row, Col, Avatar, Tag, Spin, Empty, message, Modal, Input, Select, Collapse } from 'antd';
+import { Card, Tabs, Button, Row, Col, Avatar, Tag, Spin, Empty, message, Modal, Input, Select, Collapse, Slider } from 'antd';
 import { TrophyOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { quinielaService, type Torneo } from '@/services/quinielaService';
 import { useAuthStore } from '@/store/authStore';
@@ -57,6 +57,10 @@ export const Partidos = () => {
   const [equipoModal, setEquipoModal] = useState<any>(null);
   const [modalEquipoVisible, setModalEquipoVisible] = useState(false);
   const [cargandoEquipo, setCargandoEquipo] = useState(false);
+  const [golDescansoLocal, setGolDescansoLocal] = useState<number>(0);
+  const [golDescansoVisitante, setGolDescansoVisitante] = useState<number>(0);
+  const [totalCorners, setTotalCorners] = useState<number>(8);
+  const [habraPenal, setHabraPenal] = useState<string>('');
   const { user } = useAuthStore();
 
   useEffect(() => {
@@ -168,6 +172,29 @@ export const Partidos = () => {
             strCutout: null
           });
         }
+        
+        // Cargar goles de descanso
+        const golDescansoLocalVal = (validacion.prediccion as any)?.home_score_medio_tiempo;
+        const golDescansoVisitanteVal = (validacion.prediccion as any)?.away_score_medio_tiempo;
+        if (golDescansoLocalVal !== undefined) {
+          setGolDescansoLocal(parseInt(golDescansoLocalVal) || 0);
+        }
+        if (golDescansoVisitanteVal !== undefined) {
+          setGolDescansoVisitante(parseInt(golDescansoVisitanteVal) || 0);
+        }
+        
+        // Cargar corners
+        const cornersVal = (validacion.prediccion as any)?.corners;
+        if (cornersVal !== undefined) {
+          setTotalCorners(parseInt(cornersVal) || 8);
+        }
+        
+        // Cargar penales (convertir 1/0 a si/no)
+        const penalsVal = (validacion.prediccion as any)?.penals;
+        if (penalsVal !== undefined) {
+          const penalFormato = penalsVal === '1' || penalsVal === 1 ? 'si' : 'no';
+          setHabraPenal(penalFormato);
+        }
       } else {
         setGolesLocal(0);
         setGolesVisitante(0);
@@ -188,6 +215,10 @@ export const Partidos = () => {
     setPrediccionMostrar(null);
     setGolesLocal(0);
     setGolesVisitante(0);
+    setGolDescansoLocal(0);
+    setGolDescansoVisitante(0);
+    setTotalCorners(8);
+    setHabraPenal('');
     setPrimerGoleador('');
     setBusquedaJugador('');
     setJugadoresEncontrados([]);
@@ -311,7 +342,11 @@ export const Partidos = () => {
           golesVisitante,
           idPrediccion: prediccionMostrar?.id ? String(prediccionMostrar.id) : undefined,
           primerGoleador: primerGoleador || undefined,
-          nombreJugador: jugadorSeleccionado?.strPlayer || undefined
+          nombreJugador: jugadorSeleccionado?.strPlayer || undefined,
+          golDescansoLocal,
+          golDescansoVisitante,
+          totalCorners,
+          habraPenal
         });
 
         // Llamar al servicio para guardar la predicción con los goles y puntos extras
@@ -322,8 +357,12 @@ export const Partidos = () => {
           golesLocal,
           golesVisitante,
           prediccionMostrar?.id ? String(prediccionMostrar.id) : undefined,
-          primerGoleador,
-          jugadorSeleccionado?.strPlayer
+          primerGoleador || undefined,
+          jugadorSeleccionado?.strPlayer || undefined,
+          golDescansoLocal,
+          golDescansoVisitante,
+          totalCorners || undefined,
+          habraPenal || undefined
         );
 
         message.success('¡Predicción guardada exitosamente!');
@@ -493,58 +532,36 @@ export const Partidos = () => {
       >
         {partidoSeleccionado && (
           <div style={{ textAlign: 'center' }}>
-            <h2 style={{ marginBottom: '8px' }}>
-              {prediccionMostrar ? 'Modifica tu predicción' : 'Haz tu predicción'}
+            <h2 style={{ marginBottom: '24px', fontSize: '18px', fontWeight: 600 }}>
+              Haz tu predicción
             </h2>
             
-            {/* Mostrar predicción anterior si existe */}
-            {prediccionMostrar && (
-              <div style={{ 
-                marginBottom: '24px', 
-                padding: '12px',
-                backgroundColor: '#f0f0f0',
-                borderRadius: '6px',
-                fontSize: '14px',
-                color: '#666'
-              }}>
-                <p style={{ margin: '0' }}>
-                  Tu predicción anterior: <strong>
-                    {prediccionMostrar.prediction === 'HOME' ? partidoSeleccionado.equipo1.nombre : 
-                     prediccionMostrar.prediction === 'AWAY' ? partidoSeleccionado.equipo2.nombre : 
-                     'Empate'} {prediccionMostrar.home_score} - {prediccionMostrar.away_score}
-                  </strong>
-                </p>
-              </div>
-            )}
-            
-            {/* Resumen del partido */}
+            {/* Resumen del partido - MEJORADO */}
             <div style={{ 
               display: 'flex', 
               alignItems: 'center', 
-              justifyContent: 'space-around',
+              justifyContent: 'space-between',
               marginBottom: '32px',
-              padding: '16px',
-              backgroundColor: '#f5f5f5',
-              borderRadius: '8px'
+              gap: '16px'
             }}>
-              <div style={{ textAlign: 'center' }}>
+              <div style={{ textAlign: 'center', flex: 1 }}>
                 <Avatar
-                  size={60}
+                  size={80}
                   src={partidoSeleccionado.equipo1.logo}
-                  style={{ marginBottom: '8px' }}
+                  style={{ marginBottom: '12px' }}
                 />
-                <div style={{ fontWeight: 'bold' }}>
+                <div style={{ fontWeight: 'bold', fontSize: '14px' }}>
                   {partidoSeleccionado.equipo1.nombre}
                 </div>
               </div>
-              <div style={{ color: '#999', fontSize: '14px' }}>VS</div>
-              <div style={{ textAlign: 'center' }}>
+              <div style={{ color: '#999', fontSize: '16px', fontWeight: 'bold' }}>VS</div>
+              <div style={{ textAlign: 'center', flex: 1 }}>
                 <Avatar
-                  size={60}
+                  size={80}
                   src={partidoSeleccionado.equipo2.logo}
-                  style={{ marginBottom: '8px' }}
+                  style={{ marginBottom: '12px' }}
                 />
-                <div style={{ fontWeight: 'bold' }}>
+                <div style={{ fontWeight: 'bold', fontSize: '14px' }}>
                   {partidoSeleccionado.equipo2.nombre}
                 </div>
               </div>
@@ -553,7 +570,7 @@ export const Partidos = () => {
             {/* Inputs de goles */}
             <div style={{ display: 'flex', gap: '16px', marginBottom: '24px' }}>
               <div style={{ flex: 1 }}>
-                <p style={{ marginBottom: '8px', fontWeight: 'bold', textAlign: 'left' }}>
+                <p style={{ marginBottom: '8px', fontWeight: 'bold', textAlign: 'center', fontSize: '12px', color: '#666' }}>
                   Goles - {partidoSeleccionado.equipo1.nombre}
                 </p>
                 <Input
@@ -561,12 +578,15 @@ export const Partidos = () => {
                   min="0"
                   value={golesLocal}
                   onChange={(e) => setGolesLocal(parseInt(e.target.value) || 0)}
-                  placeholder="Ingresa los goles"
-                  style={{ fontSize: '16px' }}
+                  placeholder="0"
+                  style={{ fontSize: '24px', textAlign: 'center', fontWeight: 'bold', height: '56px' }}
                 />
               </div>
+              <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: '8px', color: '#999' }}>
+                –
+              </div>
               <div style={{ flex: 1 }}>
-                <p style={{ marginBottom: '8px', fontWeight: 'bold', textAlign: 'left' }}>
+                <p style={{ marginBottom: '8px', fontWeight: 'bold', textAlign: 'center', fontSize: '12px', color: '#666' }}>
                   Goles - {partidoSeleccionado.equipo2.nombre}
                 </p>
                 <Input
@@ -574,8 +594,8 @@ export const Partidos = () => {
                   min="0"
                   value={golesVisitante}
                   onChange={(e) => setGolesVisitante(parseInt(e.target.value) || 0)}
-                  placeholder="Ingresa los goles"
-                  style={{ fontSize: '16px' }}
+                  placeholder="0"
+                  style={{ fontSize: '24px', textAlign: 'center', fontWeight: 'bold', height: '56px' }}
                 />
               </div>
             </div>
@@ -586,10 +606,12 @@ export const Partidos = () => {
                 items={[
                   {
                     key: '1',
-                    label: 'Puntos extras',
+                    label: <span style={{ fontWeight: 'bold', color: '#1890ff' }}>◎ PUNTOS EXTRA</span>,
+                    extra: <span style={{ fontSize: '12px', color: '#999' }}>Maximiza tus puntos</span>,
                     children: (
                       <div>
-                        <p style={{ marginBottom: '12px', fontWeight: 'bold', textAlign: 'left' }}>
+                        {/* Quién anotará primero */}
+                        <p style={{ marginBottom: '12px', fontWeight: 'bold', textAlign: 'left', fontSize: '14px' }}>
                           Quién anotará primero
                         </p>
                         <Select
@@ -606,15 +628,75 @@ export const Partidos = () => {
                               value: 'away'
                             }
                           ]}
-                          style={{ width: '100%', marginBottom: '20px' }}
+                          style={{ width: '100%', marginBottom: '24px' }}
+                        />
+
+                        {/* Resultado al descanso - NUEVO */}
+                        <p style={{ marginBottom: '12px', fontWeight: 'bold', textAlign: 'left', fontSize: '14px' }}>
+                          Resultado al descanso
+                        </p>
+                        <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', alignItems: 'center' }}>
+                          <Input
+                            type="number"
+                            min="0"
+                            value={golDescansoLocal}
+                            onChange={(e) => setGolDescansoLocal(parseInt(e.target.value) || 0)}
+                            placeholder="0"
+                            style={{ fontSize: '16px', textAlign: 'center', fontWeight: 'bold', height: '40px' }}
+                          />
+                          <span style={{ color: '#999', fontSize: '16px' }}>vs</span>
+                          <Input
+                            type="number"
+                            min="0"
+                            value={golDescansoVisitante}
+                            onChange={(e) => setGolDescansoVisitante(parseInt(e.target.value) || 0)}
+                            placeholder="0"
+                            style={{ fontSize: '16px', textAlign: 'center', fontWeight: 'bold', height: '40px' }}
+                          />
+                        </div>
+
+                        {/* Total de Corners - NUEVO */}
+                        <p style={{ marginBottom: '12px', fontWeight: 'bold', textAlign: 'left', fontSize: '14px' }}>
+                          Mas de {totalCorners} corners
+                        </p>
+                        <div style={{ marginBottom: '24px' }}>
+                          <Slider
+                            min={0}
+                            max={20}
+                            value={totalCorners}
+                            onChange={setTotalCorners}
+                            marks={{ 0: '0', 10: '10', 20: '20+' }}
+                          />
+                          <span style={{ color: '#1890ff', fontWeight: 'bold', fontSize: '14px' }}>{totalCorners}</span>
+                        </div>
+
+                        {/* ¿Habrá penal? - NUEVO */}
+                        <p style={{ marginBottom: '12px', fontWeight: 'bold', textAlign: 'left', fontSize: '14px' }}>
+                          ¿Habrá penal?
+                        </p>
+                        <Select
+                          placeholder="Selecciona una opción"
+                          value={habraPenal || undefined}
+                          onChange={setHabraPenal}
+                          options={[
+                            {
+                              label: 'Sí',
+                              value: 'si'
+                            },
+                            {
+                              label: 'No',
+                              value: 'no'
+                            }
+                          ]}
+                          style={{ width: '100%', marginBottom: '24px' }}
                         />
 
                         {/* Buscador de Jugador */}
-                        <p style={{ marginBottom: '12px', fontWeight: 'bold', textAlign: 'left', marginTop: '20px' }}>
+                        <p style={{ marginBottom: '12px', fontWeight: 'bold', textAlign: 'left', fontSize: '14px' }}>
                           Buscar jugador que anotará
                         </p>
                         <Input
-                          placeholder="Ingresa nombre del jugador (ej: Lionel Messi)"
+                          placeholder="Ej: Morata..."
                           value={busquedaJugador}
                           onChange={(e) => {
                             setBusquedaJugador(e.target.value);
@@ -787,7 +869,7 @@ export const Partidos = () => {
               onClick={cerrarModal}
               disabled={enviando}
             >
-              Cancelar
+              Empaté
             </Button>
           </div>
         )}

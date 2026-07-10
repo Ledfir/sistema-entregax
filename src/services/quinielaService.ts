@@ -243,7 +243,7 @@ export const quinielaService = {
    * @param primerGoleador Quién anotará primero (home o away)
    * @param nombreJugador Nombre del jugador que anotará
    */
-  async guardarPrediccion(idUsuario: string, idPartido: string, prediccion: number, golesLocal?: number, golesVisitante?: number, idPrediccion?: string, primerGoleador?: string, nombreJugador?: string): Promise<void> {
+  async guardarPrediccion(idUsuario: string, idPartido: string, prediccion: number, golesLocal?: number, golesVisitante?: number, idPrediccion?: string, primerGoleador?: string, nombreJugador?: string, golDescansoLocal?: number, golDescansoVisitante?: number, totalCorners?: number, habraPenal?: string): Promise<void> {
     try {
       const response = await apiClient.post('/quiniela/guardar-prediccion', {
         id_usuario: idUsuario,
@@ -253,7 +253,11 @@ export const quinielaService = {
         goles_visitante: golesVisitante,
         ...(idPrediccion ? { id_prediccion: idPrediccion } : {}),
         ...(primerGoleador ? { primer_goleador: primerGoleador } : {}),
-        ...(nombreJugador ? { nombre_jugador: nombreJugador } : {})
+        ...(nombreJugador ? { nombre_jugador: nombreJugador } : {}),
+        ...(golDescansoLocal !== undefined ? { gol_descanso_local: golDescansoLocal } : {}),
+        ...(golDescansoVisitante !== undefined ? { gol_descanso_visitante: golDescansoVisitante } : {}),
+        ...(totalCorners !== undefined ? { total_corners: totalCorners } : {}),
+        ...(habraPenal ? { habra_penal: habraPenal } : {})
       });
 
       if (response.data.status !== 'success') {
