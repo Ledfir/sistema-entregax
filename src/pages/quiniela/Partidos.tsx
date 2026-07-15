@@ -548,7 +548,7 @@ export const Partidos = () => {
                 <Avatar
                   size={80}
                   src={partidoSeleccionado.equipo1.logo}
-                  style={{ marginBottom: '12px' }}
+                  style={{ marginBottom: '12px', borderColor: '#000000', cursor: 'pointer' }}
                 />
                 <div style={{ fontWeight: 'bold', fontSize: '14px' }}>
                   {partidoSeleccionado.equipo1.nombre}
@@ -559,7 +559,7 @@ export const Partidos = () => {
                 <Avatar
                   size={80}
                   src={partidoSeleccionado.equipo2.logo}
-                  style={{ marginBottom: '12px' }}
+                  style={{ marginBottom: '12px', borderColor: '#000000', cursor: 'pointer' }}
                 />
                 <div style={{ fontWeight: 'bold', fontSize: '14px' }}>
                   {partidoSeleccionado.equipo2.nombre}
@@ -869,7 +869,7 @@ export const Partidos = () => {
               onClick={cerrarModal}
               disabled={enviando}
             >
-              Empaté
+              Cerrar ventana
             </Button>
           </div>
         )}

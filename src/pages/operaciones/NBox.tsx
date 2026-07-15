@@ -525,7 +525,7 @@ export const NBox = () => {
       // Verificar si la respuesta es un PDF
       const contentType = response.headers['content-type'];
       
-      if (contentType && contentType.includes('application/json')) {
+      if (contentType && typeof contentType === 'string' && contentType.includes('application/json')) {
         // Si es JSON, es un error
         const text = await response.data.text();
         const errorData = JSON.parse(text);

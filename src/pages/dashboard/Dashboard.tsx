@@ -177,7 +177,7 @@ export const Dashboard = () => {
                 <div style={{ textAlign: 'center', padding: '40px' }}>
                   <Spin />
                 </div>
-              ) : torneos.length > 0 ? (
+              ) : torneos.filter(t => t.proximo_partido).length > 0 ? (
                 <Carousel
                   arrows
                   dots={true}
@@ -185,11 +185,11 @@ export const Dashboard = () => {
                   autoplaySpeed={10000}
                   style={{ padding: '0 20px' }}
                 >
-                  {torneos.map((torneo) => (
+                  {torneos.filter(t => t.proximo_partido).map((torneo) => (
                     <div key={torneo.id}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                         <Tag color="orange">{torneo.name.toUpperCase()}</Tag>
-                        <span style={{ fontSize: '12px', color: 'white' }}>📅 {new Date(torneo.proximo_partido.match_date).toLocaleDateString('es-ES')} • {new Date(torneo.proximo_partido.match_date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span style={{ fontSize: '12px', color: 'white' }}>📅 {new Date(torneo.proximo_partido!.match_date).toLocaleDateString('es-ES')} • {new Date(torneo.proximo_partido!.match_date).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}</span>
                       </div>
                       <Row gutter={[16, 16]} align="middle" style={{ textAlign: 'center' }}>
                         <Col span={10}>
@@ -202,12 +202,12 @@ export const Dashboard = () => {
                             boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
                           }}>
                             <img 
-                              src={torneo.proximo_partido.home_flag} 
-                              alt={torneo.proximo_partido.home_team} 
+                              src={torneo.proximo_partido!.home_flag} 
+                              alt={torneo.proximo_partido!.home_team} 
                               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                           </div>
-                          <h3 style={{ color: 'white', margin: 0 }}>{torneo.proximo_partido.home_team}</h3>
+                          <h3 style={{ color: 'white', margin: 0 }}>{torneo.proximo_partido!.home_team}</h3>
                         </Col>
                         <Col span={4}>
                           <h2 style={{ color: 'rgba(255,255,255,0.5)', margin: 0, fontSize: '36px' }}>VS</h2>
@@ -222,12 +222,12 @@ export const Dashboard = () => {
                             boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
                           }}>
                             <img 
-                              src={torneo.proximo_partido.away_flag} 
-                              alt={torneo.proximo_partido.away_team} 
+                              src={torneo.proximo_partido!.away_flag} 
+                              alt={torneo.proximo_partido!.away_team} 
                               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                             />
                           </div>
-                          <h3 style={{ color: 'white', margin: 0 }}>{torneo.proximo_partido.away_team}</h3>
+                          <h3 style={{ color: 'white', margin: 0 }}>{torneo.proximo_partido!.away_team}</h3>
                         </Col>
                       </Row>
                       <div style={{ textAlign: 'center', marginTop: '24px' }}>
